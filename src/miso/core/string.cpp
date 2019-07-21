@@ -150,4 +150,16 @@ StringUtils::Format(const char* format, ...)
     return std::string(buffer.data());
 }
 
+bool
+StringUtils::StartsWith(const std::string& str, const std::string& x)
+{
+    return (x.length() <= str.length()) ? str.compare(0, x.length(), x) == 0 : false;
+}
+
+bool
+StringUtils::EndsWith(const std::string& str, const std::string& x)
+{
+    return (x.length() <= str.length()) ? str.compare(str.length() - x.length(), x.length(), x) == 0 : false;
+}
+
 } // namespace miso

@@ -19,6 +19,8 @@ public:
     static std::string ToUpper(const std::string& str);
     static std::string ToLower(const std::string& str);
     static std::string Format(const char* format, ...);
+    static bool StartsWith(const std::string& str, const std::string& x);
+    static bool EndsWith(const std::string& str, const std::string& x);
 };
 
 } // namespace miso

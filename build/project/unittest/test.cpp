@@ -290,3 +290,18 @@ TEST(StringUtils, Format)
 {
     EXPECT_EQ("0.143:test:9999:0000270F", miso::StringUtils::Format("%.3f:%s:%d:%08X", 1 / 7.0f, "test", 9999, 9999));
 }
+
+TEST(StringUtils, StartsEndsWith)
+{
+    EXPECT_EQ(false, miso::StringUtils::StartsWith("", "Tokyo"));
+    EXPECT_EQ(false, miso::StringUtils::StartsWith("Toky", "Tokyo"));
+    EXPECT_EQ(false, miso::StringUtils::StartsWith(" Tokyo", "Tokyo"));
+    EXPECT_EQ(true, miso::StringUtils::StartsWith("Tokyo", "Tokyo"));
+    EXPECT_EQ(true, miso::StringUtils::StartsWith("TokyoStation", "Tokyo"));
+
+    EXPECT_EQ(false, miso::StringUtils::EndsWith("", "Station"));
+    EXPECT_EQ(false, miso::StringUtils::EndsWith("tation", "Station"));
+    EXPECT_EQ(false, miso::StringUtils::EndsWith("Station ", "Station"));
+    EXPECT_EQ(true, miso::StringUtils::EndsWith("Station", "Station"));
+    EXPECT_EQ(true, miso::StringUtils::EndsWith("TokyoStation", "Station"));
+}

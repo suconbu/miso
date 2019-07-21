@@ -18,6 +18,9 @@
     <ClCompile Include="..\..\..\src\miso\core\endian.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\miso\core\string.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\miso\include\miso\endian.h">
@@ -27,6 +30,9 @@
       <Filter>include\miso</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\miso\include\miso\miso.h">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\miso\include\miso\string.h">
       <Filter>include\miso</Filter>
     </ClInclude>
   </ItemGroup>

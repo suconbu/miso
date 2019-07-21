@@ -1,0 +1,7 @@
+/build/obj
+/build/lib
+/build/output
+/build/packages
+/*.code-workspace
+*.vs
+*.vcxproj.user

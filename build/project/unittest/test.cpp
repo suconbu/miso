@@ -262,6 +262,13 @@ TEST(StringUtils, Trim)
     EXPECT_EQ("", trimmed);
 }
 
+TEST(StringUtils, Repeat)
+{
+    EXPECT_EQ("", miso::StringUtils::Repeat("n", 0));
+    EXPECT_EQ("n", miso::StringUtils::Repeat("n", 1));
+    EXPECT_EQ("nnnnn", miso::StringUtils::Repeat("n", 5));
+}
+
 TEST(StringUtils, Replace)
 {
     auto str = miso::StringUtils::ReadFile("test_string.txt");

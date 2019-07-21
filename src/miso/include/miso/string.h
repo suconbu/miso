@@ -14,7 +14,7 @@ public:
     static std::vector<std::string> Split(const std::string& str, const std::string& delim, bool trim_empty = false);
     static std::string Join(const std::vector<std::string>& tokens, const std::string& delim, const bool trim_empty = false);
     static std::string Trim(const std::string& str, const std::string& blank = "\r\n\t ");
-    static std::string Repeat(const std::string& str, unsigned int times);
+    static std::string Repeat(const std::string& str, size_t times);
     static std::string ReplaceAll(const std::string& str, const std::string& old_sub_str, const std::string& new_sub_str);
     static std::string ToUpper(const std::string& str);
     static std::string ToLower(const std::string& str);

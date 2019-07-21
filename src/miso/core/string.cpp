@@ -9,7 +9,7 @@
 
 namespace miso {
 
-// https://github.com/HondaDai/StringUtils
+// Based on https://github.com/HondaDai/StringUtils
 
 std::string
 StringUtils::ReadFile(const std::string& filepath)
@@ -100,10 +100,11 @@ StringUtils::Trim(const std::string& str, const std::string& blank)
 }
 
 std::string
-StringUtils::Repeat(const std::string& str, unsigned int times)
+StringUtils::Repeat(const std::string& str, size_t times)
 {
     std::stringstream repeated;
-    for (unsigned int i = 0; i < times; ++i) {
+    for (auto i = 0; i < times; ++i)
+    {
         repeated << str;
     }
     return repeated.str();

@@ -228,38 +228,58 @@ TEST(BinaryReader, Misc)
     }
 }
 
-TEST(StringUtils, Test)
+TEST(StringUtils, ReadWrite)
 {
-    {
-        auto str = miso::StringUtils::ReadFile("test_string.txt");
-        miso::StringUtils::WriteFile("test_string.ignore.txt", str);
-        auto output = miso::StringUtils::ReadFile("test_string.ignore.txt");
-        EXPECT_EQ(str, output);
-        auto tokens = miso::StringUtils::Split(str, "<");
-        EXPECT_EQ(12, tokens.size());
-        auto joined = miso::StringUtils::Join(tokens, "<<<");
-        EXPECT_EQ(397, joined.length());
+    auto str = miso::StringUtils::ReadFile("test_string.txt");
+    miso::StringUtils::WriteFile("test_string.ignore.txt", str);
+    auto output = miso::StringUtils::ReadFile("test_string.ignore.txt");
+    EXPECT_EQ(str, output);
+}
+TEST(StringUtils, SplitJoin)
+{
+    auto str = miso::StringUtils::ReadFile("test_string.txt");
+    auto tokens = miso::StringUtils::Split(str, "<");
+    EXPECT_EQ(12, tokens.size());
+    auto joined = miso::StringUtils::Join(tokens, "<<<");
+    EXPECT_EQ(397, joined.length());
+}
 
-        auto trimmed = miso::StringUtils::Trim("\t \r \n test \t \r \n ");
-        EXPECT_EQ("test", trimmed);
-        trimmed = miso::StringUtils::Trim("\t \r \n test");
-        EXPECT_EQ("test", trimmed);
-        trimmed = miso::StringUtils::Trim("test\t \r \n ");
-        EXPECT_EQ("test", trimmed);
-        trimmed = miso::StringUtils::Trim("\t \r \n t e\ns\tt \t \r \n ");
-        EXPECT_EQ("t e\ns\tt", trimmed);
-        trimmed = miso::StringUtils::Trim("test");
-        EXPECT_EQ("test", trimmed);
-        trimmed = miso::StringUtils::Trim("test", "ts");
-        EXPECT_EQ("e", trimmed);
-        trimmed = miso::StringUtils::Trim("testtesttest", "est");
-        EXPECT_EQ("", trimmed);
+TEST(StringUtils, Trim)
+{
+    auto trimmed = miso::StringUtils::Trim("\t \r \n test \t \r \n ");
+    EXPECT_EQ("test", trimmed);
+    trimmed = miso::StringUtils::Trim("\t \r \n test");
+    EXPECT_EQ("test", trimmed);
+    trimmed = miso::StringUtils::Trim("test\t \r \n ");
+    EXPECT_EQ("test", trimmed);
+    trimmed = miso::StringUtils::Trim("\t \r \n t e\ns\tt \t \r \n ");
+    EXPECT_EQ("t e\ns\tt", trimmed);
+    trimmed = miso::StringUtils::Trim("test");
+    EXPECT_EQ("test", trimmed);
+    trimmed = miso::StringUtils::Trim("test", "ts");
+    EXPECT_EQ("e", trimmed);
+    trimmed = miso::StringUtils::Trim("testtesttest", "est");
+    EXPECT_EQ("", trimmed);
+}
 
-        auto replaced = miso::StringUtils::ReplaceAll(str, "<", "<<<");
-        EXPECT_EQ(joined, replaced);
-        auto upper = miso::StringUtils::ToUpper("upper");
-        EXPECT_EQ("UPPER", upper);
-        auto lower = miso::StringUtils::ToLower("LOWER");
-        EXPECT_EQ("lower", lower);
-    }
+TEST(StringUtils, Replace)
+{
+    auto str = miso::StringUtils::ReadFile("test_string.txt");
+    auto replaced = miso::StringUtils::ReplaceAll(str, "<", "<<<");
+    replaced = miso::StringUtils::ReplaceAll(str, "<<<", "!!!!!!");
+    replaced = miso::StringUtils::ReplaceAll(str, "!!!!!!", "<");
+    EXPECT_EQ(str, replaced);
+}
+
+TEST(StringUtils, UpperLower)
+{
+    auto upper = miso::StringUtils::ToUpper("upper");
+    EXPECT_EQ("UPPER", upper);
+    auto lower = miso::StringUtils::ToLower("LOWER");
+    EXPECT_EQ("lower", lower);
+}
+
+TEST(StringUtils, Format)
+{
+    EXPECT_EQ("0.143:test:9999:0000270F", miso::StringUtils::Format("%.3f:%s:%d:%08X", 1 / 7.0f, "test", 9999, 9999));
 }

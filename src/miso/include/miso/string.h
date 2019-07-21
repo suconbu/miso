@@ -18,6 +18,7 @@ public:
     static std::string ReplaceAll(const std::string& str, const std::string& old_sub_str, const std::string& new_sub_str);
     static std::string ToUpper(const std::string& str);
     static std::string ToLower(const std::string& str);
+    static std::string Format(const char* format, ...);
 };
 
 } // namespace miso

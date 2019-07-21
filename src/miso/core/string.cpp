@@ -1,5 +1,7 @@
 #include "miso/string.h"
 
+#include <stdio.h>
+#include <stdarg.h>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -127,6 +129,24 @@ StringUtils::ToLower(const std::string& str)
     std::string s(str);
     std::transform(s.begin(), s.end(), s.begin(), tolower);
     return s;
+}
+
+std::string
+StringUtils::Format(const char* format, ...)
+{
+    va_list args1;
+    va_start(args1, format);
+    va_list args2;
+    va_copy(args2, args1);
+
+    int size = vsnprintf(nullptr, 0, format, args2);
+    std::vector<char> buffer(size + 1);
+    vsnprintf(buffer.data(), buffer.size(), format, args1);
+
+    va_end(args1);
+    va_end(args2);
+
+    return std::string(buffer.data());
 }
 
 } // namespace miso

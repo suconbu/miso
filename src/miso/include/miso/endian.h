@@ -10,6 +10,8 @@ class EndianUtils
 public:
     static Endian GetNativeEndian();
     template<typename T> static T Flip(const T value);
+
+    EndianUtils() = delete;
 };
 
 } // namespace miso

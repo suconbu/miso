@@ -11,8 +11,8 @@ namespace miso {
 class BinaryReader
 {
 public:
-    BinaryReader(const char* filename, Endian endian = Endian::Native);
-    BinaryReader(const void* buffer, size_t size, Endian endian = Endian::Native);
+    explicit BinaryReader(const char* filename, Endian endian = Endian::Native);
+    explicit BinaryReader(const void* buffer, size_t size, Endian endian = Endian::Native);
     ~BinaryReader();
     bool CanRead(size_t size = 1) const { return !stream_.fail() && (position_ + size) <= size_; }
     bool IsOverrunOccurred() const { return overrun_; }

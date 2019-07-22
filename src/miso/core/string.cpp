@@ -76,27 +76,37 @@ StringUtils::Join(const std::vector<std::string>& tokens, const std::string& del
 std::string
 StringUtils::Trim(const std::string& str, const std::string& blank)
 {
-    size_t begin = str.size();
+    size_t s = str.size();
     for (size_t i = 0; i < str.size(); ++i)
     {
         if (blank.find(str[i]) == std::string::npos)
         {
-            begin = i;
+            s = i;
             break;
         }
     }
 
-    size_t end = 0;
+    size_t e = 0;
     for (size_t i = str.size(); i > 0; --i)
     {
         if (blank.find(str[i - 1]) == std::string::npos)
         {
-            end = i - 1;
+            e = i - 1;
             break;
         }
     }
 
-    return (begin <= end) ? str.substr(begin, end - begin + 1) : "";
+    return (s <= e) ? str.substr(s, e - s + 1) : "";
+}
+
+std::string
+StringUtils::Slice(const std::string& str, int start, int end)
+{
+    int len = static_cast<int>(str.length());
+    int s = (start < 0) ? (len - std::min(-start, len)) : std::min(start, len);
+    int e = (end < 0) ? (len - std::min(-end, len)) : std::min(end, len);
+    size_t count = (s <= e) ? (e - s) : 0;
+    return str.substr(s, count);
 }
 
 std::string

@@ -311,3 +311,34 @@ TEST(StringUtils, Comapare)
     EXPECT_EQ(true, miso::StringUtils::Contains("TokyoStation", "Station"));
     EXPECT_EQ(true, miso::StringUtils::Contains("TokyoStationHotel", "Station"));
 }
+
+TEST(StringUtils, Slice)
+{
+    EXPECT_EQ("tokyo", miso::StringUtils::Slice("tokyo", 0));
+    EXPECT_EQ("yo", miso::StringUtils::Slice("tokyo", 3));
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", 5));
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", 6));
+    EXPECT_EQ("o", miso::StringUtils::Slice("tokyo", -1));
+    EXPECT_EQ("tokyo", miso::StringUtils::Slice("tokyo", -5));
+    EXPECT_EQ("tokyo", miso::StringUtils::Slice("tokyo", -6));
+
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", 0, 0));
+    EXPECT_EQ("t", miso::StringUtils::Slice("tokyo", 0, 1));
+    EXPECT_EQ("tokyo", miso::StringUtils::Slice("tokyo", 0, 5));
+    EXPECT_EQ("tokyo", miso::StringUtils::Slice("tokyo", 0, 6));
+    EXPECT_EQ("toky", miso::StringUtils::Slice("tokyo", 0, -1));
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", 0, -5));
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", 0, -6));
+
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", 5, 5));
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", 5, 6));
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", 5, 0));
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", 5, -1));
+
+    EXPECT_EQ("yo", miso::StringUtils::Slice("tokyo", -2, 5));
+    EXPECT_EQ("yo", miso::StringUtils::Slice("tokyo", -2, 6));
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", -2, 0));
+    EXPECT_EQ("y", miso::StringUtils::Slice("tokyo", -2, -1));
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", -2, -2));
+    EXPECT_EQ("", miso::StringUtils::Slice("tokyo", -2, -3));
+}

@@ -162,4 +162,10 @@ StringUtils::EndsWith(const std::string& str, const std::string& x)
     return (x.length() <= str.length()) ? str.compare(str.length() - x.length(), x.length(), x) == 0 : false;
 }
 
+bool
+StringUtils::Contains(const std::string& str, const std::string& x)
+{
+    return str.find(x) != std::string::npos;
+}
+
 } // namespace miso

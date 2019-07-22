@@ -21,6 +21,7 @@ public:
     static std::string Format(const char* format, ...);
     static bool StartsWith(const std::string& str, const std::string& x);
     static bool EndsWith(const std::string& str, const std::string& x);
+    static bool Contains(const std::string& str, const std::string& x);
 
     StringUtils() = delete;
 };

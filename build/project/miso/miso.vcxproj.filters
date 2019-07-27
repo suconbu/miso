@@ -29,5 +29,11 @@
     <ClInclude Include="..\..\..\src\miso\include\miso\string.h">
       <Filter>include\miso</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\miso\include\miso\stream.h">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\miso\include\miso\buffer.h">
+      <Filter>include\miso</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

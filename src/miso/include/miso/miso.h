@@ -11,8 +11,10 @@
 #define MISO_CORE_FILESTREAM_BUFFER_SIZE 256
 #endif//MISO_CORE_FILESTREAM_BUFFER_SIZE
 
-#include "miso/endian.h"
-#include "miso/string.h"
 #include "miso/binary_reader.h"
+#include "miso/buffer.h"
+#include "miso/endian.h"
+#include "miso/stream.h"
+#include "miso/string.h"
 
 #endif // MISO_MISO_H_

@@ -23,8 +23,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\miso\include\miso\binary_reader.h" />
+    <ClInclude Include="..\..\..\src\miso\include\miso\buffer.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\endian.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\miso.h" />
+    <ClInclude Include="..\..\..\src\miso\include\miso\stream.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\string.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

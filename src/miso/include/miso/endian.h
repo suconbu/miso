@@ -1,6 +1,8 @@
 #ifndef MISO_CORE_ENDIAN_H_
 #define MISO_CORE_ENDIAN_H_
 
+#include <memory>
+
 namespace miso {
 
 enum class Endian { Native, Little, Big };

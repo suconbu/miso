@@ -3,13 +3,13 @@
 void unittest_read(miso::BinaryReader& reader)
 {
     uint8_t buffer[100];
-    auto readSize = reader.ReadTo(buffer, sizeof(buffer));
+    auto readSize = reader.ReadBlock(buffer, sizeof(buffer));
     EXPECT_EQ(reader.GetSize(), readSize);
     EXPECT_EQ(0x01, buffer[1]);
 
     reader.SetPosition(4);
     buffer[0] = buffer[4] = buffer[5] = 0xCC;
-    readSize = reader.ReadTo(buffer, sizeof(buffer));
+    readSize = reader.ReadBlock(buffer, sizeof(buffer));
     EXPECT_EQ(readSize, 5);
     EXPECT_EQ(0x67, buffer[0]);
     EXPECT_EQ(0xEF, buffer[4]);
@@ -95,7 +95,7 @@ TEST(BinaryReader, Fail)
     EXPECT_EQ(0, reader.GetSize());
     EXPECT_EQ(0, reader.GetPosition());
     EXPECT_EQ(0, reader.Read<char>());
-    EXPECT_EQ(0, reader.ReadTo(buffer, sizeof(buffer)));
+    EXPECT_EQ(0, reader.ReadBlock(buffer, sizeof(buffer)));
 }
 
 TEST(BinaryReader, FromFile)
@@ -141,25 +141,25 @@ TEST(BinaryReader, Misc)
     }
     {
         miso::BinaryReader reader(data, sizeof(data));
-        auto v = reader.ReadToVector(reader.GetSize());
-        EXPECT_EQ(9, v.size());
+        auto buffer = reader.ReadBlock(reader.GetSize());
+        EXPECT_EQ(9, buffer.GetSize());
         //EXPECT_EQ(false, reader.IsOverrunOccurred());
     }
     {
         miso::BinaryReader reader(data, sizeof(data));
         reader.SetPosition(2);
-        auto v = reader.ReadToVector(5);
-        EXPECT_EQ(5, v.size());
-        EXPECT_EQ(0x23, v[0]);
-        EXPECT_EQ(0xAB, v[4]);
+        auto buffer = reader.ReadBlock(5);
+        EXPECT_EQ(5, buffer.GetSize());
+        EXPECT_EQ(0x23, buffer[0]);
+        EXPECT_EQ(0xAB, buffer[4]);
         //EXPECT_EQ(false, reader.IsOverrunOccurred());
     }
     {
         miso::BinaryReader reader(data, sizeof(data));
-        auto v = reader.ReadToVector(100);
-        EXPECT_EQ(9, v.size());
-        EXPECT_EQ(0x00, v[0]);
-        EXPECT_EQ(0xEF, v[8]);
+        auto buffer = reader.ReadBlock(100);
+        EXPECT_EQ(9, buffer.GetSize());
+        EXPECT_EQ(0x00, buffer[0]);
+        EXPECT_EQ(0xEF, buffer[8]);
         //EXPECT_EQ(true, reader.IsOverrunOccurred());
     }
     {
@@ -342,6 +342,52 @@ TEST(StringUtils, Slice)
     EXPECT_EQ("", miso::StringUtils::Slice("tokyo", -2, -3));
 }
 
+TEST(Buffer, Construct)
+{
+    {
+        miso::Buffer<> a(100);
+        EXPECT_EQ(100, a.GetSize());
+        miso::Buffer<> b(a);
+        EXPECT_EQ(100, b.GetSize());
+        EXPECT_TRUE(a.GetPointer() != b.GetPointer());
+        a[1] = 10;
+        a[2] = 20;
+        {
+            miso::Buffer<> c(a);
+            miso::Buffer<> d = a;
+            EXPECT_EQ(10, a[1]);
+            EXPECT_EQ(20, a[2]);
+            unsigned char* p = d.GetPointer();
+            c[1] = 11;
+            p[2] = 22;
+        }
+        EXPECT_EQ(10, a[1]);
+        EXPECT_EQ(20, a[2]);
+    }
+}
+TEST(Buffer, Resize)
+{
+    unsigned char x[] = { 0, 10, 20 };
+    miso::Buffer<> a(x, sizeof(x));
+    a.Resize(5);
+    EXPECT_EQ(20, a[2]);
+
+    miso::Buffer<> b(x, sizeof(x));
+    b.Resize(5, false);
+    EXPECT_TRUE(20 != b[2]);
+}
+TEST(Buffer, Empty)
+{
+    miso::Buffer<> a;
+    EXPECT_EQ(true, a.IsEmpty());
+    EXPECT_EQ(0, a.GetSize());
+    EXPECT_EQ(nullptr, a.GetPointer());
+    a.Resize(100);
+    EXPECT_EQ(false, a.IsEmpty());
+    EXPECT_EQ(100, a.GetSize());
+}
+
+#if 0
 TEST(Performace, OneRead1MCrt)
 {
     size_t size = 0;
@@ -371,7 +417,7 @@ TEST(Performace, OneRead1M)
     for (int n = 0; n < 100; ++n)
     {
         miso::BinaryReader reader("1m.bin");
-        reader.ReadTo(v.data(), size);
+        reader.ReadBlock(v.data(), size);
     }
 }
 
@@ -379,8 +425,7 @@ TEST(Performace, ReadAll1M)
 {
     for (int n = 0; n < 100; ++n)
     {
-        auto p = miso::FileStream::ReadAll("1m.bin");
-        std::free(p);
+        volatile auto buffer = miso::FileStream::ReadAll("1m.bin");
     }
 }
 
@@ -430,7 +475,8 @@ TEST(Performace, RandomRead1M8B)
         {
             auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
             reader.SetPosition(position);
-            reader.ReadTo((void*)buffer, sizeof(buffer));
+            reader.ReadBlock((void*)buffer, sizeof(buffer));
         }
     }
 }
+#endif

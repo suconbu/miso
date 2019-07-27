@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "gtest/gtest.h"
 #include "miso/miso.h"
+#include "gtest/gtest.h"
 
 #include <stdint.h>

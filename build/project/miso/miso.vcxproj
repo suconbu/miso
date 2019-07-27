@@ -19,8 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\miso\core\binary_reader.cpp" />
-    <ClCompile Include="..\..\..\src\miso\core\endian.cpp" />
     <ClCompile Include="..\..\..\src\miso\core\string.cpp" />
   </ItemGroup>
   <ItemGroup>

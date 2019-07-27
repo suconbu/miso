@@ -7,3 +7,5 @@
 
 #include "gtest/gtest.h"
 #include "miso/miso.h"
+
+#include <stdint.h>

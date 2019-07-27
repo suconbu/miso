@@ -12,12 +12,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\miso\core\binary_reader.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\miso\core\endian.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\miso\core\string.cpp">
       <Filter>core</Filter>
     </ClCompile>

@@ -3,13 +3,13 @@
 void unittest_read(miso::BinaryReader& reader)
 {
     uint8_t buffer[100];
-    auto readSize = reader.ReadBlockTo(buffer, sizeof(buffer));
-    EXPECT_EQ(9, readSize);
+    auto readSize = reader.ReadTo(buffer, sizeof(buffer));
+    EXPECT_EQ(reader.GetSize(), readSize);
     EXPECT_EQ(0x01, buffer[1]);
 
     reader.SetPosition(4);
     buffer[0] = buffer[4] = buffer[5] = 0xCC;
-    readSize = reader.ReadBlockTo(buffer, sizeof(buffer));
+    readSize = reader.ReadTo(buffer, sizeof(buffer));
     EXPECT_EQ(readSize, 5);
     EXPECT_EQ(0x67, buffer[0]);
     EXPECT_EQ(0xEF, buffer[4]);
@@ -64,7 +64,7 @@ TEST(BinaryReader, SizeAndPosition)
     miso::BinaryReader reader(data, sizeof(data));
 
     EXPECT_TRUE(reader.CanRead());
-    EXPECT_EQ(9, reader.GetLength());
+    EXPECT_EQ(9, reader.GetSize());
     EXPECT_EQ(0, reader.GetPosition());
     EXPECT_EQ(miso::Endian::Little, reader.GetEndian());
 
@@ -79,12 +79,12 @@ TEST(BinaryReader, SizeAndPosition)
     EXPECT_FALSE(reader.CanRead());
     reader.SetPosition(0);
 
-    reader.Close();
+    //reader.Close();
 
-    EXPECT_FALSE(reader.CanRead());
-    EXPECT_EQ(0, reader.GetLength());
-    EXPECT_EQ(0, reader.GetPosition());
-    EXPECT_EQ(miso::Endian::Little, reader.GetEndian());
+    //EXPECT_FALSE(reader.CanRead());
+    //EXPECT_EQ(0, reader.GetSize());
+    //EXPECT_EQ(0, reader.GetPosition());
+    //EXPECT_EQ(miso::Endian::Little, reader.GetEndian());
 }
 
 TEST(BinaryReader, Fail)
@@ -92,13 +92,12 @@ TEST(BinaryReader, Fail)
     char buffer[100];
     miso::BinaryReader reader(" ");
     EXPECT_FALSE(reader.CanRead());
-    EXPECT_EQ(0, reader.GetLength());
+    EXPECT_EQ(0, reader.GetSize());
     EXPECT_EQ(0, reader.GetPosition());
     EXPECT_EQ(0, reader.Read<char>());
-    EXPECT_EQ(0, reader.ReadBlockTo(buffer, sizeof(buffer)));
+    EXPECT_EQ(0, reader.ReadTo(buffer, sizeof(buffer)));
 }
 
-#include <fstream>
 TEST(BinaryReader, FromFile)
 {
     miso::BinaryReader reader("test.bin");
@@ -114,13 +113,13 @@ TEST(BinaryReader, FromMemory)
     unittest_read(reader);
 }
 
-TEST(BinaryReader, CloseAfter)
-{
-    const uint8_t data[] = { 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
-    miso::BinaryReader reader(data, sizeof(data));
-    reader.Close();
-    EXPECT_EQ(false, reader.CanRead());
-}
+//TEST(BinaryReader, CloseAfter)
+//{
+//    const uint8_t data[] = { 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
+//    miso::BinaryReader reader(data, sizeof(data));
+//    reader.Close();
+//    EXPECT_EQ(false, reader.CanRead());
+//}
 
 TEST(BinaryReader, Misc)
 {
@@ -129,7 +128,7 @@ TEST(BinaryReader, Misc)
         miso::BinaryReader reader(data, sizeof(data));
         uint16_t n = 0;
         size_t count = 0;
-        EXPECT_EQ(9, reader.GetLength());
+        EXPECT_EQ(9, reader.GetSize());
         while (reader.CanRead(sizeof(uint16_t)))
         {
             n = reader.Read<uint16_t>(999);
@@ -138,37 +137,37 @@ TEST(BinaryReader, Misc)
         EXPECT_EQ(0xCDAB, n);
         EXPECT_EQ(4, count);
         EXPECT_EQ(8, reader.GetPosition());
-        EXPECT_EQ(false, reader.IsOverrunOccurred());
+        //EXPECT_EQ(false, reader.IsOverrunOccurred());
     }
     {
         miso::BinaryReader reader(data, sizeof(data));
-        auto v = reader.ReadBlock(reader.GetLength());
+        auto v = reader.ReadToVector(reader.GetSize());
         EXPECT_EQ(9, v.size());
-        EXPECT_EQ(false, reader.IsOverrunOccurred());
+        //EXPECT_EQ(false, reader.IsOverrunOccurred());
     }
     {
         miso::BinaryReader reader(data, sizeof(data));
         reader.SetPosition(2);
-        auto v = reader.ReadBlock(5);
+        auto v = reader.ReadToVector(5);
         EXPECT_EQ(5, v.size());
         EXPECT_EQ(0x23, v[0]);
         EXPECT_EQ(0xAB, v[4]);
-        EXPECT_EQ(false, reader.IsOverrunOccurred());
+        //EXPECT_EQ(false, reader.IsOverrunOccurred());
     }
     {
         miso::BinaryReader reader(data, sizeof(data));
-        auto v = reader.ReadBlock(100);
+        auto v = reader.ReadToVector(100);
         EXPECT_EQ(9, v.size());
         EXPECT_EQ(0x00, v[0]);
         EXPECT_EQ(0xEF, v[8]);
-        EXPECT_EQ(true, reader.IsOverrunOccurred());
+        //EXPECT_EQ(true, reader.IsOverrunOccurred());
     }
     {
         miso::BinaryReader reader(data, sizeof(data));
         reader.SetPosition(4);
         auto v = reader.Peek<int32_t>();
         EXPECT_EQ(4, reader.GetPosition());
-        EXPECT_EQ(false, reader.IsOverrunOccurred());
+        //EXPECT_EQ(false, reader.IsOverrunOccurred());
     }
     {
 #pragma pack(1)
@@ -341,4 +340,97 @@ TEST(StringUtils, Slice)
     EXPECT_EQ("y", miso::StringUtils::Slice("tokyo", -2, -1));
     EXPECT_EQ("", miso::StringUtils::Slice("tokyo", -2, -2));
     EXPECT_EQ("", miso::StringUtils::Slice("tokyo", -2, -3));
+}
+
+TEST(Performace, OneRead1MCrt)
+{
+    size_t size = 0;
+    std::vector<char> v;
+    {
+        miso::BinaryReader reader("1m.bin");
+        size = reader.GetSize();
+    }
+    v.resize(size);
+    for (int n = 0; n < 100; ++n)
+    {
+        FILE* fp = fopen("1m.bin", "rb");
+        fread(v.data(), 1, size, fp);
+        fclose(fp);
+    }
+}
+
+TEST(Performace, OneRead1M)
+{
+    size_t size = 0;
+    std::vector<char> v;
+    {
+        miso::BinaryReader reader("1m.bin");
+        size = reader.GetSize();
+    }
+    v.resize(size);
+    for (int n = 0; n < 100; ++n)
+    {
+        miso::BinaryReader reader("1m.bin");
+        reader.ReadTo(v.data(), size);
+    }
+}
+
+TEST(Performace, ReadAll1M)
+{
+    for (int n = 0; n < 100; ++n)
+    {
+        auto p = miso::FileStream::ReadAll("1m.bin");
+        std::free(p);
+    }
+}
+
+TEST(Performace, SequencialRead1M8BCrt)
+{
+    size_t size = 0;
+    std::vector<char> v;
+    {
+        miso::BinaryReader reader("1m.bin");
+        size = reader.GetSize();
+    }
+    volatile char buffer[8];
+    for (int n = 0; n < 100; ++n)
+    {
+        FILE* fp = fopen("1m.bin", "rb");
+        for (size_t i = 0; i < size; i += sizeof(buffer))
+        {
+            fread((void*)buffer, 1, sizeof(buffer), fp);
+        }
+        fclose(fp);
+    }
+}
+
+TEST(Performace, SequencialRead1M8B)
+{
+    volatile char buffer[8];
+    for (int n = 0; n < 100; ++n)
+    {
+        miso::BinaryReader reader("1m.bin");
+        auto size = reader.GetSize();
+        for (size_t i = 0; i < size; i += sizeof(buffer))
+        {
+            volatile auto x = reader.Read<int64_t>();
+        }
+    }
+}
+
+TEST(Performace, RandomRead1M8B)
+{
+    for (int n = 0; n < 100; ++n)
+    {
+        srand(0);
+        miso::BinaryReader reader("1m.bin");
+        volatile char buffer[8];
+        auto size = reader.GetSize();
+        for (size_t i = 0; i < 100; ++i)
+        {
+            auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
+            reader.SetPosition(position);
+            reader.ReadTo((void*)buffer, sizeof(buffer));
+        }
+    }
 }

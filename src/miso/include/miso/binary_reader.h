@@ -7,51 +7,58 @@
 
 namespace miso {
 
-class BinaryReader
-{
+class BinaryReader {
 public:
-    explicit BinaryReader(const char* filename, Endian endian = Endian::Native) :
-        reader_(new FileStream(filename)),
-        native_endian_(EndianUtils::GetNativeEndian()),
-        target_endian_(endian == Endian::Native ? native_endian_ : endian)
+    BinaryReader(const char* filename, Endian endian = Endian::Native) :
+        BinaryReader(new FileStream(filename), endian)
     {}
-    explicit BinaryReader(const void* buffer, size_t size, Endian endian = Endian::Native) :
-        reader_(new MemoryStream(static_cast<const char*>(buffer), size)),
-        native_endian_(EndianUtils::GetNativeEndian()),
-        target_endian_(endian == Endian::Native ? native_endian_ : endian)
+    BinaryReader(const void* buffer, size_t size, Endian endian = Endian::Native) :
+        BinaryReader(new MemoryStream(static_cast<const char*>(buffer), size), endian)
     {}
-    ~BinaryReader() { delete reader_; }
+    BinaryReader(BinaryReader&& other) : BinaryReader(other.stream_, other.target_endian_)
+    {
+        other.stream_ = nullptr;
+    }
+    ~BinaryReader() { delete stream_; }
 
-    bool CanRead(size_t size = 1) const { return reader_ != nullptr && reader_->CanRead(size); }
-    size_t GetSize() const { return reader_->GetSize(); }
+    bool CanRead(size_t size = 1) const { return stream_ != nullptr && stream_->CanRead(size); }
+    size_t GetSize() const { return stream_->GetSize(); }
     Endian GetEndian() const { return target_endian_; }
     void SetEndian(Endian endian) { target_endian_ = endian; }
-    size_t GetPosition() const { return reader_->GetPosition(); }
-    void SetPosition(size_t position) { reader_->SetPosition(position); }
+    size_t GetPosition() const { return stream_->GetPosition(); }
+    void SetPosition(size_t position) { stream_->SetPosition(position); }
     template<typename T> T Read(T default_value = 0) { return ReadStream(default_value, true); }
     template<typename T> T Peek(T default_value = 0) { return ReadStream(default_value, false); }
     template<typename TAllocator = std::allocator<MISO_BYTE_TYPE>>
-    Buffer<TAllocator> ReadBlock(size_t size) {
+    Buffer<TAllocator> ReadBlock(size_t size)
+    {
         if (!CanRead()) return Buffer<TAllocator>();
         Buffer<TAllocator> buffer(size);
-        buffer.Resize(reader_->ReadBlock(buffer, size));
+        buffer.Resize(stream_->ReadBlock(buffer, size));
         return buffer;
     }
-    size_t ReadBlock(void* buffer, size_t size) { return CanRead() ? reader_->ReadBlock(static_cast<char*>(buffer), size) : 0; }
+    size_t ReadBlock(void* buffer, size_t size) { return CanRead() ? stream_->ReadBlock(static_cast<char*>(buffer), size) : 0; }
 
 private:
     Endian native_endian_;
     Endian target_endian_;
-    IStream* reader_;
+    IStream* stream_;
 
-    template<typename T> T ReadStream(T default_value, bool advance) {
+    BinaryReader(IStream* stream, Endian endian = Endian::Native) :
+        stream_(stream),
+        native_endian_(EndianUtils::GetNativeEndian()),
+        target_endian_(endian == Endian::Native ? native_endian_ : endian)
+    {}
+
+    template<typename T> T ReadStream(T default_value, bool advance)
+    {
         if (!CanRead()) return default_value;
         auto read_size = sizeof(T);
-        auto position = reader_->GetPosition();
+        auto position = stream_->GetPosition();
         T v;
-        auto actual_size = reader_->ReadBlock(reinterpret_cast<char*>(std::addressof(v)), read_size);
+        auto actual_size = stream_->ReadBlock(reinterpret_cast<char*>(std::addressof(v)), read_size);
         if (!advance) {
-            reader_->SetPosition(position);
+            stream_->SetPosition(position);
         }
         if (actual_size < read_size) return default_value;
         return (target_endian_ != native_endian_) ? EndianUtils::Flip(v) : v;

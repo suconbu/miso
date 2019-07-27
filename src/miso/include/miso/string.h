@@ -10,9 +10,10 @@
 
 namespace miso {
 
-class StringUtils
-{
+class StringUtils {
 public:
+    StringUtils() = delete;
+
     static std::string ReadFile(const std::string& filepath);
     static void WriteFile(const std::string& filepath, const std::string& content);
     static std::vector<std::string> Split(const std::string& str, const std::string& delim, bool trim_empty = false);
@@ -27,8 +28,6 @@ public:
     static bool StartsWith(const std::string& str, const std::string& x);
     static bool EndsWith(const std::string& str, const std::string& x);
     static bool Contains(const std::string& str, const std::string& x);
-
-    StringUtils() = delete;
 };
 
 // Implemented referred to https://github.com/HondaDai/StringUtils
@@ -57,14 +56,12 @@ StringUtils::Split(const std::string& str, const std::string& delim, bool trim_e
 {
     std::vector<std::string> tokens;
     size_t last_pos = 0;
-    while (true)
-    {
+    while (true) {
         size_t pos = str.find(delim, last_pos);
         pos = (pos == std::string::npos) ? str.size() : pos;
 
         size_t len = pos - last_pos;
-        if (!trim_empty || len > 0)
-        {
+        if (!trim_empty || len > 0) {
             tokens.push_back(str.substr(last_pos, len));
         }
 
@@ -79,16 +76,13 @@ inline std::string
 StringUtils::Join(const std::vector<std::string>& tokens, const std::string& delim, const bool trim_empty)
 {
     std::stringstream joined;
-    for (size_t i = 0; i < tokens.size() - 1; ++i)
-    {
-        if (!trim_empty || tokens[i].length() > 0)
-        {
+    for (size_t i = 0; i < tokens.size() - 1; ++i) {
+        if (!trim_empty || tokens[i].length() > 0) {
             joined << tokens[i] << delim;
         }
     }
 
-    if (!trim_empty || tokens[tokens.size() - 1].length() > 0)
-    {
+    if (!trim_empty || tokens[tokens.size() - 1].length() > 0) {
         joined << tokens[tokens.size() - 1];
     }
 
@@ -99,20 +93,16 @@ inline std::string
 StringUtils::Trim(const std::string& str, const std::string& blank)
 {
     size_t s = str.size();
-    for (size_t i = 0; i < str.size(); ++i)
-    {
-        if (blank.find(str[i]) == std::string::npos)
-        {
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (blank.find(str[i]) == std::string::npos) {
             s = i;
             break;
         }
     }
 
     size_t e = 0;
-    for (size_t i = str.size(); i > 0; --i)
-    {
-        if (blank.find(str[i - 1]) == std::string::npos)
-        {
+    for (size_t i = str.size(); i > 0; --i) {
+        if (blank.find(str[i - 1]) == std::string::npos) {
             e = i - 1;
             break;
         }
@@ -135,8 +125,7 @@ inline std::string
 StringUtils::Repeat(const std::string& str, size_t times)
 {
     std::stringstream repeated;
-    for (auto i = 0; i < times; ++i)
-    {
+    for (auto i = 0; i < times; ++i) {
         repeated << str;
     }
     return repeated.str();
@@ -191,7 +180,8 @@ StringUtils::StartsWith(const std::string& str, const std::string& x)
 inline bool
 StringUtils::EndsWith(const std::string& str, const std::string& x)
 {
-    return (x.length() <= str.length()) ? str.compare(str.length() - x.length(), x.length(), x) == 0 : false;
+    return (x.length() <= str.length()) ?
+        str.compare(str.length() - x.length(), x.length(), x) == 0 : false;
 }
 
 inline bool

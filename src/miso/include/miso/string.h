@@ -125,7 +125,7 @@ inline std::string
 StringUtils::Repeat(const std::string& str, size_t times)
 {
     std::stringstream repeated;
-    for (auto i = 0; i < times; ++i) {
+    for (size_t i = 0; i < times; ++i) {
         repeated << str;
     }
     return repeated.str();

@@ -28,4 +28,7 @@
       <Filter>include\miso</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\miso\main.cpp" />
+  </ItemGroup>
 </Project>

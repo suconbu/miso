@@ -26,6 +26,9 @@
     <ClInclude Include="..\..\..\src\miso\include\miso\stream.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\string.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\miso\main.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{1A5D862B-B628-4BC6-A4A8-E63F4E305122}</ProjectGuid>

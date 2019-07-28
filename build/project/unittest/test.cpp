@@ -1,5 +1,20 @@
 #include "pch.h"
 
+_CrtMemState G_MEMORY_STATE = { 0 };
+
+class MisoTest : public ::testing::Test {
+protected:
+    virtual void SetUp()
+    {
+        _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
+        _CrtMemCheckpoint(&G_MEMORY_STATE);
+    }
+    virtual void TearDown()
+    {
+        _CrtMemDumpAllObjectsSince(&G_MEMORY_STATE);
+    }
+};
+
 void unittest_read(miso::BinaryReader &reader)
 {
     uint8_t buffer[100];
@@ -58,8 +73,9 @@ void unittest_read(miso::BinaryReader &reader)
     EXPECT_FALSE(reader.CanRead());
 }
 
-TEST(BinaryReader, SizeAndPosition)
+TEST_F(MisoTest, BinaryReader_SizeAndPosition)
 {
+    TEST_TRACE("");
     const uint8_t data[] = { 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
     miso::BinaryReader reader(data, sizeof(data));
 
@@ -87,8 +103,9 @@ TEST(BinaryReader, SizeAndPosition)
     // EXPECT_EQ(miso::Endian::Little, reader.GetEndian());
 }
 
-TEST(BinaryReader, Fail)
+TEST_F(MisoTest, BinaryReader_Fail)
 {
+    TEST_TRACE("");
     char buffer[100];
     miso::BinaryReader reader(" ");
     EXPECT_FALSE(reader.CanRead());
@@ -98,22 +115,24 @@ TEST(BinaryReader, Fail)
     EXPECT_EQ(0, reader.ReadBlock(buffer, sizeof(buffer)));
 }
 
-TEST(BinaryReader, FromFile)
+TEST_F(MisoTest, BinaryReader_FromFile)
 {
+    TEST_TRACE("");
     miso::BinaryReader reader("test.bin");
     EXPECT_EQ(true, reader.CanRead());
     unittest_read(reader);
 }
 
-TEST(BinaryReader, FromMemory)
+TEST_F(MisoTest, BinaryReader_FromMemory)
 {
+    TEST_TRACE("");
     const uint8_t data[] = { 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
     miso::BinaryReader reader(data, sizeof(data));
     EXPECT_EQ(true, reader.CanRead());
     unittest_read(reader);
 }
 
-// TEST(BinaryReader, CloseAfter)
+// TEST_F(MisoTest, BinaryReader_CloseAfter)
 //{
 //    const uint8_t data[] = { 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
 //    miso::BinaryReader reader(data, sizeof(data));
@@ -121,8 +140,9 @@ TEST(BinaryReader, FromMemory)
 //    EXPECT_EQ(false, reader.CanRead());
 //}
 
-TEST(BinaryReader, Misc)
+TEST_F(MisoTest, BinaryReader_Misc)
 {
+    TEST_TRACE("");
     const uint8_t data[] = { 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
     {
         miso::BinaryReader reader(data, sizeof(data));
@@ -223,15 +243,17 @@ TEST(BinaryReader, Misc)
     }
 }
 
-TEST(StringUtils, ReadWrite)
+TEST_F(MisoTest, StringUtils_ReadWrite)
 {
+    TEST_TRACE("");
     auto str = miso::StringUtils::ReadFile("test_string.txt");
     miso::StringUtils::WriteFile("test_string.ignore.txt", str);
     auto output = miso::StringUtils::ReadFile("test_string.ignore.txt");
     EXPECT_EQ(str, output);
 }
-TEST(StringUtils, SplitJoin)
+TEST_F(MisoTest, StringUtils_SplitJoin)
 {
+    TEST_TRACE("");
     auto str = miso::StringUtils::ReadFile("test_string.txt");
     auto tokens = miso::StringUtils::Split(str, "<");
     EXPECT_EQ(12, tokens.size());
@@ -239,8 +261,9 @@ TEST(StringUtils, SplitJoin)
     EXPECT_EQ(397, joined.length());
 }
 
-TEST(StringUtils, Trim)
+TEST_F(MisoTest, StringUtils_Trim)
 {
+    TEST_TRACE("");
     auto trimmed = miso::StringUtils::Trim("\t \r \n test \t \r \n ");
     EXPECT_EQ("test", trimmed);
     trimmed = miso::StringUtils::Trim("\t \r \n test");
@@ -257,15 +280,17 @@ TEST(StringUtils, Trim)
     EXPECT_EQ("", trimmed);
 }
 
-TEST(StringUtils, Repeat)
+TEST_F(MisoTest, StringUtils_Repeat)
 {
+    TEST_TRACE("");
     EXPECT_EQ("", miso::StringUtils::Repeat("n", 0));
     EXPECT_EQ("n", miso::StringUtils::Repeat("n", 1));
     EXPECT_EQ("nnnnn", miso::StringUtils::Repeat("n", 5));
 }
 
-TEST(StringUtils, Replace)
+TEST_F(MisoTest, StringUtils_Replace)
 {
+    TEST_TRACE("");
     auto str = miso::StringUtils::ReadFile("test_string.txt");
     auto replaced = miso::StringUtils::ReplaceAll(str, "<", "<<<");
     replaced = miso::StringUtils::ReplaceAll(str, "<<<", "!!!!!!");
@@ -273,22 +298,25 @@ TEST(StringUtils, Replace)
     EXPECT_EQ(str, replaced);
 }
 
-TEST(StringUtils, UpperLower)
+TEST_F(MisoTest, StringUtils_UpperLower)
 {
+    TEST_TRACE("");
     auto upper = miso::StringUtils::ToUpper("upper");
     EXPECT_EQ("UPPER", upper);
     auto lower = miso::StringUtils::ToLower("LOWER");
     EXPECT_EQ("lower", lower);
 }
 
-TEST(StringUtils, Format)
+TEST_F(MisoTest, StringUtils_Format)
 {
+    TEST_TRACE("");
     EXPECT_EQ("0.143:test:9999:0000270F",
         miso::StringUtils::Format("%.3f:%s:%d:%08X", 1 / 7.0f, "test", 9999, 9999));
 }
 
-TEST(StringUtils, Comapare)
+TEST_F(MisoTest, StringUtils_Comapare)
 {
+    TEST_TRACE("");
     EXPECT_EQ(false, miso::StringUtils::StartsWith("", "Tokyo"));
     EXPECT_EQ(false, miso::StringUtils::StartsWith("Toky", "Tokyo"));
     EXPECT_EQ(false, miso::StringUtils::StartsWith(" Tokyo", "Tokyo"));
@@ -308,8 +336,9 @@ TEST(StringUtils, Comapare)
     EXPECT_EQ(true, miso::StringUtils::Contains("TokyoStationHotel", "Station"));
 }
 
-TEST(StringUtils, Slice)
+TEST_F(MisoTest, StringUtils_Slice)
 {
+    TEST_TRACE("");
     EXPECT_EQ("tokyo", miso::StringUtils::Slice("tokyo", 0));
     EXPECT_EQ("yo", miso::StringUtils::Slice("tokyo", 3));
     EXPECT_EQ("", miso::StringUtils::Slice("tokyo", 5));
@@ -339,8 +368,9 @@ TEST(StringUtils, Slice)
     EXPECT_EQ("", miso::StringUtils::Slice("tokyo", -2, -3));
 }
 
-TEST(Buffer, Construct)
+TEST_F(MisoTest, Buffer_Construct)
 {
+    TEST_TRACE("");
     miso::Buffer<> a(100);
     EXPECT_EQ(100, a.GetSize());
     miso::Buffer<> b(a);
@@ -360,8 +390,9 @@ TEST(Buffer, Construct)
     EXPECT_EQ(10, a[1]);
     EXPECT_EQ(20, a[2]);
 }
-TEST(Buffer, Resize)
+TEST_F(MisoTest, Buffer_Resize)
 {
+    TEST_TRACE("");
     unsigned char x[] = { 0, 10, 20 };
     miso::Buffer<> a(x, sizeof(x));
     a.Resize(5);
@@ -371,8 +402,9 @@ TEST(Buffer, Resize)
     b.Resize(5, false);
     EXPECT_TRUE(20 != b[2]);
 }
-TEST(Buffer, Empty)
+TEST_F(MisoTest, Buffer_Empty)
 {
+    TEST_TRACE("");
     miso::Buffer<> a;
     EXPECT_EQ(true, a.IsEmpty());
     EXPECT_EQ(0, a.GetSize());
@@ -383,7 +415,7 @@ TEST(Buffer, Empty)
 }
 
 #if 0
-TEST(Performace, OneRead1MCrt)
+TEST_F(Performace, OneRead1MCrt)
 {
     size_t size = 0;
     std::vector<char> v;
@@ -399,7 +431,7 @@ TEST(Performace, OneRead1MCrt)
     }
 }
 
-TEST(Performace, OneRead1M)
+TEST_F(Performace, OneRead1M)
 {
     size_t size = 0;
     std::vector<char> v;
@@ -414,14 +446,14 @@ TEST(Performace, OneRead1M)
     }
 }
 
-TEST(Performace, ReadAll1M)
+TEST_F(Performace, ReadAll1M)
 {
     for (int n = 0; n < 100; ++n) {
         volatile auto buffer = miso::FileStream::ReadAll("1m.bin");
     }
 }
 
-TEST(Performace, SequencialRead1M8BCrt)
+TEST_F(Performace, SequencialRead1M8BCrt)
 {
     size_t size = 0;
     std::vector<char> v;
@@ -439,7 +471,7 @@ TEST(Performace, SequencialRead1M8BCrt)
     }
 }
 
-TEST(Performace, SequencialRead1M8B)
+TEST_F(Performace, SequencialRead1M8B)
 {
     volatile char buffer[8];
     for (int n = 0; n < 100; ++n) {
@@ -451,7 +483,7 @@ TEST(Performace, SequencialRead1M8B)
     }
 }
 
-TEST(Performace, RandomRead1M8B)
+TEST_F(Performace, RandomRead1M8B)
 {
     for (int n = 0; n < 100; ++n) {
         srand(0);

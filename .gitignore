@@ -2,7 +2,8 @@
 /build/lib
 /build/output
 /build/packages
+/test
+/src/miso/include/libxml
 /*.code-workspace
 *.vs
 *.vcxproj.user
-*.ignore.*

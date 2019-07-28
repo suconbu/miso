@@ -498,3 +498,74 @@ TEST_F(Performace, RandomRead1M8B)
     }
 }
 #endif
+
+TEST_F(MisoTest, XmlReader_OutputXml)
+{
+    TEST_TRACE("");
+    miso::XmlReader reader("test.xml");
+    while (reader.Read()) {
+        printf(miso::StringUtils::Repeat("    ", reader.GetNestingLevel()).c_str());
+        auto type = reader.GetNodeType();
+        if (type == miso::XmlNodeType::StartElement || type == miso::XmlNodeType::EmptyElement) {
+            printf("<%s", reader.GetElementName().c_str());
+            for (auto a : reader.GetAllAttributes()) {
+                printf(" %s='%s'", a.GetName().c_str(), a.GetValue().c_str());
+            }
+            if (type == miso::XmlNodeType::EmptyElement) printf("/");
+            printf(">");
+        } else if (type == miso::XmlNodeType::EndElement) {
+            printf("</%s>", reader.GetElementName().c_str());
+        } else if (type == miso::XmlNodeType::Text) {
+            printf("%s", miso::StringUtils::Trim(reader.GetContentText()).c_str());
+        } else {
+        }
+        printf("\n");
+    }
+    for (auto& error : reader.GetErrors()) {
+        printf("Error: %s\n", error.c_str());
+    }
+}
+
+#if 0
+TEST_F(MisoTest, libxml2_Performance)
+{
+    TEST_TRACE("");
+    auto xml = miso::StringUtils::ReadFile("Azuki.xml");
+    for (int i = 0; i < 100; i++) {
+        volatile auto doc = miso::libxml::xmlReadMemory(xml.data(), (int)xml.length(), 0, 0, 0);
+        miso::libxml::xmlFreeDoc(doc);
+    }
+}
+
+TEST_F(MisoTest, XmlReader_Performance)
+{
+    TEST_TRACE("");
+    auto xml = miso::StringUtils::ReadFile("Azuki.xml");
+    for (int i = 0; i < 100; i++) {
+        miso::XmlReader reader(xml.data(), xml.length());
+        while (reader.Read()) {
+            auto type = reader.GetNodeType();
+            if (type == miso::XmlNodeType::StartElement || type == miso::XmlNodeType::EmptyElement) {
+                auto& name = reader.GetElementName();
+                if (name != "doc" &&
+                    name != "members" &&
+                    (name != "member" ||
+                        reader.GetAttributeValueString("name") != "P:Sgry.Azuki.IUserInterface.ConvertsTabToSpaces")) {
+                    reader.MoveToEndElement();
+                    continue;
+                }
+                for (auto a : reader.GetAllAttributes()) {
+                    volatile auto a_name = a.GetName();
+                    volatile auto a_value = a.GetValue();
+                }
+            } else if (type == miso::XmlNodeType::EndElement) {
+                volatile auto name = reader.GetElementName();
+            } else if (type == miso::XmlNodeType::Text) {
+                volatile auto text = reader.GetContentText();
+            } else {
+                ;
+            }
+        }
+    }
+}
+#endif

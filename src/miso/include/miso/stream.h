@@ -1,9 +1,9 @@
 #ifndef MISO_CORE_STREAM_H_
 #define MISO_CORE_STREAM_H_
 
-#include "miso/buffer.h"
-
 #include <stdio.h>
+
+#include "miso/buffer.h"
 
 namespace miso {
 

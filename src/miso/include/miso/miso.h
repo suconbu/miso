@@ -16,5 +16,6 @@
 #include "miso/endian.h"
 #include "miso/stream.h"
 #include "miso/string.h"
+#include "miso/xml_reader.h"
 
 #endif // MISO_MISO_H_

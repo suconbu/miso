@@ -13,7 +13,6 @@
 #endif
 
 #include "miso/miso.h"
-#include "libxml/xmlreader.h"
 #include "gtest/gtest.h"
 
 #include <crtdbg.h>

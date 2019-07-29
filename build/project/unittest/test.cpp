@@ -414,6 +414,112 @@ TEST_F(MisoTest, Buffer_Empty)
     EXPECT_EQ(100, a.GetSize());
 }
 
+TEST_F(MisoTest, XmlReader_Normal)
+{
+    TEST_TRACE("");
+
+    miso::XmlReader reader("test.xml");
+    EXPECT_EQ(true, reader.CanRead());
+
+    EXPECT_EQ("", reader.GetElementName());
+    EXPECT_EQ("", reader.GetAttributeValueString("id"));
+    EXPECT_EQ("", reader.GetContentText());
+    EXPECT_EQ(0, reader.GetNestingLevel());
+
+    EXPECT_EQ(true, reader.Read());
+    EXPECT_EQ(miso::XmlNodeType::StartElement, reader.GetNodeType());
+    EXPECT_EQ("root", reader.GetElementName());
+    EXPECT_EQ("root_name", reader.GetAttributeValueString("name"));
+    EXPECT_EQ("", reader.GetAttributeValueString("type"));
+    EXPECT_EQ("", reader.GetContentText());
+
+    EXPECT_EQ(true, reader.Read());
+    EXPECT_EQ(miso::XmlNodeType::EmptyElement, reader.GetNodeType());
+    EXPECT_EQ("element", reader.GetElementName());
+    EXPECT_EQ("element1", reader.GetAttributeValueString("id"));
+    EXPECT_EQ("", reader.GetAttributeValueString("name"));
+    EXPECT_EQ("", reader.GetContentText());
+    EXPECT_EQ(1, reader.GetNestingLevel());
+
+    EXPECT_EQ(true, reader.Read());
+    EXPECT_EQ(miso::XmlNodeType::StartElement, reader.GetNodeType());
+    EXPECT_EQ("element", reader.GetElementName());
+    EXPECT_EQ("element2", reader.GetAttributeValueString("id"));
+    EXPECT_EQ("element2_name", reader.GetAttributeValueString("name"));
+    auto attributes = reader.GetAllAttributes();
+    EXPECT_EQ(2, attributes.size());
+    EXPECT_EQ("id", attributes[0].GetName());
+    EXPECT_EQ("element2", attributes[0].GetValue());
+    EXPECT_EQ("name", attributes[1].GetName());
+    EXPECT_EQ("element2_name", attributes[1].GetValue());
+    EXPECT_EQ("", reader.GetContentText());
+
+    EXPECT_EQ(true, reader.Read());
+    EXPECT_EQ(miso::XmlNodeType::Text, reader.GetNodeType());
+    EXPECT_EQ("", reader.GetElementName());
+    EXPECT_EQ("", reader.GetAttributeValueString("id"));
+    EXPECT_EQ("\n    TEXT1\n    ", reader.GetContentText());
+
+    EXPECT_EQ(true, reader.Read());
+    EXPECT_EQ(miso::XmlNodeType::StartElement, reader.GetNodeType());
+    EXPECT_EQ("sub-element", reader.GetElementName());
+
+    EXPECT_EQ(true, reader.Read());
+    EXPECT_EQ(miso::XmlNodeType::Text, reader.GetNodeType());
+    EXPECT_EQ("TEXT2", reader.GetContentText());
+    EXPECT_EQ(3, reader.GetNestingLevel());
+
+    EXPECT_EQ(true, reader.Read());
+    EXPECT_EQ(miso::XmlNodeType::EndElement, reader.GetNodeType());
+    EXPECT_EQ("sub-element", reader.GetElementName());
+    EXPECT_EQ(2, reader.GetNestingLevel());
+
+    EXPECT_EQ(true, reader.Read());
+    EXPECT_EQ(miso::XmlNodeType::Text, reader.GetNodeType());
+    EXPECT_EQ("\n    TEXT3\n  ", reader.GetContentText());
+
+    EXPECT_EQ(true, reader.Read());
+    EXPECT_EQ(miso::XmlNodeType::EndElement, reader.GetNodeType());
+    EXPECT_EQ("element", reader.GetElementName());
+
+    EXPECT_EQ(true, reader.Read());
+    EXPECT_EQ(miso::XmlNodeType::EndElement, reader.GetNodeType());
+    EXPECT_EQ("root", reader.GetElementName());
+    EXPECT_EQ(0, reader.GetNestingLevel());
+
+    EXPECT_EQ(false, reader.Read());
+    EXPECT_EQ(false, reader.CanRead());
+    EXPECT_EQ(false, reader.HasError());
+}
+
+TEST_F(MisoTest, XmlReader_ErrorAttributeDupulicated)
+{
+    TEST_TRACE("");
+    miso::XmlReader reader("test_error_attribute_duplicated.xml");
+    EXPECT_EQ(true, reader.CanRead());
+
+    EXPECT_EQ(false, reader.Read());
+    EXPECT_EQ(true, reader.HasError());
+    auto errors = reader.GetErrors();
+    EXPECT_EQ(1, errors.size());
+    EXPECT_EQ("[ERROR] Attribute id redefined", errors[0]);
+}
+
+TEST_F(MisoTest, XmlReader_ErrorFileNotFound)
+{
+    TEST_TRACE("");
+    miso::XmlReader reader("test_error_file_not_found.xml");
+    EXPECT_EQ(false, reader.CanRead());
+    EXPECT_EQ(false, reader.Read());
+    EXPECT_EQ("", reader.GetElementName());
+    EXPECT_EQ("", reader.GetContentText());
+    EXPECT_EQ("", reader.GetAttributeValueString("id"));
+    EXPECT_EQ(0, reader.GetAllAttributes().size());
+    EXPECT_EQ(miso::XmlNodeType::None, reader.GetNodeType());
+    EXPECT_EQ(true, reader.HasError());
+}
+
+// BinaryReader Performance
 #if 0
 TEST_F(Performace, OneRead1MCrt)
 {
@@ -499,6 +605,8 @@ TEST_F(Performace, RandomRead1M8B)
 }
 #endif
 
+// XmlReader Output
+#if 0
 TEST_F(MisoTest, XmlReader_OutputXml)
 {
     TEST_TRACE("");
@@ -521,11 +629,16 @@ TEST_F(MisoTest, XmlReader_OutputXml)
         }
         printf("\n");
     }
-    for (auto& error : reader.GetErrors()) {
-        printf("Error: %s\n", error.c_str());
+    if (reader.HasError()) {
+        printf("Errors:\n");
+        for (auto& error : reader.GetErrors()) {
+            printf("%s\n", error.c_str());
+        }
     }
 }
+#endif
 
+// XmlReader Performance
 #if 0
 TEST_F(MisoTest, libxml2_Performance)
 {
@@ -562,10 +675,10 @@ TEST_F(MisoTest, XmlReader_Performance)
                 volatile auto name = reader.GetElementName();
             } else if (type == miso::XmlNodeType::Text) {
                 volatile auto text = reader.GetContentText();
-            } else {
+        } else {
                 ;
             }
-        }
+}
     }
 }
 #endif

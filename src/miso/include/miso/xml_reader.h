@@ -32,7 +32,8 @@ public:
     XmlReader(XmlReader&& other);
     ~XmlReader();
 
-    bool CanRead() const { return reader_ == nullptr || reached_to_end_; }
+    bool CanRead() const { return reader_ != nullptr && !reached_to_end_; }
+    bool HasError() { return !errors_.empty(); }
     const std::vector<std::string>& GetErrors() { return errors_; }
     bool Read();
     void MoveToEndElement();
@@ -51,6 +52,7 @@ private:
     std::vector<std::string> errors_;
 
     XmlReader(libxml::xmlParserInputBufferPtr buffer);
+    static void ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities severity, libxml::xmlTextReaderLocatorPtr locator);
 };
 
 inline
@@ -69,7 +71,13 @@ XmlReader::XmlReader(libxml::xmlParserInputBufferPtr buffer) :
     reader_(libxml::xmlNewTextReader(buffer, nullptr)),
     node_type_(XmlNodeType::None),
     reached_to_end_(false)
-{}
+{
+    if (reader_ != nullptr) {
+        libxml::xmlTextReaderSetErrorHandler(reader_, ErrorHandler, this);
+    } else {
+        errors_.push_back("Cannot open file");
+    }
+}
 
 inline
 XmlReader::XmlReader(XmlReader&& other) :
@@ -92,9 +100,7 @@ XmlReader::Read()
     if (reader_ == nullptr) return false;
 
     while (true) {
-        auto result = libxml::xmlTextReaderRead(reader_);
-        if (result != 1) {
-            if (result == -1) errors_.push_back("xmlTextReaderRead returns -1");
+        if (libxml::xmlTextReaderRead(reader_) != 1) {
             reached_to_end_ = true;
             return false;
         }
@@ -122,12 +128,13 @@ inline void
 XmlReader::MoveToEndElement()
 {
     if (node_type_ == XmlNodeType::EmptyElement ||
-        node_type_ == XmlNodeType::EndElement) return;
+        node_type_ == XmlNodeType::EndElement) {
+        return;
+    }
+
     int count = 1;
     while (true) {
-        auto result = libxml::xmlTextReaderRead(reader_);
-        if (result != 1) {
-            if (result == -1) errors_.push_back("xmlTextReaderRead returns -1");
+        if (libxml::xmlTextReaderRead(reader_) != 1) {
             reached_to_end_ = true;
             return;
         }
@@ -148,8 +155,12 @@ inline std::string
 XmlReader::GetElementName() const
 {
     std::string name_str;
-    auto name = libxml::xmlTextReaderName(reader_);
-    if (name != nullptr) name_str.assign(reinterpret_cast<const char*>(name));
+    if (node_type_ == XmlNodeType::StartElement ||
+        node_type_ == XmlNodeType::EmptyElement ||
+        node_type_ == XmlNodeType::EndElement) {
+        auto name = libxml::xmlTextReaderName(reader_);
+        if (name != nullptr) name_str.assign(reinterpret_cast<const char*>(name));
+    }
     return name_str;
 }
 
@@ -158,8 +169,10 @@ inline std::string
 XmlReader::GetContentText() const
 {
     std::string text_str;
-    auto text = libxml::xmlTextReaderConstValue(reader_);
-    if (text != nullptr) text_str.assign(reinterpret_cast<const char*>(text));
+    if (node_type_ == XmlNodeType::Text) {
+        auto text = libxml::xmlTextReaderConstValue(reader_);
+        if (text != nullptr) text_str.assign(reinterpret_cast<const char*>(text));
+    }
     return text_str;
 }
 
@@ -167,10 +180,13 @@ inline const std::string
 XmlReader::GetAttributeValueString(const char* name) const
 {
     std::string value_str;
-    auto value = libxml::xmlTextReaderGetAttribute(reader_, reinterpret_cast<const libxml::xmlChar*>(name));
-    if (value != nullptr) {
-        value_str.assign(reinterpret_cast<const char*>(value));
-        libxml::xmlFree(value);
+    if (node_type_ == XmlNodeType::StartElement ||
+        node_type_ == XmlNodeType::EmptyElement) {
+        auto value = libxml::xmlTextReaderGetAttribute(reader_, reinterpret_cast<const libxml::xmlChar*>(name));
+        if (value != nullptr) {
+            value_str.assign(reinterpret_cast<const char*>(value));
+            libxml::xmlFree(value);
+        }
     }
     return value_str;
 }
@@ -180,16 +196,30 @@ inline const std::vector<XmlAttribute>
 XmlReader::GetAllAttributes() const
 {
     std::vector<XmlAttribute> attributes;
-    if (libxml::xmlTextReaderHasAttributes(reader_) == 1) {
-        auto result = libxml::xmlTextReaderMoveToFirstAttribute(reader_);
-        while (result) {
-            attributes.push_back(XmlAttribute(
-                reinterpret_cast<const char*>(libxml::xmlTextReaderConstName(reader_)),
-                reinterpret_cast<const char*>(libxml::xmlTextReaderConstValue(reader_))));
-            result = libxml::xmlTextReaderMoveToNextAttribute(reader_);
+    if (node_type_ == XmlNodeType::StartElement ||
+        node_type_ == XmlNodeType::EmptyElement) {
+        if (libxml::xmlTextReaderHasAttributes(reader_) == 1) {
+            auto result = libxml::xmlTextReaderMoveToFirstAttribute(reader_);
+            while (result) {
+                attributes.push_back(XmlAttribute(
+                    reinterpret_cast<const char*>(libxml::xmlTextReaderConstName(reader_)),
+                    reinterpret_cast<const char*>(libxml::xmlTextReaderConstValue(reader_))));
+                result = libxml::xmlTextReaderMoveToNextAttribute(reader_);
+            }
         }
     }
     return attributes;
+}
+
+inline void
+XmlReader::ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities severity, libxml::xmlTextReaderLocatorPtr locator)
+{
+    (void)locator;
+    static const char* severities[] = { "", "VALIDITY_WARNING", "VALIDITY_ERROR", "WARNING", "ERROR" };
+    auto severity_label = severities[severity];
+    auto message = StringUtils::Trim(msg);
+    auto& reader = *static_cast<XmlReader*>(arg);
+    reader.errors_.push_back(StringUtils::Format("[%s] %s", severity_label, message.c_str()));
 }
 
 } // namespace miso

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root name="root_name">
+
+  <element id="element1"/>
+
+  <!-- comment -->
+  <element id="element2" name="element2_name">
+    TEXT1
+    <sub-element type="sub">TEXT2</sub-element>
+    TEXT3
+  </element>
+</root>

@@ -659,6 +659,65 @@ TEST_F(MisoTest, XmlReader_ErrorFileNotFound)
     EXPECT_EQ(true, reader.HasError());
 }
 
+TEST_F(MisoTest, Numeric)
+{
+    // From NumberFormatterTest.cpp of the Poco
+    EXPECT_EQ(0.0, miso::Numeric("0px").GetValue());
+    EXPECT_EQ(1.0, miso::Numeric("1px").GetValue());
+    EXPECT_EQ(-1.0, miso::Numeric("-1px").GetValue());
+    EXPECT_EQ(1.0, miso::Numeric("+1px").GetValue());
+    EXPECT_EQ(123.0, miso::Numeric("123px").GetValue());
+    EXPECT_EQ(-123.0, miso::Numeric("-123px").GetValue());
+    EXPECT_EQ(1, miso::Numeric("001px").GetValue());
+    EXPECT_EQ(-1, miso::Numeric("-001px").GetValue());
+    EXPECT_EQ(1.23, miso::Numeric("1.23px").GetValue());
+    EXPECT_EQ(-1.23, miso::Numeric("-1.23px").GetValue());
+    EXPECT_EQ(12.345, miso::Numeric("12.345px").GetValue());
+    EXPECT_EQ(-12.345, miso::Numeric("-12.345px").GetValue());
+    EXPECT_EQ(0.0, miso::Numeric("-0.0px").GetValue());
+    EXPECT_EQ(0.1, miso::Numeric("0.1px").GetValue());
+    EXPECT_EQ(-0.1, miso::Numeric("-0.1px").GetValue());
+    EXPECT_EQ(0.1, miso::Numeric("0.100px").GetValue());
+    EXPECT_EQ(1.0, miso::Numeric("1.px").GetValue());
+    EXPECT_EQ(0.1, miso::Numeric(".1px").GetValue());
+    EXPECT_EQ(-1.0, miso::Numeric("-1.px").GetValue());
+    EXPECT_EQ(-0.1, miso::Numeric("-.1px").GetValue());
+
+    EXPECT_EQ(1, miso::Numeric("abc1px").GetValue());
+    EXPECT_EQ(1, miso::Numeric("+++1px").GetValue());
+    EXPECT_EQ(-1, miso::Numeric("--1px").GetValue());
+    EXPECT_EQ(1, miso::Numeric("  1px  ").GetValue());
+
+    EXPECT_TRUE(miso::Numeric(nullptr).IsNaN());
+    EXPECT_TRUE(miso::Numeric("").IsNaN());
+    EXPECT_TRUE(miso::Numeric("px").IsNaN());
+    EXPECT_TRUE(miso::Numeric("-px").IsNaN());
+    EXPECT_TRUE(miso::Numeric("+px").IsNaN());
+    EXPECT_TRUE(miso::Numeric("apx").IsNaN());
+    EXPECT_TRUE(miso::Numeric("0..1px").IsNaN());
+    EXPECT_TRUE(miso::Numeric("1+px").IsNaN());
+    EXPECT_TRUE(miso::Numeric("1px++").IsNaN());
+    EXPECT_TRUE(miso::Numeric("1pxx").IsNaN());
+
+    EXPECT_EQ(miso::NumericUnit::Pixel, miso::Numeric("1px").GetUnit());
+    EXPECT_EQ(miso::NumericUnit::ScaledPixel, miso::Numeric("1sp").GetUnit());
+    EXPECT_EQ(miso::NumericUnit::Parcent, miso::Numeric("1%").GetUnit());
+    EXPECT_EQ(miso::NumericUnit::Vw, miso::Numeric("1vw").GetUnit());
+    EXPECT_EQ(miso::NumericUnit::Vh, miso::Numeric("1vh").GetUnit());
+    EXPECT_EQ(miso::NumericUnit::Vmin, miso::Numeric("1vmin").GetUnit());
+    EXPECT_EQ(miso::NumericUnit::Vmax, miso::Numeric("1vmax").GetUnit());
+    EXPECT_EQ(miso::NumericUnit::Second, miso::Numeric("1s").GetUnit());
+    EXPECT_EQ(miso::NumericUnit::Millisecond, miso::Numeric("1ms").GetUnit());
+    EXPECT_EQ(miso::NumericUnit::Count, miso::Numeric("1").GetUnit());
+
+    EXPECT_EQ("NaN", miso::Numeric("").ToString());
+    EXPECT_EQ("1px", miso::Numeric("1px").ToString());
+    EXPECT_EQ("0.100px", miso::Numeric("0.1px").ToString());
+    EXPECT_EQ("1%", miso::Numeric("1%").ToString());
+    EXPECT_EQ("1ms", miso::Numeric("1ms").ToString());
+    EXPECT_EQ("1", miso::Numeric("1").ToString());
+}
+
 // BinaryReader Performance
 #if 0
 TEST_F(Performace, OneRead1MCrt)

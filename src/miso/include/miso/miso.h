@@ -14,6 +14,7 @@
 #include "miso/binary_reader.h"
 #include "miso/buffer.h"
 #include "miso/endian.h"
+#include "miso/numeric.h"
 #include "miso/stream.h"
 #include "miso/string.h"
 #include "miso/xml_reader.h"

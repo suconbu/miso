@@ -548,6 +548,14 @@ TEST_F(MisoTest, XmlReader_MoveToEndElement)
     TEST_TRACE("");
     {
         miso::XmlReader reader("test.xml");
+        EXPECT_EQ(false, reader.MoveToEndElement());
+        reader.Read();
+        EXPECT_EQ(true, reader.MoveToEndElement());
+        EXPECT_EQ(miso::XmlNodeType::EndElement, reader.GetNodeType());
+        EXPECT_EQ("root", reader.GetElementName());
+    }
+    {
+        miso::XmlReader reader("test.xml");
         reader.Read();
         reader.Read();
         EXPECT_EQ(false, reader.MoveToEndElement());
@@ -562,13 +570,65 @@ TEST_F(MisoTest, XmlReader_MoveToEndElement)
         reader.Read(); // TEXT1
         reader.Read(); // sub-element
         reader.Read(); // TEXT2
-        EXPECT_EQ(true, reader.MoveToEndElement()); // -> /sub-element
+        EXPECT_EQ(false, reader.MoveToEndElement());
+        reader.Read(); // /sub-element
         EXPECT_EQ(false, reader.MoveToEndElement());
         reader.Read(); // TEXT3
-        EXPECT_EQ(true, reader.MoveToEndElement()); // -> /element
         EXPECT_EQ(false, reader.MoveToEndElement());
-        reader.Read(); // /root
-        EXPECT_EQ(false, reader.MoveToEndElement());
+    }
+}
+
+TEST_F(MisoTest, XmlReader_MoveToEndOfParentElement)
+{
+    TEST_TRACE("");
+    {
+        miso::XmlReader reader("test.xml");
+        EXPECT_EQ(false, reader.MoveToEndOfParentElement());
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        reader.Read();
+        EXPECT_EQ(false, reader.MoveToEndOfParentElement());
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        reader.Read();
+        reader.Read(); // element1
+        EXPECT_EQ(true, reader.MoveToEndOfParentElement());
+        EXPECT_EQ(miso::XmlNodeType::EndElement, reader.GetNodeType());
+        EXPECT_EQ("root", reader.GetElementName());
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        reader.Read();
+        reader.Read();
+        reader.Read(); // element2
+        EXPECT_EQ(true, reader.MoveToEndOfParentElement());
+        EXPECT_EQ(miso::XmlNodeType::EndElement, reader.GetNodeType());
+        EXPECT_EQ("root", reader.GetElementName());
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        reader.Read();
+        reader.Read();
+        reader.Read();
+        reader.Read(); // TEXT1
+        EXPECT_EQ(true, reader.MoveToEndOfParentElement());
+        EXPECT_EQ(miso::XmlNodeType::EndElement, reader.GetNodeType());
+        EXPECT_EQ("element", reader.GetElementName());
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        reader.Read();
+        reader.Read();
+        reader.Read();
+        reader.Read();
+        reader.Read();
+        reader.Read();
+        reader.Read(); // /sub-element
+        EXPECT_EQ(true, reader.MoveToEndOfParentElement());
+        EXPECT_EQ(miso::XmlNodeType::EndElement, reader.GetNodeType());
+        EXPECT_EQ("element", reader.GetElementName());
     }
 }
 

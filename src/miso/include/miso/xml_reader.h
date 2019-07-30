@@ -37,7 +37,8 @@ public:
     const std::vector<std::string>& GetErrors() { return errors_; }
     bool Read();
     bool MoveToElement(const char* element_name = nullptr, const char* attribute_name = nullptr, const char* attribute_value = nullptr);
-    bool MoveToEndElement();
+    bool MoveToEndElement() { return MoveToEndElementInside(false); }
+    bool MoveToEndOfParentElement() { return MoveToEndElementInside(true); }
     XmlNodeType GetNodeType() const { return node_type_; }
     std::string GetElementName() const;
     std::string GetContentText() const;
@@ -53,6 +54,7 @@ private:
     std::vector<std::string> errors_;
 
     XmlReader(libxml::xmlParserInputBufferPtr buffer);
+    bool MoveToEndElementInside(bool end_of_parent);
     static void ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities severity, libxml::xmlTextReaderLocatorPtr locator);
 };
 
@@ -164,14 +166,15 @@ XmlReader::MoveToElement(const char* element_name, const char* attribute_name, c
 }
 
 inline bool
-XmlReader::MoveToEndElement()
+XmlReader::MoveToEndElementInside(bool end_of_parent)
 {
-    if (node_type_ == XmlNodeType::EmptyElement ||
-        node_type_ == XmlNodeType::EndElement) {
-        return false;
+    int count = 1;
+    if (end_of_parent) {
+        if (node_type_ == XmlNodeType::StartElement) ++count;
+    } else {
+        if (node_type_ != XmlNodeType::StartElement) return false;
     }
 
-    int count = 1;
     while (true) {
         if (libxml::xmlTextReaderRead(reader_) != 1) {
             reached_to_end_ = true;
@@ -180,7 +183,9 @@ XmlReader::MoveToEndElement()
 
         auto type = libxml::xmlTextReaderNodeType(reader_);
         if (type == libxml::XML_READER_TYPE_ELEMENT) {
-            ++count;
+            if (libxml::xmlTextReaderIsEmptyElement(reader_) != 1) {
+                ++count;
+            }
         } else if (type == libxml::XML_READER_TYPE_END_ELEMENT) {
             if (--count == 0) {
                 node_type_ = XmlNodeType::EndElement;

@@ -492,10 +492,60 @@ TEST_F(MisoTest, XmlReader_Normal)
     EXPECT_EQ(false, reader.HasError());
 }
 
+TEST_F(MisoTest, XmlReader_MoveToElement)
+{
+    TEST_TRACE("");
+    {
+        miso::XmlReader reader("test.xml");
+        EXPECT_EQ(true, reader.MoveToElement());
+        EXPECT_EQ("root", reader.GetElementName());
+        EXPECT_EQ(true, reader.MoveToElement("sub-element"));
+        EXPECT_EQ("sub", reader.GetAttributeValueString("type"));
+        EXPECT_EQ(miso::XmlNodeType::StartElement, reader.GetNodeType());
+        EXPECT_EQ(false, reader.MoveToElement("element"));
+        EXPECT_EQ(false, reader.CanRead());
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        EXPECT_EQ(true, reader.MoveToElement("element"));
+        EXPECT_EQ(miso::XmlNodeType::EmptyElement, reader.GetNodeType());
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        EXPECT_EQ(true, reader.MoveToElement("element", "name"));
+        EXPECT_EQ("element2", reader.GetAttributeValueString("id"));
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        EXPECT_EQ(true, reader.MoveToElement("element", "id", "element2"));
+        EXPECT_EQ("element2", reader.GetAttributeValueString("id"));
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        EXPECT_EQ(true, reader.MoveToElement(nullptr, "type", "sub"));
+        EXPECT_EQ("sub", reader.GetAttributeValueString("type"));
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        EXPECT_EQ(false, reader.MoveToElement(nullptr, "hoge"));
+    }
+    {
+        miso::XmlReader reader("test.xml");
+        EXPECT_EQ(false, reader.MoveToElement(nullptr, "name", "element1_name"));
+    }
+    {
+        // XmlNodeType::TextÇ©ÇÁåüçı
+        miso::XmlReader reader("test.xml");
+        reader.MoveToElement("element", "id", "element2");
+        reader.Read();
+        EXPECT_EQ(true, reader.MoveToElement(nullptr, "type", "sub"));
+        EXPECT_EQ("sub", reader.GetAttributeValueString("type"));
+    }
+}
+
 TEST_F(MisoTest, XmlReader_MoveToEndElement)
 {
     TEST_TRACE("");
-
     {
         miso::XmlReader reader("test.xml");
         reader.Read();
@@ -504,7 +554,6 @@ TEST_F(MisoTest, XmlReader_MoveToEndElement)
         reader.Read();
         EXPECT_EQ(true, reader.MoveToEndElement());
     }
-
     {
         miso::XmlReader reader("test.xml");
         reader.Read(); // root

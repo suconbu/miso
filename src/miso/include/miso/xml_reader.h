@@ -36,7 +36,7 @@ public:
     bool HasError() { return !errors_.empty(); }
     const std::vector<std::string>& GetErrors() { return errors_; }
     bool Read();
-    void MoveToEndElement();
+    bool MoveToEndElement();
     XmlNodeType GetNodeType() const { return node_type_; }
     std::string GetElementName() const;
     std::string GetContentText() const;
@@ -124,19 +124,19 @@ XmlReader::Read()
     return true;
 }
 
-inline void
+inline bool
 XmlReader::MoveToEndElement()
 {
     if (node_type_ == XmlNodeType::EmptyElement ||
         node_type_ == XmlNodeType::EndElement) {
-        return;
+        return false;
     }
 
     int count = 1;
     while (true) {
         if (libxml::xmlTextReaderRead(reader_) != 1) {
             reached_to_end_ = true;
-            return;
+            return false;
         }
 
         auto type = libxml::xmlTextReaderNodeType(reader_);
@@ -149,6 +149,8 @@ XmlReader::MoveToEndElement()
             }
         }
     }
+
+    return true;
 }
 
 inline std::string

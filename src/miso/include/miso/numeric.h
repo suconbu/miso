@@ -13,14 +13,11 @@ namespace miso {
 
 enum class NumericUnit {
     NaN,
-    // Length
-    Pixel, ScaledPixel, Vw, Vh, Vmax, Vmin,
-    // Ratio
+    Pixel, ScaledPixel,
+    Vw, Vh, Vmax, Vmin,
     Parcent,
-    // Duration
     Second, Millisecond,
-    // Count
-    Count,
+    Unitless,
 };
 
 class Numeric {
@@ -35,9 +32,9 @@ public:
     double GetValue() const { return value_; }
     NumericUnit GetUnit() const { return unit_; }
     bool IsNaN() const { return unit_ == NumericUnit::NaN; }
-    double ToLength(float vw, float vh, float pixel_scale, float base_length, double default_value = kNaN) const;
-    float ToRatio(float default_value = kNaN) const;
-    float ToDuration(float default_value = kNaN) const;
+    double ToLength(float view_width, float view_height, float pixel_scale, double base_length, double default_value = kNaN) const;
+    double ToRatio(float default_value = kNaN) const;
+    double ToMilliseconds(float default_value = kNaN) const;
     std::string ToString() const;
 
 private:
@@ -62,7 +59,7 @@ int Numeric::Parse(const char* str, double* value_out, NumericUnit* unit_out)
         { "vmin", NumericUnit::Vmin },
         { "s", NumericUnit::Second },
         { "ms", NumericUnit::Millisecond },
-        { "", NumericUnit::Count },
+        { "", NumericUnit::Unitless },
     };
 
     // [+-]?(\d+(\.(\d+)?)?)|(\.\d+)?(\w+|%)
@@ -134,21 +131,36 @@ Numeric::Numeric(const char* str) : Numeric()
 }
 
 inline double
-Numeric::ToLength(float vw, float vh, float pixel_scale, float base_length, double default_value) const
+Numeric::ToLength(float view_width, float view_height, float pixel_scale, double base_length, double default_value) const
 {
-    return default_value;
+    return
+        (unit_ == NumericUnit::Pixel) ? value_ :
+        (unit_ == NumericUnit::ScaledPixel) ? value_ * pixel_scale :
+        (unit_ == NumericUnit::Vw) ? value_ / 100.0f * view_width :
+        (unit_ == NumericUnit::Vh) ? value_ / 100.0f * view_height :
+        (unit_ == NumericUnit::Vmax) ? value_ / 100.0f * std::max(view_width, view_height) :
+        (unit_ == NumericUnit::Vmin) ? value_ / 100.0f * std::min(view_width, view_height) :
+        (unit_ == NumericUnit::Parcent) ? value_ / 100.0f * base_length :
+        (unit_ == NumericUnit::Unitless) ? value_ * base_length :
+        default_value;
 }
 
-inline float
+inline double
 Numeric::ToRatio(float default_value) const
 {
-    return default_value;
+    return
+        (unit_ == NumericUnit::Parcent) ? value_ / 100.0f :
+        (unit_ == NumericUnit::Unitless) ? value_ :
+        default_value;
 }
 
-inline float
-Numeric::ToDuration(float default_value) const
+inline double
+Numeric::ToMilliseconds(float default_value) const
 {
-    return default_value;
+    return
+        (unit_ == NumericUnit::Second) ? value_ * 1000.0f :
+        (unit_ == NumericUnit::Millisecond) ? value_ :
+        default_value;
 }
 
 inline std::string
@@ -165,7 +177,7 @@ Numeric::ToString() const
         { NumericUnit::Vmin, "vmin" },
         { NumericUnit::Second, "s" },
         { NumericUnit::Millisecond, "ms" },
-        { NumericUnit::Count, "" },
+        { NumericUnit::Unitless, "" },
     };
     if (floor(value_) == value_) {
         return StringUtils::Format("%.0Lf%s", value_, kUnitToString.at(unit_));

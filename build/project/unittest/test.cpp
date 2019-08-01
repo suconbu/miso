@@ -737,7 +737,7 @@ TEST_F(MisoTest, Numeric)
     EXPECT_EQ(miso::NumericUnit::Vmax, miso::Numeric("1vmax").GetUnit());
     EXPECT_EQ(miso::NumericUnit::Second, miso::Numeric("1s").GetUnit());
     EXPECT_EQ(miso::NumericUnit::Millisecond, miso::Numeric("1ms").GetUnit());
-    EXPECT_EQ(miso::NumericUnit::Count, miso::Numeric("1").GetUnit());
+    EXPECT_EQ(miso::NumericUnit::Unitless, miso::Numeric("1").GetUnit());
 
     EXPECT_EQ("NaN", miso::Numeric("").ToString());
     EXPECT_EQ("1px", miso::Numeric("1px").ToString());
@@ -751,6 +751,50 @@ TEST_F(MisoTest, Numeric)
     EXPECT_EQ(0, numerics[0].GetValue());
     EXPECT_EQ(1, numerics[1].GetValue());
     EXPECT_EQ(2, numerics[2].GetValue());
+}
+
+TEST_F(MisoTest, Numeric_Convert)
+{
+    auto n = miso::Numeric("10px");
+    EXPECT_EQ(10, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
+    EXPECT_EQ(-1.0, n.ToRatio(-1.0));
+    EXPECT_EQ(-1.0, n.ToMilliseconds(-1.0));
+    n = miso::Numeric("10sp");
+    EXPECT_EQ(20, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
+    EXPECT_EQ(-1.0, n.ToRatio(-1.0));
+    EXPECT_EQ(-1.0, n.ToMilliseconds(-1.0));
+    n = miso::Numeric("10vw");
+    EXPECT_EQ(64.0, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
+    EXPECT_EQ(-1.0, n.ToRatio(-1.0));
+    EXPECT_EQ(-1.0, n.ToMilliseconds(-1.0));
+    n = miso::Numeric("10vh");
+    EXPECT_EQ(48.0, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
+    EXPECT_EQ(-1.0, n.ToRatio(-1.0));
+    EXPECT_EQ(-1.0, n.ToMilliseconds(-1.0));
+    n = miso::Numeric("10vmax");
+    EXPECT_EQ(64.0, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
+    EXPECT_EQ(-1.0, n.ToRatio(-1.0));
+    EXPECT_EQ(-1.0, n.ToMilliseconds(-1.0));
+    n = miso::Numeric("10vmin");
+    EXPECT_EQ(48.0, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
+    EXPECT_EQ(-1.0, n.ToRatio(-1.0));
+    EXPECT_EQ(-1.0, n.ToMilliseconds(-1.0));
+    n = miso::Numeric("10%");
+    EXPECT_EQ(10.0, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
+    EXPECT_EQ(0.1, n.ToRatio(-1.0));
+    EXPECT_EQ(-1.0, n.ToMilliseconds(-1.0));
+    n = miso::Numeric("10s");
+    EXPECT_EQ(-1.0, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
+    EXPECT_EQ(-1.0, n.ToRatio(-1.0));
+    EXPECT_EQ(10000.0, n.ToMilliseconds(-1.0));
+    n = miso::Numeric("10ms");
+    EXPECT_EQ(-1.0, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
+    EXPECT_EQ(-1.0, n.ToRatio(-1.0));
+    EXPECT_EQ(10.0, n.ToMilliseconds(-1.0));
+    n = miso::Numeric("10");
+    EXPECT_EQ(1000.0, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
+    EXPECT_EQ(10.0, n.ToRatio(-1.0));
+    EXPECT_EQ(-1.0, n.ToMilliseconds(-1.0));
 }
 
 // BinaryReader Performance
@@ -862,7 +906,7 @@ TEST_F(MisoTest, XmlReader_OutputXml)
         } else {
         }
         printf("\n");
-        }
+    }
     if (reader.HasError()) {
         printf("Errors:\n");
         for (auto& error : reader.GetErrors()) {
@@ -907,12 +951,12 @@ TEST_F(MisoTest, XmlReader_Performance)
                 }
             } else if (type == miso::XmlNodeType::EndElement) {
                 volatile auto name = reader.GetElementName();
-    } else if (type == miso::XmlNodeType::Text) {
-        volatile auto text = reader.GetContentText();
-    } else {
-        ;
-    }
-}
+            } else if (type == miso::XmlNodeType::Text) {
+                volatile auto text = reader.GetContentText();
+            } else {
+                ;
+            }
+        }
     }
 }
 #endif

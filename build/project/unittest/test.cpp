@@ -251,6 +251,35 @@ TEST_F(MisoTest, StringUtils_ReadWrite)
     auto output = miso::StringUtils::ReadFile("test_string.ignore.txt");
     EXPECT_EQ(str, output);
 }
+
+TEST_F(MisoTest, StringUtils_Split)
+{
+    auto t = miso::StringUtils::Split("1,2,3", ",");
+    EXPECT_EQ(3, t.size());
+    t = miso::StringUtils::Split(",1,2,3", ",");
+    EXPECT_EQ(4, t.size());
+    t = miso::StringUtils::Split("1,2,3,", ",");
+    EXPECT_EQ(4, t.size());
+    t = miso::StringUtils::Split("1,,2,3", ",");
+    EXPECT_EQ(4, t.size());
+    t = miso::StringUtils::Split("1,,2,3", ",", true);
+    EXPECT_EQ(3, t.size());
+    t = miso::StringUtils::Split(",", ",");
+    EXPECT_EQ(2, t.size());
+    t = miso::StringUtils::Split(",", ",", true);
+    EXPECT_EQ(0, t.size());
+    t = miso::StringUtils::Split("", ",");
+    EXPECT_EQ(1, t.size());
+    t = miso::StringUtils::Split("", ",", true);
+    EXPECT_EQ(0, t.size());
+    t = miso::StringUtils::Split("", "");
+    EXPECT_EQ(1, t.size());
+    t = miso::StringUtils::Split("", "", true);
+    EXPECT_EQ(0, t.size());
+    t = miso::StringUtils::Split("1,2", "");
+    EXPECT_EQ(1, t.size());
+}
+
 TEST_F(MisoTest, StringUtils_SplitJoin)
 {
     TEST_TRACE("");
@@ -716,6 +745,12 @@ TEST_F(MisoTest, Numeric)
     EXPECT_EQ("1%", miso::Numeric("1%").ToString());
     EXPECT_EQ("1ms", miso::Numeric("1ms").ToString());
     EXPECT_EQ("1", miso::Numeric("1").ToString());
+
+    auto numerics = miso::Numeric::FromString("  0 1 \t\t 2  ");
+    EXPECT_EQ(3, numerics.size());
+    EXPECT_EQ(0, numerics[0].GetValue());
+    EXPECT_EQ(1, numerics[1].GetValue());
+    EXPECT_EQ(2, numerics[2].GetValue());
 }
 
 // BinaryReader Performance
@@ -827,7 +862,7 @@ TEST_F(MisoTest, XmlReader_OutputXml)
         } else {
         }
         printf("\n");
-    }
+        }
     if (reader.HasError()) {
         printf("Errors:\n");
         for (auto& error : reader.GetErrors()) {
@@ -872,12 +907,12 @@ TEST_F(MisoTest, XmlReader_Performance)
                 }
             } else if (type == miso::XmlNodeType::EndElement) {
                 volatile auto name = reader.GetElementName();
-            } else if (type == miso::XmlNodeType::Text) {
-                volatile auto text = reader.GetContentText();
-            } else {
-                ;
-            }
-        }
+    } else if (type == miso::XmlNodeType::Text) {
+        volatile auto text = reader.GetContentText();
+    } else {
+        ;
+    }
+}
     }
 }
 #endif

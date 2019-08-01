@@ -16,9 +16,10 @@ public:
 
     static std::string ReadFile(const std::string& filepath);
     static void WriteFile(const std::string& filepath, const std::string& content);
+    static std::vector<std::string> Split(const std::string& str);
     static std::vector<std::string> Split(const std::string& str, const std::string& delim, bool trim_empty = false);
     static std::string Join(const std::vector<std::string>& tokens, const std::string& delim, const bool trim_empty = false);
-    static std::string Trim(const std::string& str, const std::string& blank = " \f\n\r\t\v");
+    static std::string Trim(const std::string& str, const std::string& blank = kBlankChars);
     static std::string Slice(const std::string& str, int start, int end = INT_MAX);
     static std::string Repeat(const std::string& str, size_t times);
     static std::string ReplaceAll(const std::string& str, const std::string& old_sub_str, const std::string& new_sub_str);
@@ -28,6 +29,9 @@ public:
     static bool StartsWith(const std::string& str, const std::string& x);
     static bool EndsWith(const std::string& str, const std::string& x);
     static bool Contains(const std::string& str, const std::string& x);
+
+private:
+    constexpr static const char* kBlankChars = " \f\n\r\t\v";
 };
 
 // Implemented referred to https://github.com/HondaDai/StringUtils
@@ -51,23 +55,50 @@ StringUtils::WriteFile(const std::string& filepath, const std::string& content)
     ofs.close();
 }
 
+// Split string by blank chars.
+inline std::vector<std::string>
+StringUtils::Split(const std::string& str)
+{
+    std::vector<std::string> tokens;
+    size_t str_len = str.size();
+    size_t last_pos = 0;
+    while (true) {
+        size_t pos = str.find_first_of(kBlankChars, last_pos);
+        pos = (pos == std::string::npos) ? str_len : pos;
+        size_t len = pos - last_pos;
+        if (len > 0) {
+            tokens.push_back(str.substr(last_pos, len));
+        }
+        if (pos == str_len) break;
+        last_pos = pos + 1;
+    }
+    return tokens;
+}
+
+// Split string by specific string.
+// If 'delim' is empty string, the returns vector contains one element consisting of the entire 'str'.
 inline std::vector<std::string>
 StringUtils::Split(const std::string& str, const std::string& delim, bool trim_empty)
 {
     std::vector<std::string> tokens;
-    size_t last_pos = 0;
-    while (true) {
-        size_t pos = str.find(delim, last_pos);
-        pos = (pos == std::string::npos) ? str.size() : pos;
-
-        size_t len = pos - last_pos;
-        if (!trim_empty || len > 0) {
-            tokens.push_back(str.substr(last_pos, len));
+    size_t str_len = str.size();
+    size_t delim_len = delim.size();
+    if (delim_len > 0) {
+        size_t last_pos = 0;
+        while (true) {
+            size_t pos = str.find(delim, last_pos);
+            pos = (pos == std::string::npos) ? str_len : pos;
+            size_t len = pos - last_pos;
+            if (!trim_empty || len > 0) {
+                tokens.push_back(str.substr(last_pos, len));
+            }
+            if (pos == str_len) break;
+            last_pos = pos + delim_len;
         }
-
-        if (pos == str.size()) break;
-
-        last_pos = pos + delim.size();
+    } else {
+        if (!trim_empty || str_len > 0) {
+            tokens.push_back(str);
+        }
     }
     return tokens;
 }

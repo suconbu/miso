@@ -30,6 +30,7 @@ public:
 
     Numeric() : value_(kNaN), unit_(NumericUnit::NaN) {}
     explicit Numeric(const char* str);
+    explicit Numeric(const std::string& str) : Numeric(str.c_str()) {}
 
     double GetValue() const { return value_; }
     NumericUnit GetUnit() const { return unit_; }
@@ -100,8 +101,7 @@ int Numeric::Parse(const char* str, double* value_out, NumericUnit* unit_out)
     auto unit = NumericUnit::NaN;
     for (auto pair : kStringToUnit) {
         auto len = strlen(pair.first);
-        auto end = *(s + len);
-        if ((end == '\0' || isspace(end)) && strncmp(pair.first, s, len) == 0) {
+        if (strncmp(pair.first, s, len) == 0 && (*(s + len) == '\0' || isspace(*(s + len)))) {
             unit = pair.second;
             s += len;
             break;
@@ -121,6 +121,9 @@ inline std::vector<Numeric>
 Numeric::FromString(const char* str)
 {
     std::vector<Numeric> numerics;
+    for (auto& token : StringUtils::Split(str)) {
+        numerics.push_back(Numeric(token));
+    }
     return numerics;
 }
 

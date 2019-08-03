@@ -22,8 +22,7 @@ enum class NumericUnit {
 
 class Numeric {
 public:
-    static int Parse(const char* str, double* value_out = nullptr, NumericUnit* unit_out = nullptr);
-    static std::vector<Numeric> FromString(const char* str);
+    static std::vector<Numeric> Parse(const char* str);
 
     Numeric() : value_(kNaN), unit_(NumericUnit::NaN) {}
     explicit Numeric(const char* str);
@@ -39,6 +38,8 @@ public:
 
 private:
     constexpr static const double kNaN = std::numeric_limits<double>::quiet_NaN();
+
+    static int Parse(const char* str, double* value_out, NumericUnit* unit_out);
 
     double value_;
     NumericUnit unit_;
@@ -115,7 +116,7 @@ int Numeric::Parse(const char* str, double* value_out, NumericUnit* unit_out)
 }
 
 inline std::vector<Numeric>
-Numeric::FromString(const char* str)
+Numeric::Parse(const char* str)
 {
     std::vector<Numeric> numerics;
     for (auto& token : StringUtils::Split(str)) {

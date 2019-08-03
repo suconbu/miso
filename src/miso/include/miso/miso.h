@@ -13,6 +13,7 @@
 
 #include "miso/binary_reader.h"
 #include "miso/buffer.h"
+#include "miso/color.h"
 #include "miso/endian.h"
 #include "miso/numeric.h"
 #include "miso/stream.h"

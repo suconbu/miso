@@ -746,7 +746,7 @@ TEST_F(MisoTest, Numeric)
     EXPECT_EQ("1ms", miso::Numeric("1ms").ToString());
     EXPECT_EQ("1", miso::Numeric("1").ToString());
 
-    auto numerics = miso::Numeric::FromString("  0 1 \t\t 2  ");
+    auto numerics = miso::Numeric::Parse("  0 1 \t\t 2  ");
     EXPECT_EQ(3, numerics.size());
     EXPECT_EQ(0, numerics[0].GetValue());
     EXPECT_EQ(1, numerics[1].GetValue());
@@ -795,6 +795,12 @@ TEST_F(MisoTest, Numeric_Convert)
     EXPECT_EQ(1000.0, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
     EXPECT_EQ(10.0, n.ToRatio(-1.0));
     EXPECT_EQ(-1.0, n.ToMilliseconds(-1.0));
+}
+
+TEST_F(MisoTest, Color)
+{
+    miso::Color a(miso::Rgba(0.1f, 0.2f, 0.4f, 0.8f));
+    miso::Color b(miso::Hsva(0.1f, 0.2f, 0.4f, 0.8f));
 }
 
 // BinaryReader Performance

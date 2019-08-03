@@ -829,11 +829,14 @@ TEST_F(MisoTest, Scalar_Convert)
 TEST_F(MisoTest, Numeric)
 {
     TEST_TRACE("");
-    auto numerics = miso::Numeric::Parse("  0 1 \t\t 2  ");
-    EXPECT_EQ(3, numerics.size());
+    auto numerics = miso::Numeric::Parse("  0 1 \t \t 2 rgb ( 12,34 , 56 )10px 20% ");
+    EXPECT_EQ(6, numerics.size());
     EXPECT_EQ(0, numerics[0].GetScalar().GetValue());
     EXPECT_EQ(1, numerics[1].GetScalar().GetValue());
     EXPECT_EQ(2, numerics[2].GetScalar().GetValue());
+    EXPECT_EQ(miso::ColorFormat::Rgb, numerics[3].GetColor().GetFormat());
+    EXPECT_EQ(10, numerics[4].GetScalar().GetValue());
+    EXPECT_EQ(20, numerics[5].GetScalar().GetValue());
 }
 
 TEST_F(MisoTest, Color)
@@ -993,7 +996,7 @@ TEST_F(Performace, RandomRead1M8B)
             auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
             reader.SetPosition(position);
             reader.ReadBlock((void*)buffer, sizeof(buffer));
-        }
+}
     }
 }
 #endif

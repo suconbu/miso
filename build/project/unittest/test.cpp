@@ -73,6 +73,13 @@ void unittest_read(miso::BinaryReader &reader)
     EXPECT_FALSE(reader.CanRead());
 }
 
+TEST(Test, Initialize)
+{
+    // Create a local static instance for avoid false detection of memory leak.
+    // miso::Scalar::GetUnitToSuffixMap
+    miso::Scalar a("0%");
+}
+
 TEST_F(MisoTest, BinaryReader_SizeAndPosition)
 {
     TEST_TRACE("");
@@ -346,23 +353,36 @@ TEST_F(MisoTest, StringUtils_Format)
 TEST_F(MisoTest, StringUtils_Comapare)
 {
     TEST_TRACE("");
-    EXPECT_EQ(false, miso::StringUtils::StartsWith("", "Tokyo"));
-    EXPECT_EQ(false, miso::StringUtils::StartsWith("Toky", "Tokyo"));
-    EXPECT_EQ(false, miso::StringUtils::StartsWith(" Tokyo", "Tokyo"));
-    EXPECT_EQ(true, miso::StringUtils::StartsWith("Tokyo", "Tokyo"));
-    EXPECT_EQ(true, miso::StringUtils::StartsWith("TokyoStation", "Tokyo"));
+    EXPECT_FALSE(miso::StringUtils::StartsWith("", "Tokyo"));
+    EXPECT_FALSE(miso::StringUtils::StartsWith("Toky", "Tokyo"));
+    EXPECT_FALSE(miso::StringUtils::StartsWith(" Tokyo", "Tokyo"));
+    EXPECT_TRUE(miso::StringUtils::StartsWith("Tokyo", "Tokyo"));
+    EXPECT_TRUE(miso::StringUtils::StartsWith("TokyoStation", "Tokyo"));
 
-    EXPECT_EQ(false, miso::StringUtils::EndsWith("", "Station"));
-    EXPECT_EQ(false, miso::StringUtils::EndsWith("tation", "Station"));
-    EXPECT_EQ(false, miso::StringUtils::EndsWith("Station ", "Station"));
-    EXPECT_EQ(true, miso::StringUtils::EndsWith("Station", "Station"));
-    EXPECT_EQ(true, miso::StringUtils::EndsWith("TokyoStation", "Station"));
+    EXPECT_FALSE(miso::StringUtils::EndsWith("", "Station"));
+    EXPECT_FALSE(miso::StringUtils::EndsWith("tation", "Station"));
+    EXPECT_FALSE(miso::StringUtils::EndsWith("Station ", "Station"));
+    EXPECT_TRUE(miso::StringUtils::EndsWith("Station", "Station"));
+    EXPECT_TRUE(miso::StringUtils::EndsWith("TokyoStation", "Station"));
 
-    EXPECT_EQ(false, miso::StringUtils::Contains("", "Station"));
-    EXPECT_EQ(false, miso::StringUtils::Contains("tation", "Station"));
-    EXPECT_EQ(true, miso::StringUtils::Contains("Station ", "Station"));
-    EXPECT_EQ(true, miso::StringUtils::Contains("TokyoStation", "Station"));
-    EXPECT_EQ(true, miso::StringUtils::Contains("TokyoStationHotel", "Station"));
+    EXPECT_FALSE(miso::StringUtils::Contains("", "Station"));
+    EXPECT_FALSE(miso::StringUtils::Contains("tation", "Station"));
+    EXPECT_TRUE(miso::StringUtils::Contains("Station ", "Station"));
+    EXPECT_TRUE(miso::StringUtils::Contains("TokyoStation", "Station"));
+    EXPECT_TRUE(miso::StringUtils::Contains("TokyoStationHotel", "Station"));
+
+    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("StatioN", "station"));
+    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("station", "Station"));
+    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("station", "STATIC", 3));
+    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("station", "STA", 3));
+    EXPECT_TRUE(0 < miso::StringUtils::CompareIgnoreCase("station", "ST", 3));
+    EXPECT_TRUE(0 < miso::StringUtils::CompareIgnoreCase("station", "S", 3));
+    EXPECT_TRUE(0 < miso::StringUtils::CompareIgnoreCase("station", "", 3));
+    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("", "", 3));
+    EXPECT_TRUE(0 > miso::StringUtils::CompareIgnoreCase("", "Station", 3));
+    EXPECT_TRUE(0 > miso::StringUtils::CompareIgnoreCase("s", "Station", 3));
+    EXPECT_TRUE(0 > miso::StringUtils::CompareIgnoreCase("st", "Station", 3));
+    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("sta", "Station", 3));
 }
 
 TEST_F(MisoTest, StringUtils_Slice)
@@ -690,6 +710,7 @@ TEST_F(MisoTest, XmlReader_ErrorFileNotFound)
 
 TEST_F(MisoTest, Scalar)
 {
+    TEST_TRACE("");
     // From NumberFormatterTest.cpp of the Poco
     EXPECT_EQ(0.0, miso::Scalar("0px").GetValue());
     EXPECT_EQ(1.0, miso::Scalar("1px").GetValue());
@@ -712,6 +733,10 @@ TEST_F(MisoTest, Scalar)
     EXPECT_EQ(-1.0, miso::Scalar("-1.px").GetValue());
     EXPECT_EQ(-0.1, miso::Scalar("-.1px").GetValue());
 
+    EXPECT_TRUE(miso::Scalar("1px ").IsValid());
+    EXPECT_TRUE(miso::Scalar("1px+").IsValid());
+    EXPECT_TRUE(miso::Scalar("1px)").IsValid());
+
     EXPECT_FALSE(miso::Scalar("abc1px").IsValid());
     EXPECT_FALSE(miso::Scalar("+++1px").IsValid());
     EXPECT_FALSE(miso::Scalar("--1px").IsValid());
@@ -724,8 +749,8 @@ TEST_F(MisoTest, Scalar)
     EXPECT_FALSE(miso::Scalar("+px").IsValid());
     EXPECT_FALSE(miso::Scalar("apx").IsValid());
     EXPECT_FALSE(miso::Scalar("0..1px").IsValid());
-    EXPECT_FALSE(miso::Scalar("1+px").IsValid());
-    EXPECT_FALSE(miso::Scalar("1px++").IsValid());
+    //EXPECT_FALSE(miso::Scalar("1+px").IsValid());
+    //EXPECT_FALSE(miso::Scalar("1px++").IsValid());
     EXPECT_FALSE(miso::Scalar("1pxx").IsValid());
 
     EXPECT_EQ(miso::ScalarUnit::Pixel, miso::Scalar("1px").GetUnit());
@@ -745,10 +770,20 @@ TEST_F(MisoTest, Scalar)
     EXPECT_EQ("1%", miso::Scalar("1%").ToString());
     EXPECT_EQ("1ms", miso::Scalar("1ms").ToString());
     EXPECT_EQ("1", miso::Scalar("1").ToString());
+
+    EXPECT_FALSE(miso::Scalar("0").IsFloat());
+    EXPECT_FALSE(miso::Scalar("1").IsFloat());
+    EXPECT_FALSE(miso::Scalar("-1").IsFloat());
+    EXPECT_TRUE(miso::Scalar("0.0").IsFloat());
+    EXPECT_TRUE(miso::Scalar("1.0").IsFloat());
+    EXPECT_TRUE(miso::Scalar("-1.0").IsFloat());
+    EXPECT_TRUE(miso::Scalar("1.").IsFloat());
+    EXPECT_TRUE(miso::Scalar(".1").IsFloat());
 }
 
 TEST_F(MisoTest, Scalar_Convert)
 {
+    TEST_TRACE("");
     auto n = miso::Scalar("10px");
     EXPECT_EQ(10, n.ToLength(640, 480, 2.0f, 100.0, -1.0));
     EXPECT_EQ(-1.0, n.ToRatio(-1.0));
@@ -793,6 +828,7 @@ TEST_F(MisoTest, Scalar_Convert)
 
 TEST_F(MisoTest, Numeric)
 {
+    TEST_TRACE("");
     auto numerics = miso::Numeric::Parse("  0 1 \t\t 2  ");
     EXPECT_EQ(3, numerics.size());
     EXPECT_EQ(0, numerics[0].GetScalar().GetValue());
@@ -802,24 +838,78 @@ TEST_F(MisoTest, Numeric)
 
 TEST_F(MisoTest, Color)
 {
-    //miso::Color h3("#123");
-    //EXPECT_EQ(miso::ColorFormat::Hex3, h3.GetFormat());
-    //EXPECT_EQ(0x33 / 255.0f, h3.GetRgba().B);
-    //EXPECT_EQ(1.0f, h3.GetRgba().A);
-    //miso::Color h4("#1234");
-    //EXPECT_EQ(miso::ColorFormat::Hex4, h3.GetFormat());
-    //EXPECT_EQ(0x33 / 255.0f, h3.GetRgba().B);
-    //EXPECT_EQ(0x44 / 255.0f, h3.GetRgba().A);
-    //miso::Color h6("#123456");
-    //EXPECT_EQ(miso::ColorFormat::Hex6, h3.GetFormat());
-    //EXPECT_EQ(0x56 / 255.0f, h3.GetRgba().B);
-    //EXPECT_EQ(1.0f, h3.GetRgba().A);
-    //miso::Color h8("#12345678");
-    //EXPECT_EQ(miso::ColorFormat::Hex8, h3.GetFormat());
-    //EXPECT_EQ(0x56 / 255.0f, h3.GetRgba().B);
-    //EXPECT_EQ(0x78 / 255.0f, h3.GetRgba().A);
-    miso::Color a(miso::Rgba(0.1f, 0.2f, 0.4f, 0.8f));
-    miso::Color b(miso::Hsva(0.1f, 0.2f, 0.4f, 0.8f));
+    TEST_TRACE("");
+    miso::Color h3("#123");
+    EXPECT_EQ(miso::ColorFormat::Hex3, h3.GetFormat());
+    EXPECT_EQ(0x33 / 255.0f, h3.GetRgba().B);
+    EXPECT_EQ(1.0f, h3.GetRgba().A);
+    EXPECT_EQ("#112233ff", h3.ToString());
+
+    miso::Color h4("#abcd");
+    EXPECT_EQ(miso::ColorFormat::Hex4, h4.GetFormat());
+    EXPECT_EQ(0xCC / 255.0f, h4.GetRgba().B);
+    EXPECT_EQ(0xDD / 255.0f, h4.GetRgba().A);
+    EXPECT_EQ("#aabbccdd", h4.ToString());
+
+    miso::Color h6("#123456");
+    EXPECT_EQ(miso::ColorFormat::Hex6, h6.GetFormat());
+    EXPECT_EQ(0x56 / 255.0f, h6.GetRgba().B);
+    EXPECT_EQ(1.0f, h6.GetRgba().A);
+    EXPECT_EQ("#123456ff", h6.ToString());
+
+    miso::Color h8("#AABBCCDD");
+    EXPECT_EQ(miso::ColorFormat::Hex8, h8.GetFormat());
+    EXPECT_EQ(0xCC / 255.0f, h8.GetRgba().B);
+    EXPECT_EQ(0xDD / 255.0f, h8.GetRgba().A);
+    EXPECT_EQ("#aabbccdd", h8.ToString());
+
+    {
+        miso::Color a(miso::Rgba(0.25f, 0.75f, 0.75f, 0.5f));
+        miso::Color b(miso::Hsla(0.5f, 0.5f, 0.5f, 0.5f));
+        miso::Color c(miso::Hsva(0.5f, 2 / 3.0f, 0.75f, 0.5f));
+        EXPECT_EQ("#40bfbf80", a.ToString());
+        EXPECT_EQ("#40bfbf80", b.ToString());
+        EXPECT_EQ("#40bfbf80", c.ToString());
+    }
+    {
+        miso::Color rgb("rgb(12,34,56)");
+        EXPECT_EQ(miso::ColorFormat::Rgb, rgb.GetFormat());
+        EXPECT_EQ("#0c2238ff", rgb.ToString());
+        miso::Color rgba("rgba(12,34,56,78)");
+        EXPECT_EQ(miso::ColorFormat::Rgba, rgba.GetFormat());
+        EXPECT_EQ("#0c22384e", rgba.ToString());
+        miso::Color hsl("hsl(12,34,56)");
+        EXPECT_EQ(miso::ColorFormat::Hsl, hsl.GetFormat());
+        EXPECT_EQ("#b57869ff", hsl.ToString());
+        miso::Color hsla("hsla(12,34,56,78)");
+        EXPECT_EQ(miso::ColorFormat::Hsla, hsla.GetFormat());
+        EXPECT_EQ("#b57869c7", hsla.ToString());
+        miso::Color hsv("hsv(12,34,56)");
+        EXPECT_EQ(miso::ColorFormat::Hsv, hsv.GetFormat());
+        EXPECT_EQ("#8f685eff", hsv.ToString());
+        miso::Color hsva("hsva(12,34,56,78)");
+        EXPECT_EQ(miso::ColorFormat::Hsva, hsva.GetFormat());
+        EXPECT_EQ("#8f685ec7", hsva.ToString());
+
+        miso::Color rgbp("rgb(12%,34%,56%)");
+        EXPECT_EQ(miso::ColorFormat::Rgb, rgbp.GetFormat());
+        EXPECT_EQ("#1f578fff", rgbp.ToString());
+        miso::Color rgbr("rgb(0.12,0.34,0.56)");
+        EXPECT_EQ(miso::ColorFormat::Rgb, rgbr.GetFormat());
+        EXPECT_EQ("#1f578fff", rgbr.ToString());
+    }
+    {
+        miso::Color a;
+        EXPECT_EQ(16, miso::Color::TryParse("rgb(12%,34%,56%)", a));
+        EXPECT_EQ(24, miso::Color::TryParse("rgb ( 12% , 34% , 56%  ) ", a));
+        EXPECT_EQ(19, miso::Color::TryParse("rgb 12% , 34% , 56%   ", a));
+        EXPECT_EQ(15, miso::Color::TryParse("rgb 12% 34% 56%   ", a));
+        EXPECT_EQ(0, miso::Color::TryParse("rgb ( 12% , 34% ) 56% ) ", a));
+        EXPECT_EQ(0, miso::Color::TryParse("rgb ) 12% 34% 56% ) ", a));
+        EXPECT_EQ(0, miso::Color::TryParse("rgb ( 12% 34% 56% ( ", a));
+        EXPECT_EQ(15, miso::Color::TryParse("rgb 12% 34% 56% ( ", a));
+        EXPECT_EQ(0, miso::Color::TryParse("rgb ( 12% 34% 56%   ", a));
+    }
 }
 
 // BinaryReader Performance

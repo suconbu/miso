@@ -29,9 +29,10 @@ public:
     static bool StartsWith(const std::string& str, const std::string& x);
     static bool EndsWith(const std::string& str, const std::string& x);
     static bool Contains(const std::string& str, const std::string& x);
+    static int CompareIgnoreCase(const char* a, const char* b, size_t count = SIZE_MAX);
 
 private:
-    constexpr static const char* kBlankChars = " \f\n\r\t\v";
+    static constexpr const char* kBlankChars = " \f\n\r\t\v";
 };
 
 // Implemented referred to https://github.com/HondaDai/StringUtils
@@ -219,6 +220,17 @@ inline bool
 StringUtils::Contains(const std::string& str, const std::string& x)
 {
     return str.find(x) != std::string::npos;
+}
+
+inline int
+StringUtils::CompareIgnoreCase(const char* a, const char* b, size_t count)
+{
+    int result = 0;
+    for (size_t i = 0; i < count; ++i) {
+        result = tolower(a[i]) - tolower(b[i]);
+        if (result != 0 || a[i] == '\0') break;
+    }
+    return result;
 }
 
 } // namespace miso

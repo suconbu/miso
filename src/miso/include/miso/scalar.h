@@ -26,14 +26,15 @@ public:
     static constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
 
     static const Scalar& GetInvalid() { const static Scalar invalid; return invalid; }
-    static int TryParse(const char* str, Scalar& scalar_out);
+    static size_t TryParse(const char* str, Scalar& scalar_out);
 
-    Scalar() : value_(kNaN), unit_(ScalarUnit::NaN) {}
+    Scalar() : value_(kNaN), unit_(ScalarUnit::NaN), float_(false) {}
     explicit Scalar(const char* str) : Scalar() { Scalar::TryParse(str, *this); }
     explicit Scalar(const std::string& str) : Scalar(str.c_str()) {}
 
     double GetValue() const { return value_; }
     ScalarUnit GetUnit() const { return unit_; }
+    bool IsFloat() const { return float_; }
     bool IsValid() const { return unit_ != ScalarUnit::NaN; }
     double ToLength(float view_width, float view_height, float pixel_scale, double base_length, double default_value = kNaN) const;
     double ToRatio(float default_value = kNaN) const;
@@ -43,11 +44,12 @@ public:
 private:
     double value_;
     ScalarUnit unit_;
+    bool float_;
 
     static const std::map<ScalarUnit, const char*>& GetUnitToSuffixMap();
 };
 
-inline int
+inline size_t
 Scalar::TryParse(const char* str, Scalar& scalar_out)
 {
     if (str == nullptr || *str == '\0') return 0;
@@ -92,7 +94,8 @@ Scalar::TryParse(const char* str, Scalar& scalar_out)
     auto unit = ScalarUnit::NaN;
     for (auto& pair : GetUnitToSuffixMap()) {
         auto len = strlen(pair.second);
-        if (strncmp(pair.second, s, len) == 0 && (*(s + len) == '\0' || isspace(*(s + len)))) {
+        if (strncmp(pair.second, s, len) == 0 &&
+            (*(s + len) == '\0' || !isalnum(*(s + len)))) {
             unit = pair.first;
             s += len;
             break;
@@ -104,8 +107,9 @@ Scalar::TryParse(const char* str, Scalar& scalar_out)
 
     scalar_out.value_ = value;
     scalar_out.unit_ = unit;
+    scalar_out.float_ = (denominator != 0);
 
-    return static_cast<int>(s - start);
+    return static_cast<size_t>(s - start);
 }
 
 inline const std::map<ScalarUnit, const char*>&

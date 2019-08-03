@@ -35,13 +35,15 @@ struct Hsva {
 
 class Color {
 public:
+    static const Color& GetInvalid() { const static Color invalid; return invalid; }
+    static int TryParse(const char* str, Color& color_out);
     static Hsva RgbaToHsva(const Rgba& rgba);
     static Rgba HsvaToRgba(const Hsva& hsva);
 
     Color() : rgba_{}, format_(ColorFormat::Invalid) {}
     explicit Color(const Rgba& rgba) : rgba_(rgba), format_(ColorFormat::Rgba) {}
     explicit Color(const Hsva& hsva) : rgba_(HsvaToRgba(hsva)), format_(ColorFormat::Hsva) {}
-    explicit Color(const char* str) {}
+    explicit Color(const char* str) : Color() { TryParse(str, *this); }
     explicit Color(const std::string& str) : Color(str.c_str()) {}
 
     ColorFormat GetFormat() const { return format_; }
@@ -49,21 +51,19 @@ public:
     Rgba GetRgba() const { return rgba_; }
     Hsva GetHsva() const { return RgbaToHsva(rgba_); }
     float GetAlpha() const { return rgba_.A; }
-    std::string ToString(ColorFormat format = ColorFormat::Hex8) const;
+    std::string ToString(const char* format = nullptr) const;
 
 private:
     Rgba rgba_;
     ColorFormat format_;
-
-    static int Parse(const char* str, Rgba* rgba_out, ColorFormat* format_out);
 };
 
 inline int
-Color::Parse(const char* str, Rgba* rgba_out, ColorFormat* format_out)
+Color::TryParse(const char* str, Color& color_out)
 {
     //TODO:
-    if (rgba_out != nullptr) *rgba_out = Rgba();
-    if (format_out != nullptr) *format_out = ColorFormat::Rgba;
+    color_out.rgba_ = Rgba();
+    color_out.format_ = ColorFormat::Rgba;
 
     return 0;
 }
@@ -116,7 +116,7 @@ Color::HsvaToRgba(const Hsva& hsva)
 }
 
 inline std::string
-Color::ToString(ColorFormat format) const
+Color::ToString(const char* format) const
 {
     return ""; //TODO:
 }

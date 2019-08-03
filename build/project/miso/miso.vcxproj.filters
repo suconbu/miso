@@ -36,6 +36,9 @@
     <ClInclude Include="..\..\..\src\miso\include\miso\numeric.h">
       <Filter>include\miso</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\miso\include\miso\scalar.h">
+      <Filter>include\miso</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\miso\main.cpp" />

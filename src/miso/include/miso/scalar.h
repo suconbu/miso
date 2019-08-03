@@ -169,10 +169,10 @@ Scalar::ToString(const char* format) const
 {
     (void)format;
     if (unit_ == ScalarUnit::NaN) return "";
-    if (floor(value_) == value_) {
-        return StringUtils::Format("%.0Lf%s", value_, GetUnitToSuffixMap().at(unit_));
-    } else {
+    if (float_) {
         return StringUtils::Format("%.3Lf%s", value_, GetUnitToSuffixMap().at(unit_));
+    } else {
+        return StringUtils::Format("%.0Lf%s", value_, GetUnitToSuffixMap().at(unit_));
     }
 }
 

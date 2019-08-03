@@ -921,6 +921,20 @@ TEST_F(MisoTest, Color)
     }
 }
 
+TEST_F(MisoTest, Numeric_ParsePerformance)
+{
+    for (int i = 0; i < 1000; ++i) {
+        volatile auto n = miso::Numeric::FromString(
+            "123.456px 123.456sp 123.456vw 123.456vh 123.456vmax 123.456vmin "
+            "123.456% 123.456s 123.456ms 123.456 #012 #3456 #789abc #def0123456 "
+            "rgb 12 34 56 rgba(12,34,56,78) "
+            "hsl 12 34 56 hsla(12,34,56,78) "
+            "hsv 12 34 56 hsva(12,34,56,78) "
+            "0"
+        );
+    }
+}
+
 // BinaryReader Performance
 #if 0
 TEST_F(Performace, OneRead1MCrt)

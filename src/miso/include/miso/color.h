@@ -47,7 +47,7 @@ struct Hsva {
 class Color {
 public:
     static const Color& GetInvalid() { const static Color invalid; return invalid; }
-    static size_t TryParse(const char* str, Color& color_out);
+    static bool TryParse(const char* str, Color& color_out, size_t* count_out = nullptr);
     static Hsla RgbaToHsla(const Rgba& rgba);
     static Hsva RgbaToHsva(const Rgba& rgba);
     static Rgba HslaToRgba(const Hsla& hsla);
@@ -75,34 +75,29 @@ private:
     Rgba rgba_;
     ColorFormat format_;
 
-    static size_t TryParseHex(const char* str, Color& color_out);
-    static size_t TryParseColor(const char* str, Color& color_out);
+    static bool TryParseHex(const char* str, Color& color_out, size_t* count_out);
+    static bool TryParseColor(const char* str, Color& color_out, size_t* count_out);
     static float HueToRgb(float p, float q, float t);
     static bool Equals(const Rgba& a, const Rgba& b) { return a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A; }
 };
 
-inline size_t
-Color::TryParse(const char* str, Color& color_out)
+inline bool
+Color::TryParse(const char* str, Color& color_out, size_t* count_out)
 {
-    size_t result = 0;
-    if ((result = TryParseHex(str, color_out)) > 0) {
-        return result;
-    } else if ((result = TryParseColor(str, color_out)) > 0) {
-        return result;
-    } else {
-        return 0;
-    }
+    if (TryParseHex(str, color_out, count_out)) return true;
+    if (TryParseColor(str, color_out, count_out)) return true;
+    return false;
 }
 
-inline size_t
-Color::TryParseHex(const char* str, Color& color_out)
+inline bool
+Color::TryParseHex(const char* str, Color& color_out, size_t* count_out)
 {
-    if (str == nullptr) return 0;
+    if (str == nullptr) return false;
 
     auto s = str;
     auto start = s;
 
-    if (*s != '#') return 0;
+    if (*s != '#') return false;
     ++s;
 
     Rgba rgba;
@@ -151,19 +146,20 @@ Color::TryParseHex(const char* str, Color& color_out)
             format = ColorFormat::Hex6;
         }
     } else {
-        return 0;
+        return false;
     }
 
     color_out.rgba_ = rgba;
     color_out.format_ = format;
+    if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
 
-    return static_cast<size_t>(s - start);
+    return true;
 }
 
-inline size_t
-Color::TryParseColor(const char* str, Color& color_out)
+inline bool
+Color::TryParseColor(const char* str, Color& color_out, size_t* count_out)
 {
-    if (str == nullptr) return 0;
+    if (str == nullptr) return false;
 
     auto s = str;
     auto start = s;
@@ -172,29 +168,29 @@ Color::TryParseColor(const char* str, Color& color_out)
 
     // (rgb|rgba|...)\s*\(?\s*\d+\s*,?\s*
 
-    int count = 0;
+    int value_count = 0;
     if (StringUtils::CompareIgnoreCase(s, "rgba", 4) == 0) {
-        count = 4;
+        value_count = 4;
         format = ColorFormat::Rgba;
     } else if (StringUtils::CompareIgnoreCase(s, "rgb", 3) == 0) {
-        count = 3;
+        value_count = 3;
         format = ColorFormat::Rgb;
     } else if (StringUtils::CompareIgnoreCase(s, "hsla", 4) == 0) {
-        count = 4;
+        value_count = 4;
         format = ColorFormat::Hsla;
     } else if (StringUtils::CompareIgnoreCase(s, "hsl", 3) == 0) {
-        count = 3;
+        value_count = 3;
         format = ColorFormat::Hsl;
     } else if (StringUtils::CompareIgnoreCase(s, "hsva", 4) == 0) {
-        count = 4;
+        value_count = 4;
         format = ColorFormat::Hsva;
     } else if (StringUtils::CompareIgnoreCase(s, "hsv", 3) == 0) {
-        count = 3;
+        value_count = 3;
         format = ColorFormat::Hsv;
     } else {
-        return 0;
+        return false;
     }
-    s += count;
+    s += value_count;
 
     int value_max[4] = {};
     if (format == ColorFormat::Rgb || format == ColorFormat::Rgba) {
@@ -205,41 +201,41 @@ Color::TryParseColor(const char* str, Color& color_out)
         value_max[0] = 360;
         value_max[1] = value_max[2] = value_max[3] = 100;
     } else {
-        return 0;
+        return false;
     }
 
     float value[4] = {};
     value[3] = 1.0f;
-    size_t index = 0;
+    size_t value_index = 0;
     bool paren = false;
-    for (; *s != '\0' && (index < count || paren); ++s) {
+    for (; *s != '\0' && (value_index < value_count || paren); ++s) {
         if (*s == '(') {
-            if (paren || 0 < index) return 0;
+            if (paren || 0 < value_index) return false;
             paren = true;
         } else if (*s == ')') {
-            if (!paren || index < count) return 0;
+            if (!paren || value_index < value_count) return false;
             paren = false;
         } else {
             Scalar scalar;
-            auto result = Scalar::TryParse(s, scalar);
-            if (result > 0) {
+            size_t count;
+            if (Scalar::TryParse(s, scalar, &count)) {
                 if (scalar.GetUnit() == ScalarUnit::Parcent || scalar.IsFloat()) {
                     float v = static_cast<float>(scalar.ToRatio());
-                    value[index] = std::max(0.0f, std::min(v, 1.0f));
+                    value[value_index] = std::max(0.0f, std::min(v, 1.0f));
                 } else if (scalar.GetUnit() == ScalarUnit::Unitless) {
-                    float max = static_cast<float>(value_max[index]);
+                    float max = static_cast<float>(value_max[value_index]);
                     float v = static_cast<float>(scalar.GetValue());
-                    value[index] = std::max(0.0f, std::min(v, max)) / max;
+                    value[value_index] = std::max(0.0f, std::min(v, max)) / max;
                 } else {
-                    return 0;
+                    return false;
                 }
-                s += (result - 1);
-                ++index;
+                s += (count - 1);
+                ++value_index;
             }
         }
     }
 
-    if (paren || index < count) return 0;
+    if (paren || value_index < value_count) return false;
 
     color_out.rgba_ =
         (format == ColorFormat::Rgb || format == ColorFormat::Rgba) ? Rgba(value[0], value[1], value[2], value[3]) :
@@ -247,8 +243,9 @@ Color::TryParseColor(const char* str, Color& color_out)
         (format == ColorFormat::Hsv || format == ColorFormat::Hsva) ? HsvaToRgba(Hsva(value[0], value[1], value[2], value[3])) :
         Rgba();
     color_out.format_ = format;
+    if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
 
-    return static_cast<size_t>(s - start);
+    return true;
 }
 
 inline Hsla

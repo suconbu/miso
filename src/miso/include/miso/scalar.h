@@ -26,7 +26,7 @@ public:
     static constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
 
     static const Scalar& GetInvalid() { const static Scalar invalid; return invalid; }
-    static size_t TryParse(const char* str, Scalar& scalar_out);
+    static bool TryParse(const char* str, Scalar& scalar_out, size_t* count_out = nullptr);
 
     Scalar() : value_(kNaN), unit_(ScalarUnit::NaN), float_(false) {}
     explicit Scalar(const char* str) : Scalar() { Scalar::TryParse(str, *this); }
@@ -49,10 +49,10 @@ private:
     static const std::map<ScalarUnit, const char*>& GetUnitToSuffixMap();
 };
 
-inline size_t
-Scalar::TryParse(const char* str, Scalar& scalar_out)
+inline bool
+Scalar::TryParse(const char* str, Scalar& scalar_out, size_t* count_out)
 {
-    if (str == nullptr || *str == '\0') return 0;
+    if (str == nullptr || *str == '\0') return false;
 
     // [+-]?(\d+(\.(\d+)?)?)|(\.\d+)?(\w+|%)
     auto s = str;
@@ -65,7 +65,7 @@ Scalar::TryParse(const char* str, Scalar& scalar_out)
         ++s;
     }
 
-    if (*s != '.' && !isdigit(*s)) return 0;
+    if (*s != '.' && !isdigit(*s)) return false;
 
     // Digits
     auto digit_start = s;
@@ -82,13 +82,13 @@ Scalar::TryParse(const char* str, Scalar& scalar_out)
                 denominator *= base;
             }
         } else if (*s == '.') {
-            if (denominator != 0) return 0;
+            if (denominator != 0) return false;
             denominator = base;
         } else {
             break;
         }
     }
-    if (s == digit_start) return 0;
+    if (s == digit_start) return false;
 
     // Unit
     auto unit = ScalarUnit::NaN;
@@ -101,15 +101,16 @@ Scalar::TryParse(const char* str, Scalar& scalar_out)
             break;
         }
     }
-    if (unit == ScalarUnit::NaN) return 0;
+    if (unit == ScalarUnit::NaN) return false;
 
     if (negative) value = -value;
 
     scalar_out.value_ = value;
     scalar_out.unit_ = unit;
     scalar_out.float_ = (denominator != 0);
+    if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
 
-    return static_cast<size_t>(s - start);
+    return true;
 }
 
 inline const std::map<ScalarUnit, const char*>&

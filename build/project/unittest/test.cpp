@@ -829,7 +829,7 @@ TEST_F(MisoTest, Scalar_Convert)
 TEST_F(MisoTest, Numeric)
 {
     TEST_TRACE("");
-    auto numerics = miso::Numeric::Parse("  0 1 \t \t 2 rgb ( 12,34 , 56 )10px 20% ");
+    auto numerics = miso::Numeric::FromString("  0 1 \t \t 2 rgb ( 12,34 , 56 )10px 20% ");
     EXPECT_EQ(6, numerics.size());
     EXPECT_EQ(0, numerics[0].GetScalar().GetValue());
     EXPECT_EQ(1, numerics[1].GetScalar().GetValue());
@@ -903,15 +903,21 @@ TEST_F(MisoTest, Color)
     }
     {
         miso::Color a;
-        EXPECT_EQ(16, miso::Color::TryParse("rgb(12%,34%,56%)", a));
-        EXPECT_EQ(24, miso::Color::TryParse("rgb ( 12% , 34% , 56%  ) ", a));
-        EXPECT_EQ(19, miso::Color::TryParse("rgb 12% , 34% , 56%   ", a));
-        EXPECT_EQ(15, miso::Color::TryParse("rgb 12% 34% 56%   ", a));
-        EXPECT_EQ(0, miso::Color::TryParse("rgb ( 12% , 34% ) 56% ) ", a));
-        EXPECT_EQ(0, miso::Color::TryParse("rgb ) 12% 34% 56% ) ", a));
-        EXPECT_EQ(0, miso::Color::TryParse("rgb ( 12% 34% 56% ( ", a));
-        EXPECT_EQ(15, miso::Color::TryParse("rgb 12% 34% 56% ( ", a));
-        EXPECT_EQ(0, miso::Color::TryParse("rgb ( 12% 34% 56%   ", a));
+        size_t count;
+        EXPECT_TRUE(miso::Color::TryParse("rgb(12%,34%,56%)", a, &count));
+        EXPECT_EQ(16, count);
+        EXPECT_TRUE(miso::Color::TryParse("rgb ( 12% , 34% , 56%  ) ", a, &count));
+        EXPECT_EQ(24, count);
+        EXPECT_TRUE(miso::Color::TryParse("rgb 12% , 34% , 56%   ", a, &count));
+        EXPECT_EQ(19, count);
+        EXPECT_TRUE(miso::Color::TryParse("rgb 12% 34% 56%   ", a, &count));
+        EXPECT_EQ(15, count);
+        EXPECT_FALSE(miso::Color::TryParse("rgb ( 12% , 34% ) 56% ) ", a));
+        EXPECT_FALSE(miso::Color::TryParse("rgb ) 12% 34% 56% ) ", a));
+        EXPECT_FALSE(miso::Color::TryParse("rgb ( 12% 34% 56% ( ", a));
+        EXPECT_TRUE(miso::Color::TryParse("rgb 12% 34% 56% ( ", a, &count));
+        EXPECT_EQ(15, count);
+        EXPECT_FALSE(miso::Color::TryParse("rgb ( 12% 34% 56%   ", a));
     }
 }
 
@@ -996,7 +1002,7 @@ TEST_F(Performace, RandomRead1M8B)
             auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
             reader.SetPosition(position);
             reader.ReadBlock((void*)buffer, sizeof(buffer));
-}
+        }
     }
 }
 #endif

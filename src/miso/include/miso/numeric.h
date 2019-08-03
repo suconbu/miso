@@ -16,8 +16,8 @@ namespace miso {
 
 class Numeric {
 public:
-    static std::vector<Numeric> Parse(const char* str);
-    static size_t TryParse(const char* str, Numeric& numeric_out);
+    static std::vector<Numeric> FromString(const char* str);
+    static bool TryParse(const char* str, Numeric& numeric_out, size_t* count_out = nullptr);
 
     Numeric() : type_(NumericType::Unknown) {}
     explicit Numeric(const char* str);
@@ -42,35 +42,34 @@ private:
 };
 
 inline std::vector<Numeric>
-Numeric::Parse(const char* str)
+Numeric::FromString(const char* str)
 {
     std::vector<Numeric> numerics;
     auto s = str;
     for (; *s != '\0'; ++s) {
         if (!isspace(*s)) {
             Numeric numeric;
-            auto result = TryParse(s, numeric);
-            if (0 == result) return std::vector<Numeric>();
+            size_t count;
+            if (!TryParse(s, numeric, &count)) return std::vector<Numeric>();
             numerics.push_back(numeric);
-            s += (result - 1);
+            s += (count - 1);
         }
     }
     return numerics;
 }
 
-inline size_t
-Numeric::TryParse(const char* str, Numeric& numeric_out)
+inline bool
+Numeric::TryParse(const char* str, Numeric& numeric_out, size_t* count_out)
 {
-    size_t result = 0;
-    if (0 < (result = Color::TryParse(str, numeric_out.color_))) {
+    if (Color::TryParse(str, numeric_out.color_, count_out)) {
         numeric_out.type_ = NumericType::Color;
-        return result;
+        return true;
     }
-    if (0 < (result = Scalar::TryParse(str, numeric_out.scalar_))) {
+    if (Scalar::TryParse(str, numeric_out.scalar_, count_out)) {
         numeric_out.type_ = NumericType::Scalar;
-        return result;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 inline bool

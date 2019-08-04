@@ -17,6 +17,7 @@ namespace miso {
 class Numeric {
 public:
     static std::vector<Numeric> FromString(const char* str);
+    static std::vector<Numeric> FromString(const std::string& str) { return FromString(str.c_str()); }
     static bool TryParse(const char* str, Numeric& numeric_out, size_t* count_out = nullptr);
 
     Numeric() : type_(NumericType::Unknown) {}

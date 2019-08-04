@@ -39,6 +39,12 @@
     <ClInclude Include="..\..\..\src\miso\include\miso\scalar.h">
       <Filter>include\miso</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\miso\include\miso\color_container.h">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\miso\include\miso\color_formatter.h">
+      <Filter>include\miso</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\miso\main.cpp" />

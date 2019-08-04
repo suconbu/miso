@@ -14,6 +14,8 @@
 #include "miso/binary_reader.h"
 #include "miso/buffer.h"
 #include "miso/color.h"
+#include "miso/color_container.h"
+#include "miso/color_formatter.h"
 #include "miso/endian.h"
 #include "miso/numeric.h"
 #include "miso/scalar.h"

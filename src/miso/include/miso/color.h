@@ -27,6 +27,9 @@ struct Rgba {
 struct Hsla {
     Hsla() = default;
     Hsla(float hue, float satulate, float lightness, float alpha = 1.0f) :H(hue), S(satulate), L(lightness), A(alpha) {}
+    explicit Hsla(const Rgba& rgba);
+
+    Rgba ToRgba() const;
 
     float H = 0.0f;
     float S = 0.0f;
@@ -37,6 +40,9 @@ struct Hsla {
 struct Hsva {
     Hsva() = default;
     Hsva(float hue, float satulate, float value, float alpha = 1.0f) :H(hue), S(satulate), V(value), A(alpha) {}
+    explicit Hsva(const Rgba& rgba);
+
+    Rgba ToRgba() const;
 
     float H = 0.0f;
     float S = 0.0f;
@@ -48,23 +54,19 @@ class Color {
 public:
     static const Color& GetInvalid() { const static Color invalid; return invalid; }
     static bool TryParse(const char* str, Color& color_out, size_t* count_out = nullptr);
-    static Hsla RgbaToHsla(const Rgba& rgba);
-    static Hsva RgbaToHsva(const Rgba& rgba);
-    static Rgba HslaToRgba(const Hsla& hsla);
-    static Rgba HsvaToRgba(const Hsva& hsva);
 
     Color() : rgba_{}, format_(ColorFormat::Invalid) {}
     explicit Color(const Rgba& rgba) : rgba_(rgba), format_(ColorFormat::Rgba) {}
-    explicit Color(const Hsla& hsla) : rgba_(HslaToRgba(hsla)), format_(ColorFormat::Hsla) {}
-    explicit Color(const Hsva& hsva) : rgba_(HsvaToRgba(hsva)), format_(ColorFormat::Hsva) {}
+    explicit Color(const Hsla& hsla) : rgba_(hsla.ToRgba()), format_(ColorFormat::Hsla) {}
+    explicit Color(const Hsva& hsva) : rgba_(hsva.ToRgba()), format_(ColorFormat::Hsva) {}
     explicit Color(const char* str) : Color() { TryParse(str, *this); }
     explicit Color(const std::string& str) : Color(str.c_str()) {}
 
     bool IsValid() const { return format_ != ColorFormat::Invalid; }
     ColorFormat GetFormat() const { return format_; }
     Rgba GetRgba() const { return rgba_; }
-    Hsla GetHsla() const { return RgbaToHsla(rgba_); }
-    Hsva GetHsva() const { return RgbaToHsva(rgba_); }
+    Hsla GetHsla() const { return Hsla(rgba_); }
+    Hsva GetHsva() const { return Hsva(rgba_); }
     float GetAlpha() const { return rgba_.A; }
     std::string ToString(const char* format = nullptr) const;
 
@@ -77,9 +79,109 @@ private:
 
     static bool TryParseHex(const char* str, Color& color_out, size_t* count_out);
     static bool TryParseColor(const char* str, Color& color_out, size_t* count_out);
-    static float HueToRgb(float p, float q, float t);
     static bool Equals(const Rgba& a, const Rgba& b) { return a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A; }
 };
+
+inline
+Hsla::Hsla(const Rgba& rgba)
+{
+    auto r = rgba.R;
+    auto g = rgba.G;
+    auto b = rgba.B;
+    auto a = rgba.A;
+
+    auto max = std::max(r, std::max(g, b));
+    auto min = std::min(r, std::min(g, b));
+
+    float d = max - min;
+
+    H =
+        (max == min) ? 0.0f :
+        (max == r) ? ((g - b) / d + (g < b ? 6.0f : 0.0f)) / 6.0f :
+        (max == g) ? ((b - r) / d + 2.0f) / 6.0f :
+        (max == b) ? ((r - g) / d + 4.0f) / 6.0f :
+        0.0f;
+    L = (max + min) / 2.0f;
+    S = (L > 0.5f) ? (d / (2.0f - max - min)) : (d / (max + min));
+    A = a;
+}
+
+inline Rgba
+Hsla::ToRgba() const
+{
+    auto hueToRgb = [](float p, float q, float t) {
+        if (t < 0.0f) t += 1.0f;
+        if (t > 1.0f) t -= 1.0f;
+        return
+            (t < 1.0f / 6.0f) ? (p + (q - p) * 6.0f * t) :
+            (t < 3.0f / 6.0f) ? (q) :
+            (t < 4.0f / 6.0f) ? (p + (q - p) * (4.0f / 6.0f - t) * 6.0f) :
+            p;
+    };
+
+    auto h = H;
+    auto s = S;
+    auto l = L;
+
+    auto r = l;
+    auto g = l;
+    auto b = l;
+
+    if (s > 0.0f) {
+        auto q = (l < 0.5f) ? (l * (1 + s)) : (l + s - l * s);
+        auto p = 2.0f * l - q;
+        r = hueToRgb(p, q, h + 2.0f / 6.0f);
+        g = hueToRgb(p, q, h);
+        b = hueToRgb(p, q, h - 2.0f / 6.0f);
+    }
+
+    return Rgba(r, g, b, A);
+}
+
+inline
+Hsva::Hsva(const Rgba& rgba)
+{
+    auto r = rgba.R;
+    auto g = rgba.G;
+    auto b = rgba.B;
+    auto a = rgba.A;
+
+    auto max = std::max(r, std::max(g, b));
+    auto min = std::min(r, std::min(g, b));
+
+    float d = max - min;
+
+    H =
+        (max == min) ? 0.0f :
+        (max == r) ? ((g - b) / d + (g < b ? 6.0f : 0.0f)) / 6.0f :
+        (max == g) ? ((b - r) / d + 2.0f) / 6.0f :
+        (max == b) ? ((r - g) / d + 4.0f) / 6.0f :
+        0.0f;
+    S = (max == 0.0f) ? 0.0f : (d / max);
+    V = max;
+    A = a;
+}
+
+inline Rgba
+Hsva::ToRgba() const
+{
+    auto h = H * 6.0f;
+    auto s = S;
+    auto v = V;
+
+    auto i = std::floor(h);
+    auto f = h - i;
+    auto p = v * (1 - s);
+    auto q = v * (1 - f * s);
+    auto t = v * (1 - (1 - f) * s);
+    auto m = (int)i % 6;
+
+    float r6[] = { v, q, p, p, t, v };
+    float g6[] = { t, v, v, q, p, p };
+    float b6[] = { p, p, t, v, v, q };
+
+    return Rgba(r6[m], g6[m], b6[m], A);
+}
 
 inline bool
 Color::TryParse(const char* str, Color& color_out, size_t* count_out)
@@ -239,120 +341,13 @@ Color::TryParseColor(const char* str, Color& color_out, size_t* count_out)
 
     color_out.rgba_ =
         (format == ColorFormat::Rgb || format == ColorFormat::Rgba) ? Rgba(value[0], value[1], value[2], value[3]) :
-        (format == ColorFormat::Hsl || format == ColorFormat::Hsla) ? HslaToRgba(Hsla(value[0], value[1], value[2], value[3])) :
-        (format == ColorFormat::Hsv || format == ColorFormat::Hsva) ? HsvaToRgba(Hsva(value[0], value[1], value[2], value[3])) :
+        (format == ColorFormat::Hsl || format == ColorFormat::Hsla) ? Hsla(value[0], value[1], value[2], value[3]).ToRgba() :
+        (format == ColorFormat::Hsv || format == ColorFormat::Hsva) ? Hsva(value[0], value[1], value[2], value[3]).ToRgba() :
         Rgba();
     color_out.format_ = format;
     if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
 
     return true;
-}
-
-inline Hsla
-Color::RgbaToHsla(const Rgba& rgba)
-{
-    auto r = rgba.R;
-    auto g = rgba.G;
-    auto b = rgba.B;
-    auto a = rgba.A;
-
-    auto max = std::max(r, std::max(g, b));
-    auto min = std::min(r, std::min(g, b));
-
-    float d = max - min;
-
-    float h =
-        (max == min) ? 0.0f :
-        (max == r) ? ((g - b) / d + (g < b ? 6.0f : 0.0f)) / 6.0f :
-        (max == g) ? ((b - r) / d + 2.0f) / 6.0f :
-        (max == b) ? ((r - g) / d + 4.0f) / 6.0f :
-        0.0f;
-    float l = (max + min) / 2.0f;
-    float s = (l > 0.5f) ? (d / (2.0f - max - min)) : (d / (max + min));
-
-    return Hsla(h, s, l, a);
-}
-
-inline Hsva
-Color::RgbaToHsva(const Rgba& rgba)
-{
-    auto r = rgba.R;
-    auto g = rgba.G;
-    auto b = rgba.B;
-    auto a = rgba.A;
-
-    auto max = std::max(r, std::max(g, b));
-    auto min = std::min(r, std::min(g, b));
-
-    float d = max - min;
-
-    float h =
-        (max == min) ? 0.0f :
-        (max == r) ? ((g - b) / d + (g < b ? 6.0f : 0.0f)) / 6.0f :
-        (max == g) ? ((b - r) / d + 2.0f) / 6.0f :
-        (max == b) ? ((r - g) / d + 4.0f) / 6.0f :
-        0.0f;
-    float s = (max == 0.0f) ? 0.0f : (d / max);
-    float v = max;
-
-    return Hsva(h, s, v, a);
-}
-
-inline Rgba
-Color::HslaToRgba(const Hsla& hsla)
-{
-    auto h = hsla.H;
-    auto s = hsla.S;
-    auto l = hsla.L;
-    auto a = hsla.A;
-
-    auto r = l;
-    auto g = l;
-    auto b = l;
-
-    if (s > 0.0f) {
-        auto q = (l < 0.5f) ? (l * (1 + s)) : (l + s - l * s);
-        auto p = 2.0f * l - q;
-        r = HueToRgb(p, q, h + 2.0f / 6.0f);
-        g = HueToRgb(p, q, h);
-        b = HueToRgb(p, q, h - 2.0f / 6.0f);
-    }
-
-    return Rgba(r, g, b, a);
-}
-
-inline float
-Color::HueToRgb(float p, float q, float t)
-{
-    if (t < 0.0f) t += 1.0f;
-    if (t > 1.0f) t -= 1.0f;
-    return
-        (t < 1.0f / 6.0f) ? (p + (q - p) * 6.0f * t) :
-        (t < 3.0f / 6.0f) ? (q) :
-        (t < 4.0f / 6.0f) ? (p + (q - p) * (4.0f / 6.0f - t) * 6.0f) :
-        p;
-}
-
-inline Rgba
-Color::HsvaToRgba(const Hsva& hsva)
-{
-    auto h = hsva.H * 6.0f;
-    auto s = hsva.S;
-    auto v = hsva.V;
-    auto a = hsva.A;
-
-    auto i = std::floor(h);
-    auto f = h - i;
-    auto p = v * (1 - s);
-    auto q = v * (1 - f * s);
-    auto t = v * (1 - (1 - f) * s);
-    auto m = (int)i % 6;
-
-    float r6[] = { v, q, p, p, t, v };
-    float g6[] = { t, v, v, q, p, p };
-    float b6[] = { p, p, t, v, v, q };
-
-    return Rgba(r6[m], g6[m], b6[m], a);
 }
 
 inline std::string

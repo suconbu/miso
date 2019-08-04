@@ -36,9 +36,9 @@ public:
     bool IsFloat() const { return float_; }
     double GetValue() const { return value_; }
     ScalarUnit GetUnit() const { return unit_; }
-    double ToLength(float view_width, float view_height, float pixel_scale, double base_length, double default_value = kNaN) const;
-    double ToRatio(float default_value = kNaN) const;
-    double ToMilliseconds(float default_value = kNaN) const;
+    double ToLength(double view_width, double view_height, double pixel_scale, double base_length, double default_value = kNaN) const;
+    double ToRatio(double default_value = kNaN) const;
+    double ToMilliseconds(double default_value = kNaN) const;
     std::string ToString(const char* format = nullptr) const;
 
 private:
@@ -132,34 +132,34 @@ Scalar::GetUnitToSuffixMap()
 }
 
 inline double
-Scalar::ToLength(float view_width, float view_height, float pixel_scale, double base_length, double default_value) const
+Scalar::ToLength(double view_width, double view_height, double pixel_scale, double base_length, double default_value) const
 {
     return
         (unit_ == ScalarUnit::Pixel) ? value_ :
         (unit_ == ScalarUnit::ScaledPixel) ? value_ * pixel_scale :
-        (unit_ == ScalarUnit::Vw) ? value_ / 100.0f * view_width :
-        (unit_ == ScalarUnit::Vh) ? value_ / 100.0f * view_height :
-        (unit_ == ScalarUnit::Vmax) ? value_ / 100.0f * std::max(view_width, view_height) :
-        (unit_ == ScalarUnit::Vmin) ? value_ / 100.0f * std::min(view_width, view_height) :
-        (unit_ == ScalarUnit::Parcent) ? value_ / 100.0f * base_length :
+        (unit_ == ScalarUnit::Vw) ? value_ / 100.0 * view_width :
+        (unit_ == ScalarUnit::Vh) ? value_ / 100.0 * view_height :
+        (unit_ == ScalarUnit::Vmax) ? value_ / 100.0 * std::max(view_width, view_height) :
+        (unit_ == ScalarUnit::Vmin) ? value_ / 100.0 * std::min(view_width, view_height) :
+        (unit_ == ScalarUnit::Parcent) ? value_ / 100.0 * base_length :
         (unit_ == ScalarUnit::Unitless) ? value_ * base_length :
         default_value;
 }
 
 inline double
-Scalar::ToRatio(float default_value) const
+Scalar::ToRatio(double default_value) const
 {
     return
-        (unit_ == ScalarUnit::Parcent) ? value_ / 100.0f :
+        (unit_ == ScalarUnit::Parcent) ? value_ / 100.0 :
         (unit_ == ScalarUnit::Unitless) ? value_ :
         default_value;
 }
 
 inline double
-Scalar::ToMilliseconds(float default_value) const
+Scalar::ToMilliseconds(double default_value) const
 {
     return
-        (unit_ == ScalarUnit::Second) ? value_ * 1000.0f :
+        (unit_ == ScalarUnit::Second) ? value_ * 1000.0 :
         (unit_ == ScalarUnit::Millisecond) ? value_ :
         default_value;
 }

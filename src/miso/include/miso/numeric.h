@@ -27,9 +27,9 @@ public:
     bool IsValid() const;
     const Scalar& GetScalar() const { return (type_ == NumericType::Scalar) ? scalar_ : Scalar::GetInvalid(); }
     const Color& GetColor() const { return (type_ == NumericType::Color) ? color_ : Color::GetInvalid(); }
-    double ToLength(float view_width, float view_height, float pixel_scale, double base_length, double default_value = Scalar::kNaN) const;
-    double ToRatio(float default_value = Scalar::kNaN) const;
-    double ToMilliseconds(float default_value = Scalar::kNaN) const;
+    double ToLength(double view_width, double view_height, double pixel_scale, double base_length, double default_value = Scalar::kNaN) const;
+    double ToRatio(double default_value = Scalar::kNaN) const;
+    double ToMilliseconds(double default_value = Scalar::kNaN) const;
     std::string ToString(const char* format = nullptr) const;
 
 private:
@@ -89,7 +89,7 @@ Numeric::Numeric(const char* str) : Numeric()
 }
 
 inline double
-Numeric::ToLength(float view_width, float view_height, float pixel_scale, double base_length, double default_value) const
+Numeric::ToLength(double view_width, double view_height, double pixel_scale, double base_length, double default_value) const
 {
     return (type_ == NumericType::Scalar) ?
         scalar_.ToLength(view_width, view_height, pixel_scale, base_length, default_value) :
@@ -97,7 +97,7 @@ Numeric::ToLength(float view_width, float view_height, float pixel_scale, double
 }
 
 inline double
-Numeric::ToRatio(float default_value) const
+Numeric::ToRatio(double default_value) const
 {
     return (type_ == NumericType::Scalar) ?
         scalar_.ToRatio(default_value) :
@@ -105,7 +105,7 @@ Numeric::ToRatio(float default_value) const
 }
 
 inline double
-Numeric::ToMilliseconds(float default_value) const
+Numeric::ToMilliseconds(double default_value) const
 {
     return (type_ == NumericType::Scalar) ?
         scalar_.ToMilliseconds(default_value) :

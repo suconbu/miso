@@ -12,7 +12,7 @@
 
 namespace miso {
 
-enum class ColorFormat { Invalid, Rgb, Rgba, Hsl, Hsla, Hsv, Hsva, Hex3, Hex4, Hex6, Hex8 };
+enum class ColorSpace { Unknown, Rgb, Hsl, Hsv };
 
 struct Rgba {
     Rgba() = default;
@@ -26,10 +26,11 @@ struct Rgba {
 
 struct Hsla {
     Hsla() = default;
-    Hsla(float hue, float satulate, float lightness, float alpha = 1.0f) :H(hue), S(satulate), L(lightness), A(alpha) {}
+    Hsla(float hue, float satulate, float lightness, float alpha = 1.0f) : H(hue), S(satulate), L(lightness), A(alpha) {}
     explicit Hsla(const Rgba& rgba);
 
     Rgba ToRgba() const;
+    operator Rgba() const { return ToRgba(); }
 
     float H = 0.0f;
     float S = 0.0f;
@@ -39,10 +40,11 @@ struct Hsla {
 
 struct Hsva {
     Hsva() = default;
-    Hsva(float hue, float satulate, float value, float alpha = 1.0f) :H(hue), S(satulate), V(value), A(alpha) {}
+    Hsva(float hue, float satulate, float value, float alpha = 1.0f) : H(hue), S(satulate), V(value), A(alpha) {}
     explicit Hsva(const Rgba& rgba);
 
     Rgba ToRgba() const;
+    operator Rgba() const { return ToRgba(); }
 
     float H = 0.0f;
     float S = 0.0f;
@@ -55,18 +57,13 @@ public:
     static const Color& GetInvalid() { const static Color invalid; return invalid; }
     static bool TryParse(const char* str, Color& color_out, size_t* count_out = nullptr);
 
-    Color() : rgba_{}, format_(ColorFormat::Invalid) {}
-    explicit Color(const Rgba& rgba) : rgba_(rgba), format_(ColorFormat::Rgba) {}
-    explicit Color(const Hsla& hsla) : rgba_(hsla.ToRgba()), format_(ColorFormat::Hsla) {}
-    explicit Color(const Hsva& hsva) : rgba_(hsva.ToRgba()), format_(ColorFormat::Hsva) {}
+    Color() : rgba_{}, valid_(false) {}
+    explicit Color(const Rgba& rgba) : rgba_(rgba), valid_(true) {}
     explicit Color(const char* str) : Color() { TryParse(str, *this); }
     explicit Color(const std::string& str) : Color(str.c_str()) {}
 
-    bool IsValid() const { return format_ != ColorFormat::Invalid; }
-    ColorFormat GetFormat() const { return format_; }
+    bool IsValid() const { return valid_; }
     Rgba GetRgba() const { return rgba_; }
-    Hsla GetHsla() const { return Hsla(rgba_); }
-    Hsva GetHsva() const { return Hsva(rgba_); }
     float GetAlpha() const { return rgba_.A; }
     std::string ToString(const char* format = nullptr) const;
 
@@ -75,10 +72,10 @@ public:
 
 private:
     Rgba rgba_;
-    ColorFormat format_;
+    bool valid_;
 
     static bool TryParseHex(const char* str, Color& color_out, size_t* count_out);
-    static bool TryParseColor(const char* str, Color& color_out, size_t* count_out);
+    static bool TryParseColorSpace(const char* str, Color& color_out, size_t* count_out);
     static bool Equals(const Rgba& a, const Rgba& b) { return a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A; }
 };
 
@@ -187,7 +184,7 @@ inline bool
 Color::TryParse(const char* str, Color& color_out, size_t* count_out)
 {
     if (TryParseHex(str, color_out, count_out)) return true;
-    if (TryParseColor(str, color_out, count_out)) return true;
+    if (TryParseColorSpace(str, color_out, count_out)) return true;
     return false;
 }
 
@@ -203,7 +200,6 @@ Color::TryParseHex(const char* str, Color& color_out, size_t* count_out)
     ++s;
 
     Rgba rgba;
-    ColorFormat format = ColorFormat::Invalid;
 
     uint32_t value = 0;
     uint32_t base = 16;
@@ -220,8 +216,6 @@ Color::TryParseHex(const char* str, Color& color_out, size_t* count_out)
         }
     }
     if (count == 3 || count == 4) {
-        // #123  -> r:0x11, g:0x22, b:0x33
-        // #1234 -> r:0x11, g:0x22, b:0x33, a:0x44
         auto r = (value >> ((count - 1) * 4)) & 0xF;
         auto g = (value >> ((count - 2) * 4)) & 0xF;
         auto b = (value >> ((count - 3) * 4)) & 0xF;
@@ -231,10 +225,8 @@ Color::TryParseHex(const char* str, Color& color_out, size_t* count_out)
         if (count == 4) {
             auto a = value & 0xF;
             rgba.A = ((a << 4) | a) / 255.0f;
-            format = ColorFormat::Hex4;
         } else {
             rgba.A = 1.0f;
-            format = ColorFormat::Hex3;
         }
     } else if (count == 6 || count == 8) {
         rgba.R = ((value >> ((count - 2) * 4)) & 0xFF) / 255.0f;
@@ -242,64 +234,57 @@ Color::TryParseHex(const char* str, Color& color_out, size_t* count_out)
         rgba.B = ((value >> ((count - 6) * 4)) & 0xFF) / 255.0f;
         if (count == 8) {
             rgba.A = (value & 0xFF) / 255.0f;
-            format = ColorFormat::Hex8;
         } else {
             rgba.A = 1.0f;
-            format = ColorFormat::Hex6;
         }
     } else {
         return false;
     }
 
     color_out.rgba_ = rgba;
-    color_out.format_ = format;
+    color_out.valid_ = true;
     if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
 
     return true;
 }
 
 inline bool
-Color::TryParseColor(const char* str, Color& color_out, size_t* count_out)
+Color::TryParseColorSpace(const char* str, Color& color_out, size_t* count_out)
 {
     if (str == nullptr) return false;
 
     auto s = str;
     auto start = s;
 
-    ColorFormat format = ColorFormat::Invalid;
-
-    // (rgb|rgba|...)\s*\(?\s*\d+\s*,?\s*
-
     int value_count = 0;
+    auto format = ColorSpace::Unknown;
     if (StringUtils::CompareIgnoreCase(s, "rgba", 4) == 0) {
         value_count = 4;
-        format = ColorFormat::Rgba;
+        format = ColorSpace::Rgb;
     } else if (StringUtils::CompareIgnoreCase(s, "rgb", 3) == 0) {
         value_count = 3;
-        format = ColorFormat::Rgb;
+        format = ColorSpace::Rgb;
     } else if (StringUtils::CompareIgnoreCase(s, "hsla", 4) == 0) {
         value_count = 4;
-        format = ColorFormat::Hsla;
+        format = ColorSpace::Hsl;
     } else if (StringUtils::CompareIgnoreCase(s, "hsl", 3) == 0) {
         value_count = 3;
-        format = ColorFormat::Hsl;
+        format = ColorSpace::Hsl;
     } else if (StringUtils::CompareIgnoreCase(s, "hsva", 4) == 0) {
         value_count = 4;
-        format = ColorFormat::Hsva;
+        format = ColorSpace::Hsv;
     } else if (StringUtils::CompareIgnoreCase(s, "hsv", 3) == 0) {
         value_count = 3;
-        format = ColorFormat::Hsv;
+        format = ColorSpace::Hsv;
     } else {
         return false;
     }
     s += value_count;
 
     int value_max[4] = {};
-    if (format == ColorFormat::Rgb || format == ColorFormat::Rgba) {
+    if (format == ColorSpace::Rgb) {
         value_max[0] = value_max[1] = value_max[2] = value_max[3] = 255;
-    } else if (
-        format == ColorFormat::Hsl || format == ColorFormat::Hsla ||
-        format == ColorFormat::Hsv || format == ColorFormat::Hsva) {
+    } else if (format == ColorSpace::Hsl || format == ColorSpace::Hsv) {
         value_max[0] = 360;
         value_max[1] = value_max[2] = value_max[3] = 100;
     } else {
@@ -340,11 +325,11 @@ Color::TryParseColor(const char* str, Color& color_out, size_t* count_out)
     if (paren || value_index < value_count) return false;
 
     color_out.rgba_ =
-        (format == ColorFormat::Rgb || format == ColorFormat::Rgba) ? Rgba(value[0], value[1], value[2], value[3]) :
-        (format == ColorFormat::Hsl || format == ColorFormat::Hsla) ? Hsla(value[0], value[1], value[2], value[3]).ToRgba() :
-        (format == ColorFormat::Hsv || format == ColorFormat::Hsva) ? Hsva(value[0], value[1], value[2], value[3]).ToRgba() :
+        (format == ColorSpace::Rgb) ? Rgba(value[0], value[1], value[2], value[3]) :
+        (format == ColorSpace::Hsl) ? Hsla(value[0], value[1], value[2], value[3]).ToRgba() :
+        (format == ColorSpace::Hsv) ? Hsva(value[0], value[1], value[2], value[3]).ToRgba() :
         Rgba();
-    color_out.format_ = format;
+    color_out.valid_ = true;
     if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
 
     return true;
@@ -353,7 +338,7 @@ Color::TryParseColor(const char* str, Color& color_out, size_t* count_out)
 inline std::string
 Color::ToString(const char* format) const
 {
-    if (format_ == ColorFormat::Invalid) return "";
+    if (!valid_) return "";
     return StringUtils::Format("#%02x%02x%02x%02x",
         static_cast<uint8_t>(rgba_.R * 255.0f + 0.5f),
         static_cast<uint8_t>(rgba_.G * 255.0f + 0.5f),

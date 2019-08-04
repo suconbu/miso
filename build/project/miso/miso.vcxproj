@@ -25,6 +25,7 @@
     <ClInclude Include="..\..\..\src\miso\include\miso\color_container.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\color_formatter.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\endian.h" />
+    <ClInclude Include="..\..\..\src\miso\include\miso\interpolator.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\miso.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\numeric.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\scalar.h" />

@@ -17,6 +17,7 @@
 #include "miso/color_container.h"
 #include "miso/color_formatter.h"
 #include "miso/endian.h"
+#include "miso/interpolator.h"
 #include "miso/numeric.h"
 #include "miso/scalar.h"
 #include "miso/stream.h"

@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_BUFFER_H_
-#define MISO_CORE_BUFFER_H_
+#ifndef MISO_BUFFER_H_
+#define MISO_BUFFER_H_
 
 #include <memory.h>
 
@@ -57,4 +57,4 @@ private:
 
 } // namespace miso
 
-#endif // MISO_CORE_BUFFER_H_
+#endif // MISO_BUFFER_H_

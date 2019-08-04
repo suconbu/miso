@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_XML_READER_H_
-#define MISO_CORE_XML_READER_H_
+#ifndef MISO_XML_READER_H_
+#define MISO_XML_READER_H_
 
 #include <string>
 #include <map>
@@ -271,4 +271,4 @@ XmlReader::ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities 
 
 } // namespace miso
 
-#endif // MISO_CORE_XML_READER_H_
+#endif // MISO_XML_READER_H_

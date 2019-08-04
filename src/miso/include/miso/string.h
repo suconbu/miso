@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_STRING_H_
-#define MISO_CORE_STRING_H_
+#ifndef MISO_STRING_H_
+#define MISO_STRING_H_
 
 #include <stdarg.h>
 #include <algorithm>
@@ -262,4 +262,4 @@ StringUtils::CompareIgnoreCase(const char* a, const char* b, size_t count)
 
 } // namespace miso
 
-#endif // MISO_CORE_STRING_H_
+#endif // MISO_STRING_H_

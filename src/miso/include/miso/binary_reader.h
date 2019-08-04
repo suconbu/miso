@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_BINARY_READER_H_
-#define MISO_CORE_BINARY_READER_H_
+#ifndef MISO_BINARY_READER_H_
+#define MISO_BINARY_READER_H_
 
 #include "miso/buffer.h"
 #include "miso/endian.h"
@@ -67,4 +67,4 @@ private:
 
 } // namespace miso
 
-#endif // MISO_CORE_BINARY_READER_H_
+#endif // MISO_BINARY_READER_H_

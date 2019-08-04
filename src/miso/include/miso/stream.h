@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_STREAM_H_
-#define MISO_CORE_STREAM_H_
+#ifndef MISO_STREAM_H_
+#define MISO_STREAM_H_
 
 #include <stdio.h>
 
@@ -139,8 +139,8 @@ public:
     }
 
 private:
-    const size_t buffer_size_ = MISO_CORE_FILESTREAM_BUFFER_SIZE;
-    Type buffer_[MISO_CORE_FILESTREAM_BUFFER_SIZE];
+    const size_t buffer_size_ = MISO_FILESTREAM_BUFFER_SIZE;
+    Type buffer_[MISO_FILESTREAM_BUFFER_SIZE];
     FILE *fp_;
     size_t stream_size_;
     size_t offset_;
@@ -167,4 +167,4 @@ private:
 
 } // namespace miso
 
-#endif // MISO_CORE_STREAM_H_
+#endif // MISO_STREAM_H_

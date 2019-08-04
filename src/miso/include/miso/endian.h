@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_ENDIAN_H_
-#define MISO_CORE_ENDIAN_H_
+#ifndef MISO_ENDIAN_H_
+#define MISO_ENDIAN_H_
 
 #include <memory>
 
@@ -54,4 +54,4 @@ EndianUtils::Flip(const T value)
 
 } // namespace miso
 
-#endif // MISO_CORE_ENDIAN_H_
+#endif // MISO_ENDIAN_H_

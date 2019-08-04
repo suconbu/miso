@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_NUMERIC_H_
-#define MISO_CORE_NUMERIC_H_
+#ifndef MISO_NUMERIC_H_
+#define MISO_NUMERIC_H_
 
 #include <ctype.h>
 #include <limits>
@@ -122,4 +122,4 @@ Numeric::ToString(const char* format) const
 
 } // namespace miso
 
-#endif // MISO_CORE_NUMERIC_H_
+#endif // MISO_NUMERIC_H_

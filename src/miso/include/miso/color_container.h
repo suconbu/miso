@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_COLOR_CONTAINER_H_
-#define MISO_CORE_COLOR_CONTAINER_H_
+#ifndef MISO_COLOR_CONTAINER_H_
+#define MISO_COLOR_CONTAINER_H_
 
 #include <algorithm>
 
@@ -148,4 +148,4 @@ Hsva::ToRgba() const
 
 } // namespace miso
 
-#endif // MISO_CORE_COLOR_CONTAINER_H_
+#endif // MISO_COLOR_CONTAINER_H_

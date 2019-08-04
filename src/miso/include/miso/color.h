@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_COLOR_H_
-#define MISO_CORE_COLOR_H_
+#ifndef MISO_COLOR_H_
+#define MISO_COLOR_H_
 
 #include <ctype.h>
 #include <stdint.h>
@@ -258,4 +258,4 @@ Color::ToString(const char* format) const
 
 } // namespace miso
 
-#endif // MISO_CORE_COLOR_H_
+#endif // MISO_COLOR_H_

@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_SCALAR_H_
-#define MISO_CORE_SCALAR_H_
+#ifndef MISO_SCALAR_H_
+#define MISO_SCALAR_H_
 
 #include <ctype.h>
 #include <limits>
@@ -178,4 +178,4 @@ Scalar::ToString(const char* format) const
 
 } // namespace miso
 
-#endif // MISO_CORE_SCALAR_H_
+#endif // MISO_SCALAR_H_

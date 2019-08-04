@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_INTERPOLATOR_H_
-#define MISO_CORE_INTERPOLATOR_H_
+#ifndef MISO_INTERPOLATOR_H_
+#define MISO_INTERPOLATOR_H_
 
 #include "miso/string.h"
 
@@ -24,4 +24,4 @@ Interpolator::GetFunction(const char* name)
 
 } // namespace miso
 
-#endif // MISO_CORE_INTERPOLATOR_H_
+#endif // MISO_INTERPOLATOR_H_

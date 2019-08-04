@@ -1,5 +1,5 @@
-#ifndef MISO_CORE_COLOR_FORMATTER_H_
-#define MISO_CORE_COLOR_FORMATTER_H_
+#ifndef MISO_COLOR_FORMATTER_H_
+#define MISO_COLOR_FORMATTER_H_
 
 #include <stdint.h>
 #include <string>
@@ -80,4 +80,4 @@ ColorFormatter::ToColorSpaceString(const Rgba& rgba, ColorSpace colorspace, bool
 
 } // namespace miso
 
-#endif // MISO_CORE_COLOR_FORMATTER_H_
+#endif // MISO_COLOR_FORMATTER_H_

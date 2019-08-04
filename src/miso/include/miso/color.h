@@ -335,15 +335,82 @@ Color::TryParseColorSpace(const char* str, Color& color_out, size_t* count_out)
     return true;
 }
 
+// hex3,hex4     | #rgb, #rgba
+// hex,hex6,hex8 | #rrggbb, #rrggbbaa
+// rgb,rgba      | rgb(r:0-255,g:0-255,b:0-255[,a:0-255])
+// rgb%,rgba%    | rgb(r:0-100%,g:0-100%,b:0-100%[,a:0-100%])
+// hsl,hsla      | hsl(h:0-360,s:0-100,l:0-100[,a:0-255])
+// hsl%,hsla%    | hsl(h:0-100%,s:0-100%,l:0-100%[,a:0-100%])
+// hsv,hsva      | hsl(h:0-360,s:0-100,v:0-100[,a:0-255])
+// hsv%,hsva%    | hsl(h:0-100%,s:0-100%,v:0-100%[,a:0-100%])
 inline std::string
 Color::ToString(const char* format) const
 {
-    if (!valid_) return "";
-    return StringUtils::Format("#%02x%02x%02x%02x",
-        static_cast<uint8_t>(rgba_.R * 255.0f + 0.5f),
-        static_cast<uint8_t>(rgba_.G * 255.0f + 0.5f),
-        static_cast<uint8_t>(rgba_.B * 255.0f + 0.5f),
-        static_cast<uint8_t>(rgba_.A * 255.0f + 0.5f));
+    auto f = (format == nullptr) ? "hex" : format;
+    auto output_format = "";
+    auto output_prefix = "";
+    auto output_suffix = "";
+    uint8_t v[4] = {};
+    bool alpha = false;
+    if (!valid_) {
+        ;
+    } else if (StringUtils::CompareIgnoreCase(f, "hex", 3) == 0) {
+        f += 3;
+        output_prefix = "#";
+        v[0] = static_cast<uint8_t>(rgba_.R * 255.0f + 0.5f);
+        v[1] = static_cast<uint8_t>(rgba_.G * 255.0f + 0.5f);
+        v[2] = static_cast<uint8_t>(rgba_.B * 255.0f + 0.5f);
+        v[3] = static_cast<uint8_t>(rgba_.A * 255.0f + 0.5f);
+        if (*f == '3') {
+            output_format = "%s%1x%1x%1x";
+            v[0] /= 16; v[1] /= 16; v[2] /= 16; v[3] /= 16;
+        } else if (*f == '4') {
+            output_format = "%s%1x%1x%1x%1x";
+            v[0] /= 16; v[1] /= 16; v[2] /= 16; v[3] /= 16;
+        } else if (*f == '6' || *f == '\0') {
+            output_format = "%s%02x%02x%02x";
+        } else if (*f == '8') {
+            output_format = "%s%02x%02x%02x%02x";
+        } else {
+            return "";
+        }
+    } else {
+        float fv[4] = {};
+        if (StringUtils::CompareIgnoreCase(f, "rgb", 3) == 0) {
+            output_prefix = "rgb";
+            fv[0] = rgba_.R; fv[1] = rgba_.G; fv[2] = rgba_.G; fv[3] = rgba_.A;
+        } else if (StringUtils::CompareIgnoreCase(f, "hsl", 3) == 0) {
+            output_prefix = "hsl";
+            Hsla hsla(rgba_);
+            fv[0] = hsla.H; fv[1] = hsla.S; fv[2] = hsla.L; fv[3] = hsla.A;
+        } else if (StringUtils::CompareIgnoreCase(f, "hsv", 3) == 0) {
+            output_prefix = "hsv";
+            Hsva hsva(rgba_);
+            fv[0] = hsva.H; fv[1] = hsva.S; fv[2] = hsva.V; fv[3] = hsva.A;
+        } else {
+            return "";
+        }
+        f += 3;
+        if (*f == 'a') {
+            ++f;
+            alpha = true;
+        }
+        auto max = 0.0f;
+        if (*f == '%') {
+            ++f;
+            max = 100.0f;
+            output_format = alpha ? "%sa(%d%%,%d%%,%d%%,%d%%)" : "%s(%d%%,%d%%,%d%%)";
+        } else {
+            max = 255.0f;
+            output_format = alpha ? "%sa(%d,%d,%d,%d)" : "%s(%d,%d,%d)";
+        }
+        v[0] = static_cast<uint8_t>(fv[0] * max + 0.5f);
+        v[1] = static_cast<uint8_t>(fv[1] * max + 0.5f);
+        v[2] = static_cast<uint8_t>(fv[2] * max + 0.5f);
+        v[3] = static_cast<uint8_t>(fv[3] * max + 0.5f);
+        if (*f != '\0') return "";
+    }
+    return StringUtils::Format(output_format, output_prefix, v[0], v[1], v[2], v[3]);
 }
 
 } // namespace miso

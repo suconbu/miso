@@ -846,60 +846,60 @@ TEST_F(MisoTest, Color)
     EXPECT_TRUE(h3.IsValid());
     EXPECT_EQ(0x33 / 255.0f, h3.GetRgba().B);
     EXPECT_EQ(1.0f, h3.GetRgba().A);
-    EXPECT_EQ("#112233ff", h3.ToString());
+    EXPECT_EQ("#112233ff", h3.ToString("hex8"));
 
     miso::Color h4("#abcd");
     EXPECT_TRUE(h4.IsValid());
     EXPECT_EQ(0xCC / 255.0f, h4.GetRgba().B);
     EXPECT_EQ(0xDD / 255.0f, h4.GetRgba().A);
-    EXPECT_EQ("#aabbccdd", h4.ToString());
+    EXPECT_EQ("#aabbccdd", h4.ToString("hex8"));
 
     miso::Color h6("#123456");
     EXPECT_TRUE(h6.IsValid());
     EXPECT_EQ(0x56 / 255.0f, h6.GetRgba().B);
     EXPECT_EQ(1.0f, h6.GetRgba().A);
-    EXPECT_EQ("#123456ff", h6.ToString());
+    EXPECT_EQ("#123456ff", h6.ToString("hex8"));
 
     miso::Color h8("#AABBCCDD");
     EXPECT_TRUE(h8.IsValid());
     EXPECT_EQ(0xCC / 255.0f, h8.GetRgba().B);
     EXPECT_EQ(0xDD / 255.0f, h8.GetRgba().A);
-    EXPECT_EQ("#aabbccdd", h8.ToString());
+    EXPECT_EQ("#aabbccdd", h8.ToString("hex8"));
 
     {
         miso::Color a(miso::Rgba(0.25f, 0.75f, 0.75f, 0.5f));
         miso::Color b(miso::Hsla(0.5f, 0.5f, 0.5f, 0.5f));
         miso::Color c(miso::Hsva(0.5f, 2 / 3.0f, 0.75f, 0.5f));
-        EXPECT_EQ("#40bfbf80", a.ToString());
-        EXPECT_EQ("#40bfbf80", b.ToString());
-        EXPECT_EQ("#40bfbf80", c.ToString());
+        EXPECT_EQ("#40bfbf80", a.ToString("hex8"));
+        EXPECT_EQ("#40bfbf80", b.ToString("hex8"));
+        EXPECT_EQ("#40bfbf80", c.ToString("hex8"));
     }
     {
         miso::Color rgb("rgb(12,34,56)");
         EXPECT_TRUE(rgb.IsValid());
-        EXPECT_EQ("#0c2238ff", rgb.ToString());
+        EXPECT_EQ("#0c2238ff", rgb.ToString("hex8"));
         miso::Color rgba("rgba(12,34,56,78)");
         EXPECT_TRUE(rgba.IsValid());
-        EXPECT_EQ("#0c22384e", rgba.ToString());
+        EXPECT_EQ("#0c22384e", rgba.ToString("hex8"));
         miso::Color hsl("hsl(12,34,56)");
         EXPECT_TRUE(hsl.IsValid());
-        EXPECT_EQ("#b57869ff", hsl.ToString());
+        EXPECT_EQ("#b57869ff", hsl.ToString("hex8"));
         miso::Color hsla("hsla(12,34,56,78)");
         EXPECT_TRUE(hsla.IsValid());
-        EXPECT_EQ("#b57869c7", hsla.ToString());
+        EXPECT_EQ("#b57869c7", hsla.ToString("hex8"));
         miso::Color hsv("hsv(12,34,56)");
         EXPECT_TRUE(hsv.IsValid());
-        EXPECT_EQ("#8f685eff", hsv.ToString());
+        EXPECT_EQ("#8f685eff", hsv.ToString("hex8"));
         miso::Color hsva("hsva(12,34,56,78)");
         EXPECT_TRUE(hsva.IsValid());
-        EXPECT_EQ("#8f685ec7", hsva.ToString());
+        EXPECT_EQ("#8f685ec7", hsva.ToString("hex8"));
 
         miso::Color rgbp("rgb(12%,34%,56%)");
         EXPECT_TRUE(rgbp.IsValid());
-        EXPECT_EQ("#1f578fff", rgbp.ToString());
+        EXPECT_EQ("#1f578fff", rgbp.ToString("hex8"));
         miso::Color rgbr("rgb(0.12,0.34,0.56)");
         EXPECT_TRUE(rgbr.IsValid());
-        EXPECT_EQ("#1f578fff", rgbr.ToString());
+        EXPECT_EQ("#1f578fff", rgbr.ToString("hex8"));
     }
     {
         miso::Color a;

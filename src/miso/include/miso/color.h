@@ -60,8 +60,8 @@ public:
     explicit Color(const char* str) : Color() { TryParse(str, *this); }
     explicit Color(const std::string& str) : Color(str.c_str()) {}
 
-    ColorFormat GetFormat() const { return format_; }
     bool IsValid() const { return format_ != ColorFormat::Invalid; }
+    ColorFormat GetFormat() const { return format_; }
     Rgba GetRgba() const { return rgba_; }
     Hsla GetHsla() const { return RgbaToHsla(rgba_); }
     Hsva GetHsva() const { return RgbaToHsva(rgba_); }
@@ -263,7 +263,7 @@ Color::RgbaToHsla(const Rgba& rgba)
 
     float h =
         (max == min) ? 0.0f :
-        (max == r) ? ((g - b) / d + (g < b ? 6.0f : 0)) / 6.0f :
+        (max == r) ? ((g - b) / d + (g < b ? 6.0f : 0.0f)) / 6.0f :
         (max == g) ? ((b - r) / d + 2.0f) / 6.0f :
         (max == b) ? ((r - g) / d + 4.0f) / 6.0f :
         0.0f;
@@ -288,7 +288,7 @@ Color::RgbaToHsva(const Rgba& rgba)
 
     float h =
         (max == min) ? 0.0f :
-        (max == r) ? ((g - b) / d + (g < b ? 6.0f : 0)) / 6.0f :
+        (max == r) ? ((g - b) / d + (g < b ? 6.0f : 0.0f)) / 6.0f :
         (max == g) ? ((b - r) / d + 2.0f) / 6.0f :
         (max == b) ? ((r - g) / d + 4.0f) / 6.0f :
         0.0f;
@@ -313,9 +313,9 @@ Color::HslaToRgba(const Hsla& hsla)
     if (s > 0.0f) {
         auto q = (l < 0.5f) ? (l * (1 + s)) : (l + s - l * s);
         auto p = 2.0f * l - q;
-        r = HueToRgb(p, q, h + 2 / 6.0f);
+        r = HueToRgb(p, q, h + 2.0f / 6.0f);
         g = HueToRgb(p, q, h);
-        b = HueToRgb(p, q, h - 2 / 6.0f);
+        b = HueToRgb(p, q, h - 2.0f / 6.0f);
     }
 
     return Rgba(r, g, b, a);
@@ -327,9 +327,9 @@ Color::HueToRgb(float p, float q, float t)
     if (t < 0.0f) t += 1.0f;
     if (t > 1.0f) t -= 1.0f;
     return
-        (t < 1 / 6.0f) ? (p + (q - p) * 6.0f * t) :
-        (t < 3 / 6.0f) ? (q) :
-        (t < 4 / 6.0f) ? (p + (q - p) * (4 / 6.0f - t) * 6.0f) :
+        (t < 1.0f / 6.0f) ? (p + (q - p) * 6.0f * t) :
+        (t < 3.0f / 6.0f) ? (q) :
+        (t < 4.0f / 6.0f) ? (p + (q - p) * (4.0f / 6.0f - t) * 6.0f) :
         p;
 }
 
@@ -360,10 +360,10 @@ Color::ToString(const char* format) const
 {
     if (format_ == ColorFormat::Invalid) return "";
     return StringUtils::Format("#%02x%02x%02x%02x",
-        static_cast<uint8_t>(rgba_.R * 255 + 0.5f),
-        static_cast<uint8_t>(rgba_.G * 255 + 0.5f),
-        static_cast<uint8_t>(rgba_.B * 255 + 0.5f),
-        static_cast<uint8_t>(rgba_.A * 255 + 0.5f));
+        static_cast<uint8_t>(rgba_.R * 255.0f + 0.5f),
+        static_cast<uint8_t>(rgba_.G * 255.0f + 0.5f),
+        static_cast<uint8_t>(rgba_.B * 255.0f + 0.5f),
+        static_cast<uint8_t>(rgba_.A * 255.0f + 0.5f));
 }
 
 } // namespace miso

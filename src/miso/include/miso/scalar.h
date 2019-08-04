@@ -32,10 +32,10 @@ public:
     explicit Scalar(const char* str) : Scalar() { Scalar::TryParse(str, *this); }
     explicit Scalar(const std::string& str) : Scalar(str.c_str()) {}
 
+    bool IsValid() const { return unit_ != ScalarUnit::NaN; }
+    bool IsFloat() const { return float_; }
     double GetValue() const { return value_; }
     ScalarUnit GetUnit() const { return unit_; }
-    bool IsFloat() const { return float_; }
-    bool IsValid() const { return unit_ != ScalarUnit::NaN; }
     double ToLength(float view_width, float view_height, float pixel_scale, double base_length, double default_value = kNaN) const;
     double ToRatio(float default_value = kNaN) const;
     double ToMilliseconds(float default_value = kNaN) const;

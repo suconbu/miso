@@ -8,8 +8,8 @@
 #include <vector>
 #include <cassert>
 
-#include "miso/scalar.h"
 #include "miso/color.h"
+#include "miso/scalar.h"
 #include "miso/string.h"
 
 namespace miso {
@@ -23,9 +23,9 @@ public:
     explicit Numeric(const char* str);
     explicit Numeric(const std::string& str) : Numeric(str.c_str()) {}
 
+    bool IsValid() const;
     const Scalar& GetScalar() const { return (type_ == NumericType::Scalar) ? scalar_ : Scalar::GetInvalid(); }
     const Color& GetColor() const { return (type_ == NumericType::Color) ? color_ : Color::GetInvalid(); }
-    bool IsValid() const;
     double ToLength(float view_width, float view_height, float pixel_scale, double base_length, double default_value = Scalar::kNaN) const;
     double ToRatio(float default_value = Scalar::kNaN) const;
     double ToMilliseconds(float default_value = Scalar::kNaN) const;

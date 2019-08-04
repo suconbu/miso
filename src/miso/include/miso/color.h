@@ -119,22 +119,22 @@ Color::TryParseColorSpace(const char* str, Color& color_out, size_t* count_out)
 
     int value_count = 0;
     auto format = ColorSpace::Unknown;
-    if (StringUtils::CompareIgnoreCase(s, "rgba", 4) == 0) {
+    if (StringUtils::StartsWith(s, "rgba")) {
         value_count = 4;
         format = ColorSpace::Rgb;
-    } else if (StringUtils::CompareIgnoreCase(s, "rgb", 3) == 0) {
+    } else if (StringUtils::StartsWith(s, "rgb")) {
         value_count = 3;
         format = ColorSpace::Rgb;
-    } else if (StringUtils::CompareIgnoreCase(s, "hsla", 4) == 0) {
+    } else if (StringUtils::StartsWith(s, "hsla")) {
         value_count = 4;
         format = ColorSpace::Hsl;
-    } else if (StringUtils::CompareIgnoreCase(s, "hsl", 3) == 0) {
+    } else if (StringUtils::StartsWith(s, "hsl")) {
         value_count = 3;
         format = ColorSpace::Hsl;
-    } else if (StringUtils::CompareIgnoreCase(s, "hsva", 4) == 0) {
+    } else if (StringUtils::StartsWith(s, "hsva")) {
         value_count = 4;
         format = ColorSpace::Hsv;
-    } else if (StringUtils::CompareIgnoreCase(s, "hsv", 3) == 0) {
+    } else if (StringUtils::StartsWith(s, "hsv")) {
         value_count = 3;
         format = ColorSpace::Hsv;
     } else {
@@ -196,14 +196,22 @@ Color::TryParseColorSpace(const char* str, Color& color_out, size_t* count_out)
     return true;
 }
 
-// hex3,hex4     | #rgb, #rgba
-// hex,hex6,hex8 | #rrggbb, #rrggbbaa
-// rgb,rgba      | rgb(r:0-255,g:0-255,b:0-255[,a:0-255])
-// rgb%,rgba%    | rgb(r:0-100%,g:0-100%,b:0-100%[,a:0-100%])
-// hsl,hsla      | hsl(h:0-360,s:0-100,l:0-100[,a:0-255])
-// hsl%,hsla%    | hsl(h:0-100%,s:0-100%,l:0-100%[,a:0-100%])
-// hsv,hsva      | hsl(h:0-360,s:0-100,v:0-100[,a:0-255])
-// hsv%,hsva%    | hsl(h:0-100%,s:0-100%,v:0-100%[,a:0-100%])
+// hex3     | #rgb
+// hex4     | #rgba
+// hex,hex6 | #rrggbb
+// hex8     | #rrggbbaa
+// rgb      | rgb(r:0-255,g:0-255,b:0-255)
+// rgb%     | rgb(r:0-100%,g:0-100%,b:0-100%)
+// rgba     | rgb(r:0-255,g:0-255,b:0-255,a:0-255)
+// rgba%    | rgb(r:0-100%,g:0-100%,b:0-100%,a:0-100%)
+// hsl      | hsl(h:0-360,s:0-100,l:0-100)
+// hsl%     | hsl(h:0-100%,s:0-100%,l:0-100%)
+// hsla     | hsl(h:0-360,s:0-100,l:0-100,a:0-255)
+// hsla%    | hsl(h:0-100%,s:0-100%,l:0-100%,a:0-100%)
+// hsv      | hsv(h:0-360,s:0-100,v:0-100)
+// hsv%     | hsv(h:0-100%,s:0-100%,v:0-100%)
+// hsva     | hsv(h:0-360,s:0-100,v:0-100,a:0-255)
+// hsva%    | hsv(h:0-100%,s:0-100%,v:0-100%,a:0-100%)
 inline std::string
 Color::ToString(const char* format) const
 {
@@ -211,7 +219,7 @@ Color::ToString(const char* format) const
 
     if (!valid_) {
         return "";
-    } else if (StringUtils::CompareIgnoreCase(f, "hex", 3) == 0) {
+    } else if (StringUtils::StartsWith(f, "hex")) {
         f += 3;
         if (*f == '3') {
             return ColorFormatter::ToHexString(rgba_, 3);
@@ -226,11 +234,11 @@ Color::ToString(const char* format) const
         }
     } else {
         auto colorspace = ColorSpace::Unknown;
-        if (StringUtils::CompareIgnoreCase(f, "rgb", 3) == 0) {
+        if (StringUtils::StartsWith(f, "rgb")) {
             colorspace = ColorSpace::Rgb;
-        } else if (StringUtils::CompareIgnoreCase(f, "hsl", 3) == 0) {
+        } else if (StringUtils::StartsWith(f, "hsl")) {
             colorspace = ColorSpace::Hsl;
-        } else if (StringUtils::CompareIgnoreCase(f, "hsv", 3) == 0) {
+        } else if (StringUtils::StartsWith(f, "hsv")) {
             colorspace = ColorSpace::Hsv;
         } else {
             return "";

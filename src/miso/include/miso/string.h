@@ -26,9 +26,12 @@ public:
     static std::string ToUpper(const std::string& str);
     static std::string ToLower(const std::string& str);
     static std::string Format(const char* format, ...);
-    static bool StartsWith(const std::string& str, const std::string& x);
-    static bool EndsWith(const std::string& str, const std::string& x);
-    static bool Contains(const std::string& str, const std::string& x);
+    static bool StartsWith(const char* str, const char* x, bool ignore_case = false);
+    static bool StartsWith(const std::string& str, const std::string& x, bool ignore_case = false);
+    static bool EndsWith(const char* str, const char* x, bool ignore_case = false);
+    static bool EndsWith(const std::string& str, const std::string& x, bool ignore_case = false);
+    static bool Contains(const char* str, const char* x, bool ignore_case = false);
+    static bool Contains(const std::string& str, const std::string& x, bool ignore_case = false);
     static int CompareIgnoreCase(const char* a, const char* b, size_t count = SIZE_MAX);
 
 private:
@@ -204,22 +207,46 @@ StringUtils::Format(const char* format, ...)
 }
 
 inline bool
-StringUtils::StartsWith(const std::string& str, const std::string& x)
+StringUtils::StartsWith(const char* str, const char* x, bool ignore_case)
 {
-    return (x.length() <= str.length()) ? str.compare(0, x.length(), x) == 0 : false;
+    size_t x_len = strlen(x);
+    return ignore_case ? CompareIgnoreCase(str, x, x_len) == 0 : strncmp(str, x, x_len) == 0;
 }
 
 inline bool
-StringUtils::EndsWith(const std::string& str, const std::string& x)
+StringUtils::StartsWith(const std::string& str, const std::string& x, bool ignore_case)
 {
-    return (x.length() <= str.length()) ?
-        str.compare(str.length() - x.length(), x.length(), x) == 0 : false;
+    return StartsWith(str.c_str(), x.c_str(), ignore_case);
 }
 
 inline bool
-StringUtils::Contains(const std::string& str, const std::string& x)
+StringUtils::EndsWith(const char* str, const char* x, bool ignore_case)
 {
-    return str.find(x) != std::string::npos;
+    size_t str_len = strlen(str);
+    size_t x_len = strlen(x);
+    if (str_len < x_len) return false;
+    auto start = str + str_len - x_len;
+    return ignore_case ? CompareIgnoreCase(start, x, x_len) == 0 : strncmp(start, x, x_len) == 0;
+}
+
+inline bool
+StringUtils::EndsWith(const std::string& str, const std::string& x, bool ignore_case)
+{
+    return EndsWith(str.c_str(), x.c_str(), ignore_case);
+}
+
+inline bool
+StringUtils::Contains(const char* str, const char* x, bool ignore_case)
+{
+    return Contains(std::string(str), std::string(x), ignore_case);
+}
+
+inline bool
+StringUtils::Contains(const std::string& str, const std::string& x, bool ignore_case)
+{
+    return ignore_case ?
+        StringUtils::ToLower(str).find(StringUtils::ToLower(x)) != std::string::npos :
+        str.find(x) != std::string::npos;
 }
 
 inline int

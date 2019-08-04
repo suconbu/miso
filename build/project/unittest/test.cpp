@@ -359,17 +359,32 @@ TEST_F(MisoTest, StringUtils_Comapare)
     EXPECT_TRUE(miso::StringUtils::StartsWith("Tokyo", "Tokyo"));
     EXPECT_TRUE(miso::StringUtils::StartsWith("TokyoStation", "Tokyo"));
 
+    EXPECT_TRUE(miso::StringUtils::StartsWith("tokyostation", "tokyo", true));
+    EXPECT_TRUE(miso::StringUtils::StartsWith("tokyostation", "TOKYO", true));
+    EXPECT_TRUE(miso::StringUtils::StartsWith("TOKYOSTATION", "tokyo", true));
+    EXPECT_TRUE(miso::StringUtils::StartsWith("TOKYOSTATION", "TOKYO", true));
+
     EXPECT_FALSE(miso::StringUtils::EndsWith("", "Station"));
     EXPECT_FALSE(miso::StringUtils::EndsWith("tation", "Station"));
     EXPECT_FALSE(miso::StringUtils::EndsWith("Station ", "Station"));
     EXPECT_TRUE(miso::StringUtils::EndsWith("Station", "Station"));
     EXPECT_TRUE(miso::StringUtils::EndsWith("TokyoStation", "Station"));
 
+    EXPECT_TRUE(miso::StringUtils::EndsWith("tokyostation", "station", true));
+    EXPECT_TRUE(miso::StringUtils::EndsWith("tokyostation", "STATION", true));
+    EXPECT_TRUE(miso::StringUtils::EndsWith("TOKYOSTATION", "station", true));
+    EXPECT_TRUE(miso::StringUtils::EndsWith("TOKYOSTATION", "STATION", true));
+
     EXPECT_FALSE(miso::StringUtils::Contains("", "Station"));
     EXPECT_FALSE(miso::StringUtils::Contains("tation", "Station"));
     EXPECT_TRUE(miso::StringUtils::Contains("Station ", "Station"));
     EXPECT_TRUE(miso::StringUtils::Contains("TokyoStation", "Station"));
     EXPECT_TRUE(miso::StringUtils::Contains("TokyoStationHotel", "Station"));
+
+    EXPECT_TRUE(miso::StringUtils::Contains("tokyostationhotel", "station", true));
+    EXPECT_TRUE(miso::StringUtils::Contains("tokyostationhotel", "STATION", true));
+    EXPECT_TRUE(miso::StringUtils::Contains("TOKYOSTATIONHOTEL", "station", true));
+    EXPECT_TRUE(miso::StringUtils::Contains("TOKYOSTATIONHOTEL", "STATION", true));
 
     EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("StatioN", "station"));
     EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("station", "Station"));

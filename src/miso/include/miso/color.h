@@ -1,14 +1,12 @@
 #ifndef MISO_COLOR_H_
 #define MISO_COLOR_H_
 
-#include <ctype.h>
 #include <stdint.h>
-#include <limits>
 #include <string>
 #include <algorithm>
 
 #include "miso/color_space.h"
-#include "miso/scalar.h"
+#include "miso/numeric.h"
 #include "miso/string.h"
 
 namespace miso {
@@ -188,15 +186,15 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* count_out)
             if (!paren || value_index < value_count) return false;
             paren = false;
         } else {
-            Scalar scalar;
+            Numeric numeric;
             size_t count;
-            if (Scalar::TryParse(s, scalar, &count)) {
-                if (scalar.GetUnit() == ScalarUnit::Parcent || scalar.IsFloat()) {
-                    float v = static_cast<float>(scalar.ToRatio());
+            if (Numeric::TryParse(s, numeric, &count)) {
+                if (numeric.GetUnit() == NumericUnit::Parcent || numeric.IsFloat()) {
+                    float v = static_cast<float>(numeric.ToRatio());
                     value[value_index] = std::max(0.0f, std::min(v, 1.0f));
-                } else if (scalar.GetUnit() == ScalarUnit::Unitless) {
+                } else if (numeric.GetUnit() == NumericUnit::Unitless) {
                     float max = static_cast<float>(vmax[value_index]);
-                    float v = static_cast<float>(scalar.GetValue());
+                    float v = static_cast<float>(numeric.GetValue());
                     value[value_index] = std::max(0.0f, std::min(v, max)) / max;
                 } else {
                     return false;

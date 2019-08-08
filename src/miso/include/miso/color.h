@@ -20,12 +20,13 @@ public:
     static Color FromHsva(float h, float s, float v, float a);
     //static Color FromName(const char* name);
 
-    Color() {}
-    Color(float r, float g, float b, float a) : R(r), G(g), B(b), A(a) {}
-    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : R(r / 255.0f), G(g / 255.0f), B(b / 255.0f), A(a / 255.0f) {}
+    Color() = default;
+    Color(float r, float g, float b, float a) : R(r), G(g), B(b), A(a), valid_(true) {}
+    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : R(r / 255.0f), G(g / 255.0f), B(b / 255.0f), A(a / 255.0f), valid_(true) {}
     Color(const char* str) { TryParse(str, *this); }
 
-    bool IsValid() const { return !std::isnan(A); }
+    bool IsValid() const { return valid_; }
+    uint32_t ToUint32() const;
     std::string ToString(const char* format = nullptr) const;
 
     bool operator == (const Color& other) const;
@@ -34,31 +35,31 @@ public:
     float R = 0.0f;
     float G = 0.0f;
     float B = 0.0f;
-    float A = std::numeric_limits<float>::quiet_NaN();
+    float A = 0.0f;
 
 private:
     static bool TryParseHex(const char* str, Color& color_out, size_t* count_out);
     static bool TryParseDec(const char* str, Color& color_out, size_t* count_out);
     std::string ToStringHex(const char* format) const;
     std::string ToStringDec(const char* format) const;
+
+    bool valid_ = false;
 };
 
 inline Color
 Color::FromHsla(float h, float s, float l, float a)
 {
-    Color color;
-    ColorSpace::HslToRgb(h, s, l, &color.R, &color.G, &color.B);
-    color.A = a;
-    return color;
+    float r, g, b;
+    ColorSpace::HslToRgb(h, s, l, &r, &g, &b);
+    return Color(r, g, b, a);
 }
 
 inline Color
 Color::FromHsva(float h, float s, float v, float a)
 {
-    Color color;
-    ColorSpace::HsvToRgb(h, s, v, &color.R, &color.G, &color.B);
-    color.A = a;
-    return color;
+    float r, g, b;
+    ColorSpace::HsvToRgb(h, s, v, &r, &g, &b);
+    return Color(r, g, b, a);
 }
 
 inline bool
@@ -126,6 +127,7 @@ Color::TryParseHex(const char* str, Color& color_out, size_t* count_out)
     color_out.G = g;
     color_out.B = b;
     color_out.A = a;
+    color_out.valid_ = true;
     if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
 
     return true;
@@ -219,9 +221,20 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* count_out)
     } else {
         return false;
     }
+    color_out.valid_ = true;
     if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
 
     return true;
+}
+
+inline uint32_t
+Color::ToUint32() const
+{
+    auto r = static_cast<uint8_t>(R * 255.0f + 0.5f);
+    auto g = static_cast<uint8_t>(G * 255.0f + 0.5f);
+    auto b = static_cast<uint8_t>(B * 255.0f + 0.5f);
+    auto a = static_cast<uint8_t>(A * 255.0f + 0.5f);
+    return (r << 24) | (g << 16) | (b << 8) | a;
 }
 
 // hex3     | #rgb

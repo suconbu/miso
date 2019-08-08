@@ -19,12 +19,10 @@ enum class NumericUnit {
 
 class Numeric {
 public:
-    static constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
-
     static const Numeric& GetInvalid() { const static Numeric invalid; return invalid; }
     static bool TryParse(const char* str, Numeric& numeric_out, size_t* count_out = nullptr);
 
-    Numeric() : value_(kNaN), unit_(NumericUnit::NaN), float_(false) {}
+    Numeric() = default;
     explicit Numeric(const char* str) : Numeric() { Numeric::TryParse(str, *this); }
     explicit Numeric(const std::string& str) : Numeric(str.c_str()) {}
 
@@ -38,9 +36,11 @@ public:
     std::string ToString(const char* format = nullptr) const;
 
 private:
-    double value_;
-    NumericUnit unit_;
-    bool float_;
+    static constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
+
+    double value_ = kNaN;
+    NumericUnit unit_ = NumericUnit::NaN;
+    bool float_ = false;
 
     static const std::map<NumericUnit, const char*>& GetUnitToSuffixMap();
 };

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\miso\include\miso\binary_reader.h" />
+    <ClInclude Include="..\..\..\src\miso\include\miso\boolean.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\buffer.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\color.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\color_space.h" />

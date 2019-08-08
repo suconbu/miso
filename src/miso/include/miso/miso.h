@@ -18,6 +18,7 @@
 #include "miso/endian.h"
 #include "miso/interpolator.h"
 #include "miso/value.h"
+#include "miso/boolean.h"
 #include "miso/numeric.h"
 #include "miso/stream.h"
 #include "miso/string.h"

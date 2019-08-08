@@ -844,14 +844,76 @@ TEST_F(MisoTest, Numeric_Convert)
 TEST_F(MisoTest, Value)
 {
     TEST_TRACE("");
-    auto values = miso::Value::FromString("  0 1 \t \t 2 rgb ( 12,34 , 56 )10px 20% ");
-    EXPECT_EQ(6, values.size());
+    auto values = miso::Value::FromString("  0 1 \t \t 2 rgb ( 12,34 , 56 )10px 20% True hsla(0,0,0,0)");
+    ASSERT_EQ(8, values.size());
     EXPECT_EQ(0, values[0].GetNumeric().GetValue());
     EXPECT_EQ(1, values[1].GetNumeric().GetValue());
     EXPECT_EQ(2, values[2].GetNumeric().GetValue());
     EXPECT_TRUE(values[3].GetColor().IsValid());
     EXPECT_EQ(10, values[4].GetNumeric().GetValue());
     EXPECT_EQ(20, values[5].GetNumeric().GetValue());
+    EXPECT_TRUE(values[6].IsTrue());
+    EXPECT_FALSE(values[7].IsTrue());
+}
+
+TEST_F(MisoTest, Boolean)
+{
+    {
+        size_t count = 0;
+        miso::Boolean a;
+        EXPECT_TRUE(miso::Boolean::TryParse("true-", a, &count));
+        EXPECT_TRUE(a.IsTrue());
+        EXPECT_EQ(4, count);
+        EXPECT_TRUE(miso::Boolean::TryParse("false ", a, &count));
+        EXPECT_FALSE(a.IsTrue());
+        EXPECT_EQ(5, count);
+        EXPECT_FALSE(miso::Boolean::TryParse("truu ", a, &count));
+    }
+    {
+        miso::Boolean a;
+        EXPECT_FALSE(a.IsValid());
+        EXPECT_FALSE(a.IsTrue());
+        miso::Boolean b("true");
+        EXPECT_TRUE(b.IsValid());
+        EXPECT_TRUE(b.IsTrue());
+        miso::Boolean c("on");
+        EXPECT_TRUE(c.IsValid());
+        EXPECT_TRUE(c.IsTrue());
+        miso::Boolean d("yes");
+        EXPECT_TRUE(d.IsValid());
+        EXPECT_TRUE(d.IsTrue());
+
+        miso::Boolean e("false");
+        EXPECT_TRUE(e.IsValid());
+        EXPECT_FALSE(e.IsTrue());
+        miso::Boolean f("off");
+        EXPECT_TRUE(f.IsValid());
+        EXPECT_FALSE(f.IsTrue());
+        miso::Boolean g("no");
+        EXPECT_TRUE(g.IsValid());
+        EXPECT_FALSE(g.IsTrue());
+
+        miso::Boolean h("tru");
+        EXPECT_FALSE(h.IsValid());
+        EXPECT_FALSE(h.IsTrue());
+        miso::Boolean i("fal");
+        EXPECT_FALSE(i.IsValid());
+        EXPECT_FALSE(i.IsTrue());
+    }
+    {
+        miso::Boolean a;
+        EXPECT_FALSE(a.IsValid());
+        EXPECT_FALSE(a.IsTrue());
+        miso::Boolean b("True");
+        EXPECT_TRUE(b.IsValid());
+        EXPECT_TRUE(b.IsTrue());
+        miso::Boolean c("oN");
+        EXPECT_TRUE(c.IsValid());
+        EXPECT_TRUE(c.IsTrue());
+        miso::Boolean d("YeS");
+        EXPECT_TRUE(d.IsValid());
+        EXPECT_TRUE(d.IsTrue());
+    }
 }
 
 TEST_F(MisoTest, Color)

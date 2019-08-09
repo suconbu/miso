@@ -30,9 +30,9 @@ public:
     bool IsFloat() const { return float_; }
     double GetValue() const { return value_; }
     NumericUnit GetUnit() const { return unit_; }
-    double ToLength(double view_width, double view_height, double pixel_scale, double base_length, double default_value = kNaN) const;
-    double ToRatio(double default_value = kNaN) const;
-    double ToMilliseconds(double default_value = kNaN) const;
+    template<typename T> T ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value = std::numeric_limits<T>::quiet_NaN()) const;
+    template<typename T> T ToRatio(T default_value = std::numeric_limits<T>::quiet_NaN()) const;
+    template<typename T> T ToMilliseconds(T default_value = std::numeric_limits<T>::quiet_NaN()) const;
     std::string ToString(const char* format = nullptr) const;
 
 private:
@@ -127,37 +127,37 @@ Numeric::GetUnitToSuffixMap()
     return kUnitToSuffix;
 }
 
-inline double
-Numeric::ToLength(double view_width, double view_height, double pixel_scale, double base_length, double default_value) const
+template<typename T> inline T
+Numeric::ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value) const
 {
-    return
+    return static_cast<T>(
         (unit_ == NumericUnit::Pixel) ? value_ :
         (unit_ == NumericUnit::ScaledPixel) ? value_ * pixel_scale :
-        (unit_ == NumericUnit::Vw) ? value_ / 100.0 * view_width :
-        (unit_ == NumericUnit::Vh) ? value_ / 100.0 * view_height :
-        (unit_ == NumericUnit::Vmax) ? value_ / 100.0 * std::max(view_width, view_height) :
-        (unit_ == NumericUnit::Vmin) ? value_ / 100.0 * std::min(view_width, view_height) :
-        (unit_ == NumericUnit::Parcent) ? value_ / 100.0 * base_length :
+        (unit_ == NumericUnit::Vw) ? value_ / 100.0f * view_width :
+        (unit_ == NumericUnit::Vh) ? value_ / 100.0f * view_height :
+        (unit_ == NumericUnit::Vmax) ? value_ / 100.0f * std::max(view_width, view_height) :
+        (unit_ == NumericUnit::Vmin) ? value_ / 100.0f * std::min(view_width, view_height) :
+        (unit_ == NumericUnit::Parcent) ? value_ / 100.0f * base_length :
         (unit_ == NumericUnit::Unitless) ? value_ * base_length :
-        default_value;
+        default_value);
 }
 
-inline double
-Numeric::ToRatio(double default_value) const
+template<typename T> inline T
+Numeric::ToRatio(T default_value) const
 {
-    return
-        (unit_ == NumericUnit::Parcent) ? value_ / 100.0 :
+    return static_cast<T>(
+        (unit_ == NumericUnit::Parcent) ? value_ / 100.0f :
         (unit_ == NumericUnit::Unitless) ? value_ :
-        default_value;
+        default_value);
 }
 
-inline double
-Numeric::ToMilliseconds(double default_value) const
+template<typename T> inline T
+Numeric::ToMilliseconds(T default_value) const
 {
-    return
-        (unit_ == NumericUnit::Second) ? value_ * 1000.0 :
+    return static_cast<T>(
+        (unit_ == NumericUnit::Second) ? value_ * 1000.0f :
         (unit_ == NumericUnit::Millisecond) ? value_ :
-        default_value;
+        default_value);
 }
 
 inline std::string

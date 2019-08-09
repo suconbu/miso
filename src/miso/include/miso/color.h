@@ -192,7 +192,7 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* count_out)
             size_t count;
             if (Numeric::TryParse(s, numeric, &count)) {
                 if (numeric.GetUnit() == NumericUnit::Parcent || numeric.IsFloat()) {
-                    float v = static_cast<float>(numeric.ToRatio());
+                    float v = numeric.ToRatio(0.0f);
                     value[value_index] = std::max(0.0f, std::min(v, 1.0f));
                 } else if (numeric.GetUnit() == NumericUnit::Unitless) {
                     float max = static_cast<float>(vmax[value_index]);

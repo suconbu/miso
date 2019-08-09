@@ -25,9 +25,9 @@ public:
     bool IsTrue() const;
     const Numeric& GetNumeric() const { return (type_ == ValueType::Numeric) ? numeric_ : Numeric::GetInvalid(); }
     const Color& GetColor() const { return (type_ == ValueType::Color) ? color_ : Color::GetInvalid(); }
-    double ToLength(double view_width, double view_height, double pixel_scale, double base_length, double default_value = kNaN) const;
-    double ToRatio(double default_value = kNaN) const;
-    double ToMilliseconds(double default_value = kNaN) const;
+    template<typename T> T ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value = std::numeric_limits<T>::quiet_NaN()) const;
+    template<typename T> T ToRatio(T default_value = std::numeric_limits<T>::quiet_NaN()) const;
+    template<typename T> T ToMilliseconds(T default_value = std::numeric_limits<T>::quiet_NaN()) const;
     std::string ToString(const char* format = nullptr) const;
 
 private:
@@ -103,24 +103,24 @@ Value::Value(const char* str) : Value()
     TryParse(str, *this);
 }
 
-inline double
-Value::ToLength(double view_width, double view_height, double pixel_scale, double base_length, double default_value) const
+template<typename T> inline T
+Value::ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value) const
 {
     return (type_ == ValueType::Numeric) ?
         numeric_.ToLength(view_width, view_height, pixel_scale, base_length, default_value) :
         default_value;
 }
 
-inline double
-Value::ToRatio(double default_value) const
+template<typename T> inline T
+Value::ToRatio(T default_value) const
 {
     return (type_ == ValueType::Numeric) ?
         numeric_.ToRatio(default_value) :
         default_value;
 }
 
-inline double
-Value::ToMilliseconds(double default_value) const
+template<typename T> inline T
+Value::ToMilliseconds(T default_value) const
 {
     return (type_ == ValueType::Numeric) ?
         numeric_.ToMilliseconds(default_value) :

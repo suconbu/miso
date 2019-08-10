@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-#include "miso/string.h"
+#include "miso/string_utils.h"
 
 namespace miso {
 

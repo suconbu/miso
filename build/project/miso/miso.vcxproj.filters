@@ -18,9 +18,6 @@
     <ClInclude Include="..\..\..\src\miso\include\miso\miso.h">
       <Filter>include\miso</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\string.h">
-      <Filter>include\miso</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\miso\include\miso\stream.h">
       <Filter>include\miso</Filter>
     </ClInclude>
@@ -46,6 +43,9 @@
       <Filter>include\miso</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\miso\include\miso\boolean.h">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\miso\include\miso\string_utils.h">
       <Filter>include\miso</Filter>
     </ClInclude>
   </ItemGroup>

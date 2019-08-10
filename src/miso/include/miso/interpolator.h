@@ -1,7 +1,7 @@
 #ifndef MISO_INTERPOLATOR_H_
 #define MISO_INTERPOLATOR_H_
 
-#include "miso/string.h"
+#include "miso/string_utils.h"
 
 namespace miso {
 

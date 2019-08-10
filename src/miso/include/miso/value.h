@@ -9,7 +9,7 @@
 #include "miso/boolean.h"
 #include "miso/color.h"
 #include "miso/numeric.h"
-#include "miso/string.h"
+#include "miso/string_utils.h"
 
 namespace miso {
 

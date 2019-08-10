@@ -30,7 +30,7 @@
     <ClInclude Include="..\..\..\src\miso\include\miso\value.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\numeric.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\stream.h" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\string.h" />
+    <ClInclude Include="..\..\..\src\miso\include\miso\string_utils.h" />
     <ClInclude Include="..\..\..\src\miso\include\miso\xml_reader.h" />
   </ItemGroup>
   <ItemGroup>

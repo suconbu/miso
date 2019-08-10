@@ -23,6 +23,7 @@ public:
     explicit Value(const char* str);
     explicit Value(const std::string& str) : Value(str.c_str()) {}
     ~Value() { if (type_ == ValueType::Array) delete array_; }
+    Value& operator=(const Value& value) { Copy(value, *this); return *this; }
 
     bool IsValid() const;
     bool IsTrue() const;
@@ -146,29 +147,29 @@ Value::GetAt(size_t index) const
 inline
 Value::Value(const char* str) : Value()
 {
-    std::vector<Value> values;
+    auto values = new std::vector<Value>();
+    if (values == nullptr) return;
+
+    values->reserve(10);
     auto s = str;
     for (; *s != '\0'; ++s) {
         if (!isspace(*s)) {
             Value value;
             size_t count;
             if (!TryParse(s, value, &count)) break;
-            values.push_back(value);
+            values->push_back(std::move(value));
             s += (count - 1);
         }
     }
     if (*s == '\0') {
-        if (values.size() > 1) {
-            array_ = new std::vector<Value>();
-            if (array_ != nullptr) {
-                array_->reserve(values.size());
-                std::copy(values.begin(), values.end(), std::back_inserter(*array_));
-                type_ = ValueType::Array;
-            } else {
-                type_ = ValueType::Invalid;
-            }
-        } else if (values.size() == 1) {
-            Copy(values[0], *this);
+        if (values->size() > 1) {
+            type_ = ValueType::Array;
+            array_ = values;
+            values = nullptr;
+        } else if (values->size() == 1) {
+            Copy(values->at(0), *this);
+            delete values;
+            values = nullptr;
         } else {
             ;
         }

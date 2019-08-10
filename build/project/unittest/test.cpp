@@ -841,11 +841,22 @@ TEST_F(MisoTest, Numeric_Convert)
     EXPECT_EQ(-1.0, n.ToMilliseconds(-1.0));
 }
 
+miso::Value ValueMoveTest()
+{
+    miso::Value values("0 1 2");
+    return values;
+}
+
 TEST_F(MisoTest, Value)
 {
     TEST_TRACE("");
-    auto values = miso::Value::FromString("  0 1 \t \t 2 rgb ( 12,34 , 56 )10px 20% True hsla(0,0,0,0)");
-    ASSERT_EQ(8, values.size());
+    miso::Value value("1");
+    ASSERT_EQ(1, value.GetCount());
+    EXPECT_EQ(1, value.GetNumeric().GetValue());
+    EXPECT_EQ(1, value[0].GetNumeric().GetValue());
+
+    miso::Value values("0 1 \t \t 2 rgb ( 12,34 , 56 )10px 20% True hsla(0,0,0,0)");
+    ASSERT_EQ(8, values.GetCount());
     EXPECT_EQ(0, values[0].GetNumeric().GetValue());
     EXPECT_EQ(1, values[1].GetNumeric().GetValue());
     EXPECT_EQ(2, values[2].GetNumeric().GetValue());
@@ -854,10 +865,17 @@ TEST_F(MisoTest, Value)
     EXPECT_EQ(20, values[5].GetNumeric().GetValue());
     EXPECT_TRUE(values[6].IsTrue());
     EXPECT_FALSE(values[7].IsTrue());
+
+    miso::Value copy(values);
+    ASSERT_EQ(8, copy.GetCount());
+
+    auto moved = ValueMoveTest();
+    ASSERT_EQ(3, moved.GetCount());
 }
 
 TEST_F(MisoTest, Boolean)
 {
+    TEST_TRACE("");
     {
         size_t count = 0;
         miso::Boolean a;
@@ -1001,7 +1019,7 @@ TEST_F(MisoTest, Color)
 TEST_F(MisoTest, Value_ParsePerformance)
 {
     for (int i = 0; i < 1000; ++i) {
-        volatile auto n = miso::Value::FromString(
+        volatile miso::Value n(
             "123.456px 123.456sp 123.456vw 123.456vh 123.456vmax 123.456vmin "
             "123.456% 123.456s 123.456ms 123.456 #012 #3456 #789abc #def0123456 "
             "rgb 12 34 56 rgba(12,34,56,78) "

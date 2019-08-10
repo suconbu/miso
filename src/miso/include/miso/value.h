@@ -1,6 +1,8 @@
 #ifndef MISO_VALUE_H_
 #define MISO_VALUE_H_
 
+#include <algorithm>
+#include <iterator>
 #include <string>
 #include <vector>
 
@@ -13,16 +15,20 @@ namespace miso {
 
 class Value {
 public:
-    static std::vector<Value> FromString(const char* str);
-    static std::vector<Value> FromString(const std::string& str) { return FromString(str.c_str()); }
-    static bool TryParse(const char* str, Value& value_out, size_t* count_out = nullptr);
+    static const Value& GetInvalid() { static const Value invalid; return invalid; }
 
-    Value() : type_(ValueType::Unknown) {}
+    Value() {};
+    Value(const Value& value) { Copy(value, *this); }
+    Value(Value&& value) { Move(value, *this); }
     explicit Value(const char* str);
     explicit Value(const std::string& str) : Value(str.c_str()) {}
+    ~Value() { if (type_ == ValueType::Array) delete array_; }
 
     bool IsValid() const;
     bool IsTrue() const;
+    size_t GetCount() const { return (type_ == ValueType::Array) ? array_->size() : 1; }
+    const Value& GetAt(size_t index) const;
+    const Value& operator[](size_t index) { return GetAt(index); }
     const Numeric& GetNumeric() const { return (type_ == ValueType::Numeric) ? numeric_ : Numeric::GetInvalid(); }
     const Color& GetColor() const { return (type_ == ValueType::Color) ? color_ : Color::GetInvalid(); }
     template<typename T> T ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value = std::numeric_limits<T>::quiet_NaN()) const;
@@ -31,33 +37,21 @@ public:
     std::string ToString(const char* format = nullptr) const;
 
 private:
-    enum class ValueType { Unknown, Boolean, Numeric, Color };
+    enum class ValueType { Invalid, Array, Boolean, Numeric, Color };
     static constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
 
-    ValueType type_;
+    ValueType type_ = ValueType::Invalid;
     union {
+        std::vector<Value>* array_ = 0;
         Boolean boolean_;
         Numeric numeric_;
         Color color_;
     };
-};
 
-inline std::vector<Value>
-Value::FromString(const char* str)
-{
-    std::vector<Value> values;
-    auto s = str;
-    for (; *s != '\0'; ++s) {
-        if (!isspace(*s)) {
-            Value value;
-            size_t count;
-            if (!TryParse(s, value, &count)) return std::vector<Value>();
-            values.push_back(value);
-            s += (count - 1);
-        }
-    }
-    return values;
-}
+    static bool TryParse(const char* str, Value& value_out, size_t* count_out = nullptr);
+    static void Copy(const Value& from, Value& to);
+    static void Move(Value& from, Value& to);
+};
 
 inline bool
 Value::TryParse(const char* str, Value& value_out, size_t* count_out)
@@ -77,6 +71,47 @@ Value::TryParse(const char* str, Value& value_out, size_t* count_out)
     return false;
 }
 
+inline void
+Value::Copy(const Value& from, Value& to)
+{
+    to.type_ = from.type_;
+    if (from.type_ == ValueType::Array) {
+        to.array_ = new std::vector<Value>();
+        if (to.array_ != nullptr) {
+            to.array_->reserve(from.array_->size());
+            std::copy(from.array_->begin(), from.array_->end(), std::back_inserter(*to.array_));
+        } else {
+            to.type_ = ValueType::Invalid;
+        }
+    } else if (from.type_ == ValueType::Boolean) {
+        to.boolean_ = from.boolean_;
+    } else if (from.type_ == ValueType::Numeric) {
+        to.numeric_ = from.numeric_;
+    } else if (from.type_ == ValueType::Color) {
+        to.color_ = from.color_;
+    } else {
+        ;
+    }
+}
+
+inline void
+Value::Move(Value& from, Value& to)
+{
+    to.type_ = from.type_;
+    if (from.type_ == ValueType::Array) {
+        to.array_ = from.array_;
+        from.array_ = nullptr;
+    } else if (from.type_ == ValueType::Boolean) {
+        to.boolean_ = from.boolean_;
+    } else if (from.type_ == ValueType::Numeric) {
+        to.numeric_ = from.numeric_;
+    } else if (from.type_ == ValueType::Color) {
+        to.color_ = from.color_;
+    } else {
+        ;
+    }
+}
+
 inline bool
 Value::IsValid() const
 {
@@ -84,6 +119,7 @@ Value::IsValid() const
         (type_ == ValueType::Boolean) ? boolean_.IsValid() :
         (type_ == ValueType::Numeric) ? numeric_.IsValid() :
         (type_ == ValueType::Color) ? color_.IsValid() :
+        (type_ == ValueType::Array) ? true :
         false;
 }
 
@@ -94,13 +130,49 @@ Value::IsTrue() const
         (type_ == ValueType::Boolean) ? boolean_.IsTrue() :
         (type_ == ValueType::Numeric) ? (numeric_.IsValid() && numeric_.GetValue() != 0.0) :
         (type_ == ValueType::Color) ? (color_.IsValid() && color_.ToUint32() != 0) :
+        (type_ == ValueType::Array) ? true :
         false;
+}
+
+inline const Value&
+Value::GetAt(size_t index) const
+{
+    return
+        (type_ == ValueType::Array && index < array_->size()) ? array_->at(index) :
+        (type_ != ValueType::Array) ? *this :
+        GetInvalid();
 }
 
 inline
 Value::Value(const char* str) : Value()
 {
-    TryParse(str, *this);
+    std::vector<Value> values;
+    auto s = str;
+    for (; *s != '\0'; ++s) {
+        if (!isspace(*s)) {
+            Value value;
+            size_t count;
+            if (!TryParse(s, value, &count)) break;
+            values.push_back(value);
+            s += (count - 1);
+        }
+    }
+    if (*s == '\0') {
+        if (values.size() > 1) {
+            array_ = new std::vector<Value>();
+            if (array_ != nullptr) {
+                array_->reserve(values.size());
+                std::copy(values.begin(), values.end(), std::back_inserter(*array_));
+                type_ = ValueType::Array;
+            } else {
+                type_ = ValueType::Invalid;
+            }
+        } else if (values.size() == 1) {
+            Copy(values[0], *this);
+        } else {
+            ;
+        }
+    }
 }
 
 template<typename T> inline T

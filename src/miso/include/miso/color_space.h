@@ -3,7 +3,7 @@
 
 namespace miso {
 
-enum class ColorSpaceType { Unknown, Rgb, Hsl, Hsv };
+enum class ColorSpaceType { Invalid, Rgb, Hsl, Hsv };
 
 class ColorSpace {
 public:

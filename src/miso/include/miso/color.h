@@ -21,9 +21,9 @@ public:
     //static Color FromName(const char* name);
 
     Color() = default;
-    Color(float r, float g, float b, float a) : R(r), G(g), B(b), A(a), valid_(true) {}
-    Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : R(r / 255.0f), G(g / 255.0f), B(b / 255.0f), A(a / 255.0f), valid_(true) {}
-    Color(const char* str) { TryParse(str, *this); }
+    explicit Color(float r, float g, float b, float a) : R(r), G(g), B(b), A(a), valid_(true) {}
+    explicit Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : R(r / 255.0f), G(g / 255.0f), B(b / 255.0f), A(a / 255.0f), valid_(true) {}
+    explicit Color(const char* str) { TryParse(str, *this); }
 
     bool IsValid() const { return valid_; }
     uint32_t ToUint32() const;
@@ -142,7 +142,7 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* count_out)
     auto start = s;
 
     int value_count = 0;
-    auto format = ColorSpaceType::Unknown;
+    auto format = ColorSpaceType::Invalid;
     if (StringUtils::StartsWith(s, "rgba")) {
         value_count = 4;
         format = ColorSpaceType::Rgb;

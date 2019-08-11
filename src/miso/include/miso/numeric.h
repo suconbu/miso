@@ -36,13 +36,11 @@ public:
     std::string ToString(const char* format = nullptr) const;
 
 private:
-    static constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
+    static const std::map<NumericUnit, const char*>& GetUnitToSuffixMap();
 
-    double value_ = kNaN;
+    double value_ = std::numeric_limits<double>::quiet_NaN();
     NumericUnit unit_ = NumericUnit::NaN;
     bool float_ = false;
-
-    static const std::map<NumericUnit, const char*>& GetUnitToSuffixMap();
 };
 
 inline bool

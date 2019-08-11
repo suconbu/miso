@@ -33,7 +33,7 @@ public:
         : current_(static_cast<const Type *>(memory)), begin_(static_cast<const Type *>(memory)),
         end_(static_cast<const Type *>(memory) + size)
     {}
-    MemoryStream(MemoryStream&&) = default;
+    MemoryStream(MemoryStream&&) noexcept = default;
 
     bool CanRead(size_t size = 1) const { return begin_ != nullptr && (current_ + size) <= end_; }
     Type Read() { return (current_ < end_) ? *current_++ : *(end_ - 1); }
@@ -70,7 +70,7 @@ public:
     {
         if (fp_ != 0) FillBuffer();
     }
-    FileStream(FileStream&& other) : FileStream(other.fp_)
+    FileStream(FileStream&& other) noexcept : FileStream(other.fp_)
     {
         other.fp_ = 0;
         other.stream_size_ = 0;
@@ -139,16 +139,6 @@ public:
     }
 
 private:
-    const size_t buffer_size_ = MISO_FILESTREAM_BUFFER_SIZE;
-    Type buffer_[MISO_FILESTREAM_BUFFER_SIZE];
-    FILE *fp_;
-    size_t stream_size_;
-    size_t offset_;
-    Type *current_;
-    Type *begin_;
-    Type *end_;
-    bool reached_to_end_;
-
     FileStream(FILE* fp) :
         fp_(fp), stream_size_(GetStreamSize(fp)), offset_(0),
         current_(buffer_), begin_(buffer_), end_(nullptr), reached_to_end_(false)
@@ -163,6 +153,16 @@ private:
         end_ = buffer_ + read_count;
         reached_to_end_ = (read_count < buffer_size_);
     }
+
+    const size_t buffer_size_ = MISO_FILESTREAM_BUFFER_SIZE;
+    Type buffer_[MISO_FILESTREAM_BUFFER_SIZE];
+    FILE *fp_;
+    size_t stream_size_;
+    size_t offset_;
+    Type *current_;
+    Type *begin_;
+    Type *end_;
+    bool reached_to_end_;
 };
 
 } // namespace miso

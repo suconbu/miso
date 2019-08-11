@@ -19,13 +19,10 @@ public:
 
     bool IsValid() const { return !std::isnan(value_); }
     bool IsTrue() const { return !std::isnan(value_) && 0.5f <= value_; }
-
     std::string ToString(const char* format = nullptr) const;
 
 private:
-    static constexpr float kNaN = std::numeric_limits<float>::quiet_NaN();
-
-    float value_ = kNaN;
+    float value_ = std::numeric_limits<float>::quiet_NaN();
 };
 
 inline bool
@@ -42,7 +39,7 @@ Boolean::TryParse(const char* str, Boolean& numeric_out, size_t* count_out)
     if (count < 2) return false;
 
     const char* names[] = { "true", "false", "on", "off", "yes", "no" };
-    float value = kNaN;
+    float value = std::numeric_limits<float>::quiet_NaN();
     for (int i = 0; i < sizeof(names) / sizeof(names[0]); ++i) {
         if (StringUtils::CompareIgnoreCase(start, names[i], strlen(names[i])) == 0) {
             value = ((i % 2) == 0) ? 1.0f : 0.0f;

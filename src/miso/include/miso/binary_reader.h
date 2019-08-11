@@ -9,16 +9,9 @@ namespace miso {
 
 class BinaryReader {
 public:
-    BinaryReader(const char* filename, Endian endian = Endian::Native) :
-        BinaryReader(new FileStream(filename), endian)
-    {}
-    BinaryReader(const void* buffer, size_t size, Endian endian = Endian::Native) :
-        BinaryReader(new MemoryStream(static_cast<const char*>(buffer), size), endian)
-    {}
-    BinaryReader(BinaryReader&& other) : BinaryReader(other.stream_, other.target_endian_)
-    {
-        other.stream_ = nullptr;
-    }
+    BinaryReader(const char* filename, Endian endian = Endian::Native) : BinaryReader(new FileStream(filename), endian) {}
+    BinaryReader(const void* buffer, size_t size, Endian endian = Endian::Native) : BinaryReader(new MemoryStream(static_cast<const char*>(buffer), size), endian) {}
+    BinaryReader(BinaryReader&& other) noexcept : BinaryReader(other.stream_, other.target_endian_) { other.stream_ = nullptr; }
     ~BinaryReader() { delete stream_; }
 
     bool CanRead(size_t size = 1) const { return stream_ != nullptr && stream_->CanRead(size); }
@@ -40,10 +33,6 @@ public:
     size_t ReadBlock(void* buffer, size_t size) { return CanRead() ? stream_->ReadBlock(static_cast<char*>(buffer), size) : 0; }
 
 private:
-    Endian native_endian_;
-    Endian target_endian_;
-    IStream* stream_;
-
     BinaryReader(IStream* stream, Endian endian = Endian::Native) :
         stream_(stream),
         native_endian_(EndianUtils::GetNativeEndian()),
@@ -63,6 +52,10 @@ private:
         if (actual_size < read_size) return default_value;
         return (target_endian_ != native_endian_) ? EndianUtils::Flip(v) : v;
     }
+
+    Endian native_endian_;
+    Endian target_endian_;
+    IStream* stream_;
 };
 
 } // namespace miso

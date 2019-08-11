@@ -19,17 +19,18 @@ public:
 
     Value() {};
     Value(const Value& value) { Copy(value, *this); }
-    Value(Value&& value) { Move(value, *this); }
+    Value(Value&& value) noexcept { Move(value, *this); }
     explicit Value(const char* str);
     explicit Value(const std::string& str) : Value(str.c_str()) {}
     ~Value() { if (type_ == ValueType::Array) delete array_; }
+
     Value& operator=(const Value& value) { Copy(value, *this); return *this; }
+    const Value& operator[](size_t index) { return GetAt(index); }
 
     bool IsValid() const;
     bool IsTrue() const;
     size_t GetCount() const { return (type_ == ValueType::Array) ? array_->size() : 1; }
     const Value& GetAt(size_t index) const;
-    const Value& operator[](size_t index) { return GetAt(index); }
     const Numeric& GetNumeric() const { return (type_ == ValueType::Numeric) ? numeric_ : Numeric::GetInvalid(); }
     const Color& GetColor() const { return (type_ == ValueType::Color) ? color_ : Color::GetInvalid(); }
     template<typename T> T ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value = std::numeric_limits<T>::quiet_NaN()) const;
@@ -39,7 +40,10 @@ public:
 
 private:
     enum class ValueType { Invalid, Array, Boolean, Numeric, Color };
-    static constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
+
+    static bool TryParse(const char* str, Value& value_out, size_t* count_out = nullptr);
+    static void Copy(const Value& from, Value& to);
+    static void Move(Value& from, Value& to);
 
     ValueType type_ = ValueType::Invalid;
     union {
@@ -48,10 +52,6 @@ private:
         Numeric numeric_;
         Color color_;
     };
-
-    static bool TryParse(const char* str, Value& value_out, size_t* count_out = nullptr);
-    static void Copy(const Value& from, Value& to);
-    static void Move(Value& from, Value& to);
 };
 
 inline bool

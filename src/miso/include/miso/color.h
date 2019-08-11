@@ -15,35 +15,32 @@ class Color {
 public:
     static const Color& GetInvalid() { const static Color invalid; return invalid; }
     static bool TryParse(const char* str, Color& color_out, size_t* count_out = nullptr);
-
     static Color FromHsla(float h, float s, float l, float a);
     static Color FromHsva(float h, float s, float v, float a);
     //static Color FromName(const char* name);
 
     Color() = default;
-    explicit Color(float r, float g, float b, float a) : R(r), G(g), B(b), A(a), valid_(true) {}
-    explicit Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : R(r / 255.0f), G(g / 255.0f), B(b / 255.0f), A(a / 255.0f), valid_(true) {}
+    explicit Color(float r, float g, float b, float a) : R(r), G(g), B(b), A(a) {}
+    explicit Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : R(r / 255.0f), G(g / 255.0f), B(b / 255.0f), A(a / 255.0f) {}
     explicit Color(const char* str) { TryParse(str, *this); }
 
-    bool IsValid() const { return valid_; }
+    bool operator==(const Color& other) const;
+    bool operator!=(const Color& other) const;
+
+    bool IsValid() const { return !std::isnan(R) && !std::isnan(G) && !std::isnan(B) && !std::isnan(A); }
     uint32_t ToUint32() const;
     std::string ToString(const char* format = nullptr) const;
 
-    bool operator == (const Color& other) const;
-    bool operator != (const Color& other) const;
-
-    float R = 0.0f;
-    float G = 0.0f;
-    float B = 0.0f;
-    float A = 0.0f;
+    float R = std::numeric_limits<float>::quiet_NaN();
+    float G = std::numeric_limits<float>::quiet_NaN();
+    float B = std::numeric_limits<float>::quiet_NaN();
+    float A = std::numeric_limits<float>::quiet_NaN();
 
 private:
     static bool TryParseHex(const char* str, Color& color_out, size_t* count_out);
     static bool TryParseDec(const char* str, Color& color_out, size_t* count_out);
     std::string ToStringHex(const char* format) const;
     std::string ToStringDec(const char* format) const;
-
-    bool valid_ = false;
 };
 
 inline Color
@@ -127,7 +124,6 @@ Color::TryParseHex(const char* str, Color& color_out, size_t* count_out)
     color_out.G = g;
     color_out.B = b;
     color_out.A = a;
-    color_out.valid_ = true;
     if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
 
     return true;
@@ -221,7 +217,6 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* count_out)
     } else {
         return false;
     }
-    color_out.valid_ = true;
     if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
 
     return true;
@@ -344,7 +339,7 @@ Color::ToStringDec(const char* format) const
 }
 
 inline bool
-Color::operator == (const Color& other) const
+Color::operator==(const Color& other) const
 {
     return
         (std::abs(R - other.R) < 0.0001f) &&
@@ -354,7 +349,7 @@ Color::operator == (const Color& other) const
 }
 
 inline bool
-Color::operator != (const Color& other) const
+Color::operator!=(const Color& other) const
 {
     return !(*this == other);
 }

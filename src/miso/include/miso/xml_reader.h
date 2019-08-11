@@ -29,7 +29,7 @@ class XmlReader {
 public:
     explicit XmlReader(const char* filename);
     XmlReader(const char* buffer, size_t size);
-    XmlReader(XmlReader&& other);
+    XmlReader(XmlReader&& other) noexcept;
     ~XmlReader();
 
     bool CanRead() const { return reader_ != nullptr && !reached_to_end_; }
@@ -47,15 +47,15 @@ public:
     int GetNestingLevel() const { return libxml::xmlTextReaderDepth(reader_); }
 
 private:
+    XmlReader(libxml::xmlParserInputBufferPtr buffer);
+    bool MoveToEndElementInside(bool end_of_parent);
+    static void ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities severity, libxml::xmlTextReaderLocatorPtr locator);
+
     libxml::xmlParserInputBufferPtr buffer_;
     libxml::xmlTextReaderPtr reader_;
     XmlNodeType node_type_;
     bool reached_to_end_;
     std::vector<std::string> errors_;
-
-    XmlReader(libxml::xmlParserInputBufferPtr buffer);
-    bool MoveToEndElementInside(bool end_of_parent);
-    static void ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities severity, libxml::xmlTextReaderLocatorPtr locator);
 };
 
 inline
@@ -83,7 +83,7 @@ XmlReader::XmlReader(libxml::xmlParserInputBufferPtr buffer) :
 }
 
 inline
-XmlReader::XmlReader(XmlReader&& other) :
+XmlReader::XmlReader(XmlReader&& other) noexcept :
     buffer_(other.buffer_), reader_(other.reader_)
 {
     other.reader_ = nullptr;

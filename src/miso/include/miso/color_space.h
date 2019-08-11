@@ -9,9 +9,11 @@ class ColorSpace {
 public:
     ColorSpace() = delete;
 
+    // HSL
     static void HslToRgb(float h, float s, float l, float* r_out, float* g_out, float* b_out);
     static void RgbToHsl(float r, float g, float b, float* h_out, float* s_out, float* l_out);
 
+    // HSV
     static void HsvToRgb(float h, float s, float v, float* r_out, float* g_out, float* b_out);
     static void RgbToHsv(float r, float g, float b, float* h_out, float* s_out, float* v_out);
 };

@@ -18,8 +18,7 @@ public:
         memcpy(buffer_, source, sizeof(Type) * size);
     }
     Buffer(const Buffer<TAllocator>& other) : Buffer(other, other.buffer_size_, other.allocator_) {}
-    Buffer& operator=(const Buffer<TAllocator>&) = delete;
-    Buffer(Buffer<TAllocator>&& other) :
+    Buffer(Buffer<TAllocator>&& other) noexcept :
         allocator_(other.allocator_), buffer_(other.buffer_), buffer_size_(other.buffer_size_), used_size_(other.used_size_)
     {
         other.buffer_ = nullptr;
@@ -27,6 +26,9 @@ public:
         other.used_size_ = 0;
     }
     ~Buffer() { allocator_.deallocate(buffer_, buffer_size_); }
+
+    Buffer& operator=(const Buffer<TAllocator>&) = delete;
+    operator Type*() const { return buffer_; }
 
     bool IsEmpty() { return buffer_ == nullptr; }
     size_t GetSize() const { return used_size_; }
@@ -46,7 +48,6 @@ public:
         used_size_ = new_size;
     }
     Type* GetPointer() const { return buffer_; }
-    operator Type*() const { return buffer_; }
 
 private:
     TAllocator& allocator_;

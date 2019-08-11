@@ -3,14 +3,6 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-#ifndef MISO_BYTE_TYPE
-#define MISO_BYTE_TYPE unsigned char
-#endif // MISO_BYTE_TYPE
-
-#ifndef MISO_FILESTREAM_BUFFER_SIZE
-#define MISO_FILESTREAM_BUFFER_SIZE 256
-#endif // MISO_FILESTREAM_BUFFER_SIZE
-
 #include "miso/binary_reader.h"
 #include "miso/buffer.h"
 #include "miso/color.h"
@@ -21,6 +13,8 @@
 #include "miso/boolean.h"
 #include "miso/numeric.h"
 #include "miso/stream.h"
+#include "miso/memory_stream.h"
+#include "miso/file_stream.h"
 #include "miso/string_utils.h"
 #include "miso/xml_reader.h"
 

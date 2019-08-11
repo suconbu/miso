@@ -1,16 +1,19 @@
 #ifndef MISO_BINARY_READER_H_
 #define MISO_BINARY_READER_H_
 
+#include <cstdint>
+
 #include "miso/buffer.h"
 #include "miso/endian.h"
-#include "miso/stream.h"
+#include "miso/file_stream.h"
+#include "miso/memory_stream.h"
 
 namespace miso {
 
 class BinaryReader {
 public:
     BinaryReader(const char* filename, Endian endian = Endian::Native) : BinaryReader(new FileStream(filename), endian) {}
-    BinaryReader(const void* buffer, size_t size, Endian endian = Endian::Native) : BinaryReader(new MemoryStream(static_cast<const char*>(buffer), size), endian) {}
+    BinaryReader(const uint8_t* buffer, size_t size, Endian endian = Endian::Native) : BinaryReader(new MemoryStream(buffer, size), endian) {}
     BinaryReader(BinaryReader&& other) noexcept : BinaryReader(other.stream_, other.target_endian_) { other.stream_ = nullptr; }
     ~BinaryReader() { delete stream_; }
 
@@ -22,7 +25,7 @@ public:
     void SetPosition(size_t position) { stream_->SetPosition(position); }
     template<typename T> T Read(T default_value = 0) { return ReadStream(default_value, true); }
     template<typename T> T Peek(T default_value = 0) { return ReadStream(default_value, false); }
-    template<typename TAllocator = std::allocator<MISO_BYTE_TYPE>>
+    template<typename TAllocator = std::allocator<uint8_t>>
     Buffer<TAllocator> ReadBlock(size_t size)
     {
         if (!CanRead()) return Buffer<TAllocator>();
@@ -30,7 +33,7 @@ public:
         buffer.Resize(stream_->ReadBlock(buffer, size));
         return buffer;
     }
-    size_t ReadBlock(void* buffer, size_t size) { return CanRead() ? stream_->ReadBlock(static_cast<char*>(buffer), size) : 0; }
+    size_t ReadBlock(void* buffer, size_t size) { return CanRead() ? stream_->ReadBlock(static_cast<uint8_t*>(buffer), size) : 0; }
 
 private:
     BinaryReader(IStream* stream, Endian endian = Endian::Native) :
@@ -45,7 +48,7 @@ private:
         auto read_size = sizeof(T);
         auto position = stream_->GetPosition();
         T v;
-        auto actual_size = stream_->ReadBlock(reinterpret_cast<char*>(std::addressof(v)), read_size);
+        auto actual_size = stream_->ReadBlock(reinterpret_cast<uint8_t*>(std::addressof(v)), read_size);
         if (!advance) {
             stream_->SetPosition(position);
         }

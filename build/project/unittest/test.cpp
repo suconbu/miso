@@ -223,7 +223,7 @@ TEST_F(MisoTest, BinaryReader_Misc)
         } combined = { 1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
                       12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 };
 #pragma pack()
-        miso::BinaryReader reader(&combined, sizeof(combined), miso::Endian::Big);
+        miso::BinaryReader reader(reinterpret_cast<uint8_t*>(&combined), sizeof(combined), miso::Endian::Big);
         EXPECT_EQ(1, miso::EndianUtils::Flip(reader.Read<char>()));
         EXPECT_EQ(2, miso::EndianUtils::Flip(reader.Read<short>()));
         EXPECT_EQ(3, miso::EndianUtils::Flip(reader.Read<int>()));

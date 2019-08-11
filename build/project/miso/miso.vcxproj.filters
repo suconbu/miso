@@ -48,6 +48,12 @@
     <ClInclude Include="..\..\..\src\miso\include\miso\string_utils.h">
       <Filter>include\miso</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\miso\include\miso\memory_stream.h">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\miso\include\miso\file_stream.h">
+      <Filter>include\miso</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\miso\main.cpp" />

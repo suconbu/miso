@@ -21,14 +21,16 @@ public:
 
     Color() = default;
     explicit Color(float r, float g, float b, float a) : R(r), G(g), B(b), A(a) {}
-    explicit Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : R(r / 255.0f), G(g / 255.0f), B(b / 255.0f), A(a / 255.0f) {}
+    explicit Color(uint32_t rgba) : R(((rgba >> 24) & 0xFF) / 255.0f), G(((rgba >> 16) & 0xFF) / 255.0f), B(((rgba >> 8) & 0xFF) / 255.0f), A(((rgba >> 0) & 0xFF) / 255.0f) {}
     explicit Color(const char* str) { TryParse(str, *this); }
+    explicit Color(const std::string& str) : Color(str.c_str()) {}
 
     bool operator==(const Color& other) const;
     bool operator!=(const Color& other) const;
 
     bool IsValid() const { return !std::isnan(R) && !std::isnan(G) && !std::isnan(B) && !std::isnan(A); }
     uint32_t ToUint32() const;
+    Color GetInterpolated(const Color& end_value, const Interpolator& interpolator, float progress) const;
     std::string ToString(const char* format = nullptr) const;
 
     float R = std::numeric_limits<float>::quiet_NaN();
@@ -230,6 +232,16 @@ Color::ToUint32() const
     auto b = static_cast<uint8_t>(B * 255.0f + 0.5f);
     auto a = static_cast<uint8_t>(A * 255.0f + 0.5f);
     return (r << 24) | (g << 16) | (b << 8) | a;
+}
+
+inline Color
+Color::GetInterpolated(const Color& end_value, const Interpolator& interpolator, float progress) const
+{
+    return Color(
+        static_cast<float>(interpolator.Interpolate(R, end_value.R, progress)),
+        static_cast<float>(interpolator.Interpolate(G, end_value.G, progress)),
+        static_cast<float>(interpolator.Interpolate(B, end_value.B, progress)),
+        static_cast<float>(interpolator.Interpolate(A, end_value.A, progress)));
 }
 
 // hex3     | #rgb

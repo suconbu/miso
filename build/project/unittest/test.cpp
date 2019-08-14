@@ -1016,6 +1016,28 @@ TEST_F(MisoTest, Color)
     }
 }
 
+TEST_F(MisoTest, Color_Interpolate)
+{
+    miso::Value a("100%");
+    miso::Value b("200%");
+    miso::Interpolator linear("linear");
+    EXPECT_TRUE(abs(0.80 - a.GetInterpolated(b, linear, -0.2f).ToRatio<double>()) < 0.0001);
+    EXPECT_TRUE(abs(1.00 - a.GetInterpolated(b, linear, 0.0f).ToRatio<double>()) < 0.0001);
+    EXPECT_TRUE(abs(1.20 - a.GetInterpolated(b, linear, 0.2f).ToRatio<double>()) < 0.0001);
+    EXPECT_TRUE(abs(1.50 - a.GetInterpolated(b, linear, 0.5f).ToRatio<double>()) < 0.0001);
+    EXPECT_TRUE(abs(1.80 - a.GetInterpolated(b, linear, 0.8f).ToRatio<double>()) < 0.0001);
+    EXPECT_TRUE(abs(2.00 - a.GetInterpolated(b, linear, 1.0f).ToRatio<double>()) < 0.0001);
+    EXPECT_TRUE(abs(2.50 - a.GetInterpolated(b, linear, 1.5f).ToRatio<double>()) < 0.0001);
+    miso::Interpolator step_start("step-start");
+    EXPECT_TRUE(abs(2.00 - a.GetInterpolated(b, step_start, 0.0f).ToRatio<double>()) < 0.0001);
+    EXPECT_TRUE(abs(2.00 - a.GetInterpolated(b, step_start, 0.5f).ToRatio<double>()) < 0.0001);
+    EXPECT_TRUE(abs(2.00 - a.GetInterpolated(b, step_start, 1.0f).ToRatio<double>()) < 0.0001);
+    miso::Interpolator step_end("step-end");
+    EXPECT_TRUE(abs(1.00 - a.GetInterpolated(b, step_end, 0.0f).ToRatio<double>()) < 0.0001);
+    EXPECT_TRUE(abs(1.00 - a.GetInterpolated(b, step_end, 0.5f).ToRatio<double>()) < 0.0001);
+    EXPECT_TRUE(abs(2.00 - a.GetInterpolated(b, step_end, 1.0f).ToRatio<double>()) < 0.0001);
+}
+
 TEST_F(MisoTest, Value_ParsePerformance)
 {
     for (int i = 0; i < 1000; ++i) {

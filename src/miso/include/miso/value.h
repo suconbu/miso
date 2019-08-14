@@ -36,6 +36,7 @@ public:
     template<typename T> T ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value = std::numeric_limits<T>::quiet_NaN()) const;
     template<typename T> T ToRatio(T default_value = std::numeric_limits<T>::quiet_NaN()) const;
     template<typename T> T ToMilliseconds(T default_value = std::numeric_limits<T>::quiet_NaN()) const;
+    Value GetInterpolated(const Value& end_value, const Interpolator& interpolator, float progress) const;
     std::string ToString(const char* format = nullptr) const;
 
 private:
@@ -198,6 +199,29 @@ Value::ToMilliseconds(T default_value) const
     return (type_ == ValueType::Numeric) ?
         numeric_.ToMilliseconds(default_value) :
         default_value;
+}
+
+inline Value
+Value::GetInterpolated(const Value& end_value, const Interpolator& interpolator, float progress) const
+{
+    Value value;
+    value.type_ = type_;
+    if (type_ == ValueType::Array) {
+        if (value.array_->size() != end_value.array_->size()) return Value::GetInvalid();
+        value.array_->resize(array_->size());
+        for (int i = 0; i < array_->size(); ++i) {
+            value.array_->push_back(array_->at(i).GetInterpolated(end_value.array_->at(i), interpolator, progress));
+        }
+    } else if (type_ == ValueType::Boolean) {
+        value.boolean_ = boolean_.GetInterpolated(end_value.boolean_, interpolator, progress);
+    } else if (type_ == ValueType::Numeric) {
+        value.numeric_ = numeric_.GetInterpolated(end_value.numeric_, interpolator, progress);
+    } else if (type_ == ValueType::Color) {
+        value.color_ = color_.GetInterpolated(end_value.color_, interpolator, progress);
+    } else {
+        ;
+    }
+    return value;
 }
 
 inline std::string

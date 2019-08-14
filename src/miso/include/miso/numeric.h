@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 
+#include "miso/interpolator.h"
 #include "miso/string_utils.h"
 
 namespace miso {
@@ -25,6 +26,10 @@ public:
     Numeric() = default;
     explicit Numeric(const char* str) : Numeric() { Numeric::TryParse(str, *this); }
     explicit Numeric(const std::string& str) : Numeric(str.c_str()) {}
+    explicit Numeric(double value, NumericUnit unit) : value_(value), unit_(unit), float_(value_ != floor(value_)) {}
+
+    bool operator==(const Numeric& other) const;
+    bool operator!=(const Numeric& other) const;
 
     bool IsValid() const { return unit_ != NumericUnit::NaN; }
     bool IsFloat() const { return float_; }
@@ -33,6 +38,7 @@ public:
     template<typename T> T ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value = std::numeric_limits<T>::quiet_NaN()) const;
     template<typename T> T ToRatio(T default_value = std::numeric_limits<T>::quiet_NaN()) const;
     template<typename T> T ToMilliseconds(T default_value = std::numeric_limits<T>::quiet_NaN()) const;
+    Numeric GetInterpolated(const Numeric& end_value, const Interpolator& interpolator, float progress) const;
     std::string ToString(const char* format = nullptr) const;
 
 private:
@@ -125,17 +131,29 @@ Numeric::GetUnitToSuffixMap()
     return kUnitToSuffix;
 }
 
+inline bool
+Numeric::operator==(const Numeric& other) const
+{
+    return (unit_ == other.unit_) && (value_ == other.value_);
+}
+
+inline bool
+Numeric::operator!=(const Numeric& other) const
+{
+    return !(*this == other);
+}
+
 template<typename T> inline T
 Numeric::ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value) const
 {
     return static_cast<T>(
         (unit_ == NumericUnit::Pixel) ? value_ :
         (unit_ == NumericUnit::ScaledPixel) ? value_ * pixel_scale :
-        (unit_ == NumericUnit::Vw) ? value_ / 100.0f * view_width :
-        (unit_ == NumericUnit::Vh) ? value_ / 100.0f * view_height :
-        (unit_ == NumericUnit::Vmax) ? value_ / 100.0f * std::max(view_width, view_height) :
-        (unit_ == NumericUnit::Vmin) ? value_ / 100.0f * std::min(view_width, view_height) :
-        (unit_ == NumericUnit::Parcent) ? value_ / 100.0f * base_length :
+        (unit_ == NumericUnit::Vw) ? value_ / 100.0 * view_width :
+        (unit_ == NumericUnit::Vh) ? value_ / 100.0 * view_height :
+        (unit_ == NumericUnit::Vmax) ? value_ / 100.0 * std::max(view_width, view_height) :
+        (unit_ == NumericUnit::Vmin) ? value_ / 100.0 * std::min(view_width, view_height) :
+        (unit_ == NumericUnit::Parcent) ? value_ / 100.0 * base_length :
         (unit_ == NumericUnit::Unitless) ? value_ * base_length :
         default_value);
 }
@@ -144,7 +162,7 @@ template<typename T> inline T
 Numeric::ToRatio(T default_value) const
 {
     return static_cast<T>(
-        (unit_ == NumericUnit::Parcent) ? value_ / 100.0f :
+        (unit_ == NumericUnit::Parcent) ? value_ / 100.0 :
         (unit_ == NumericUnit::Unitless) ? value_ :
         default_value);
 }
@@ -153,9 +171,15 @@ template<typename T> inline T
 Numeric::ToMilliseconds(T default_value) const
 {
     return static_cast<T>(
-        (unit_ == NumericUnit::Second) ? value_ * 1000.0f :
+        (unit_ == NumericUnit::Second) ? value_ * 1000.0 :
         (unit_ == NumericUnit::Millisecond) ? value_ :
         default_value);
+}
+
+inline Numeric
+Numeric::GetInterpolated(const Numeric& end_value, const Interpolator& interpolator, float progress) const
+{
+    return Numeric(interpolator.Interpolate(static_cast<float>(value_), static_cast<float>(end_value.value_), progress), unit_);
 }
 
 inline std::string
@@ -163,7 +187,7 @@ Numeric::ToString(const char* format) const
 {
     (void)format;
     if (unit_ == NumericUnit::NaN) return "";
-    if (float_) {
+    if (IsFloat()) {
         return StringUtils::Format("%.3Lf%s", value_, GetUnitToSuffixMap().at(unit_));
     } else {
         return StringUtils::Format("%.0Lf%s", value_, GetUnitToSuffixMap().at(unit_));

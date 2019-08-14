@@ -1016,26 +1016,60 @@ TEST_F(MisoTest, Color)
     }
 }
 
-TEST_F(MisoTest, Color_Interpolate)
+TEST_F(MisoTest, Interpolate)
 {
     miso::Value a("100%");
     miso::Value b("200%");
     miso::Interpolator linear("linear");
-    EXPECT_TRUE(abs(0.80 - a.GetInterpolated(b, linear, -0.2f).ToRatio<double>()) < 0.0001);
-    EXPECT_TRUE(abs(1.00 - a.GetInterpolated(b, linear, 0.0f).ToRatio<double>()) < 0.0001);
-    EXPECT_TRUE(abs(1.20 - a.GetInterpolated(b, linear, 0.2f).ToRatio<double>()) < 0.0001);
-    EXPECT_TRUE(abs(1.50 - a.GetInterpolated(b, linear, 0.5f).ToRatio<double>()) < 0.0001);
-    EXPECT_TRUE(abs(1.80 - a.GetInterpolated(b, linear, 0.8f).ToRatio<double>()) < 0.0001);
-    EXPECT_TRUE(abs(2.00 - a.GetInterpolated(b, linear, 1.0f).ToRatio<double>()) < 0.0001);
-    EXPECT_TRUE(abs(2.50 - a.GetInterpolated(b, linear, 1.5f).ToRatio<double>()) < 0.0001);
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, linear, -0.2f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, linear, 0.0f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(1.20, std::round(a.GetInterpolated(b, linear, 0.2f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(1.50, std::round(a.GetInterpolated(b, linear, 0.5f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(1.80, std::round(a.GetInterpolated(b, linear, 0.8f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, linear, 1.0f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, linear, 1.5f).ToRatio<double>() * 1000) / 1000);
     miso::Interpolator step_start("step-start");
-    EXPECT_TRUE(abs(2.00 - a.GetInterpolated(b, step_start, 0.0f).ToRatio<double>()) < 0.0001);
-    EXPECT_TRUE(abs(2.00 - a.GetInterpolated(b, step_start, 0.5f).ToRatio<double>()) < 0.0001);
-    EXPECT_TRUE(abs(2.00 - a.GetInterpolated(b, step_start, 1.0f).ToRatio<double>()) < 0.0001);
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_start, 0.0f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_start, 0.5f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_start, 1.0f).ToRatio<double>() * 1000) / 1000);
     miso::Interpolator step_end("step-end");
-    EXPECT_TRUE(abs(1.00 - a.GetInterpolated(b, step_end, 0.0f).ToRatio<double>()) < 0.0001);
-    EXPECT_TRUE(abs(1.00 - a.GetInterpolated(b, step_end, 0.5f).ToRatio<double>()) < 0.0001);
-    EXPECT_TRUE(abs(2.00 - a.GetInterpolated(b, step_end, 1.0f).ToRatio<double>()) < 0.0001);
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end, 0.0f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end, 0.5f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end, 1.0f).ToRatio<double>() * 1000) / 1000);
+}
+
+TEST_F(MisoTest, Interpolate_Bezier)
+{
+    miso::Value a("0%");
+    miso::Value b("100%");
+
+    miso::Interpolator liner(0, 0, 1, 1);
+    for (int i = 0; i < 10; ++i) {
+        EXPECT_EQ(i / 10.0, std::round(a.GetInterpolated(b, liner, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+    }
+
+    miso::Interpolator ease(0.25f, 0.1f, 0.25f, 1);
+    double eq_ease[] = { 0.0, 0.095, 0.295, 0.513, 0.683, 0.802, 0.885, 0.941, 0.976, 0.994, 1.0 };
+    for (int i = 0; i < 10; ++i) {
+        EXPECT_EQ(eq_ease[i], std::round(a.GetInterpolated(b, ease, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+    }
+
+    miso::Interpolator ease_inout(0.42f, 0, 0.58f, 1);
+    double eq_ease_inout[] = { 0.0, 0.02, 0.082, 0.187, 0.332, 0.5, 0.668, 0.813, 0.918, 0.98, 1.0 };
+    for (int i = 0; i < 10; ++i) {
+        EXPECT_EQ(eq_ease_inout[i], std::round(a.GetInterpolated(b, ease_inout, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+    }
+
+    miso::Interpolator tame(0.1f, -0.6f, 0.2f, 0);
+    double eq_tame[] = { 0.0, -0.239, -0.152, -0.005, 0.151, 0.307, 0.457, 0.601, 0.74, 0.872, 1.0 };
+    for (int i = 0; i < 10; ++i) {
+        EXPECT_EQ(eq_tame[i], std::round(a.GetInterpolated(b, tame, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+    }
+
+    miso::Interpolator invalid1(-0.1f, 0.1f, 0.25f, 1);
+    EXPECT_FALSE(invalid1.IsValid());
+    miso::Interpolator invalid2(0.25f, 0.1f, 1.1f, 1);
+    EXPECT_FALSE(invalid2.IsValid());
 }
 
 TEST_F(MisoTest, Value_ParsePerformance)

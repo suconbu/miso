@@ -28,12 +28,18 @@ private:
     static constexpr float kNewtonMinSlope = 0.001f;
     static constexpr float kSubdivisionPrecision = 0.0000001f;
     static constexpr int kSubdivisionMaxIterations = 10;
+    static constexpr float kPI = 3.1415926535f;
 
     static float None(const Interpolator& self, float t, float s, float d) { return StepStart(self, t, s, d); }
-    static float StepStart(const Interpolator& self, float t, float s, float d) { (void)self;  return (0.0f == t) ? s : (s + d); }
-    static float StepEnd(const Interpolator& self, float t, float s, float d) { (void)self; return (t < 1.0f) ? s : (s + d); }
-    //static float Linear(const Interpolator& self, float t, float s, float d) { (void)self; return s + d * t; }
     static float Bezier(const Interpolator& self, float t, float s, float d);
+    static float StepStart(const Interpolator& self, float t, float s, float d) { (void)self;  return (t <= 0.0f) ? s : (s + d); }
+    static float StepEnd(const Interpolator& self, float t, float s, float d) { (void)self; return (t < 1.0f) ? s : (s + d); }
+    static float EaseInElastic(const Interpolator& self, float t, float s, float d);
+    static float EaseOutElastic(const Interpolator& self, float t, float s, float d);
+    static float EaseInOutElastic(const Interpolator& self, float t, float s, float d);
+    static float EaseInBounce(const Interpolator& self, float t, float s, float d);
+    static float EaseOutBounce(const Interpolator& self, float t, float s, float d);
+    static float EaseInOutBounce(const Interpolator& self, float t, float s, float d);
 
     static float CalculateBezier(float t, float a1, float a2) { return ((GetA(a1, a2) * t + GetB(a1, a2)) * t + GetC(a1)) * t; }
     static float CalculateSlope(float t, float a1, float a2) { return 3.0f * GetA(a1, a2) * t * t + 2.0f * GetB(a1, a2) * t + GetC(a1); }
@@ -57,10 +63,32 @@ private:
 inline
 Interpolator::Interpolator(const char* name)
 {
-    std::string n(name);
-    auto n_end = std::remove_if(n.begin(), n.end(), [](char c) { return c == ' ' || c == '-' || c == '_'; });
-    n.erase(n_end, n.end());
+    // Testing for (a == b + c) or (a == c + b) with ignore case
+    // e.g.
+    // a:"EaseInSine" b:"sine" c:"easein" -> true
+    // a:"SineEaseIn" b:"sine" c:"easein" -> true
+    // a:"EaseSineIn" b:"sine" c:"easein" -> false
+    auto match = [](const char* a, const char* b, const char* c) {
+        auto b_len = strlen(b);
+        auto c_len = strlen(c);
+        if (StringUtils::CompareN(a, b, b_len, true) == 0) {
+            return StringUtils::Compare(a + b_len, c, true) == 0;
+        } else if (StringUtils::CompareN(a, c, c_len, true) == 0) {
+            return StringUtils::Compare(a + c_len, b, true) == 0;
+        } else {
+            return false;
+        }
+    };
+
+    std::string name_str(name);
+    auto name_str_end = std::remove_if(name_str.begin(), name_str.end(), [](char c) { return c == ' ' || c == '-' || c == '_'; });
+    name_str.erase(name_str_end, name_str.end());
+    const char* n = name_str.c_str();
+
     // https://developer.mozilla.org/ja/docs/Web/CSS/timing-function
+    // https://on-ze.com/archives/6697
+
+    // CSS compatible easings
     if (StringUtils::Compare(n, "stepstart", true) == 0) function_ = StepStart;
     else if (StringUtils::Compare(n, "stepend", true) == 0) function_ = StepEnd;
     else if (StringUtils::Compare(n, "linear", true) == 0) InitializeBezier(0.0f, 0.0f, 1.0f, 1.0f);
@@ -68,7 +96,104 @@ Interpolator::Interpolator(const char* name)
     else if (StringUtils::Compare(n, "easein", true) == 0) InitializeBezier(0.42f, 0.0f, 1.0f, 1.0f);
     else if (StringUtils::Compare(n, "easeinout", true) == 0) InitializeBezier(0.42f, 0.0f, 0.58f, 1.0f);
     else if (StringUtils::Compare(n, "easeout", true) == 0) InitializeBezier(0.0f, 0.0f, 0.58f, 1.0f);
+    // Sine
+    else if (match(n, "sine", "easein")) InitializeBezier(0.47f, 0.0f, 0.745f, 0.715f);
+    else if (match(n, "sine", "easeout")) InitializeBezier(0.39f, 0.575f, 0.565f, 1.0f);
+    else if (match(n, "sine", "easeinout")) InitializeBezier(0.445f, 0.05f, 0.55f, 0.95f);
+    // Quad
+    else if (match(n, "quad", "easein")) InitializeBezier(0.55f, 0.085f, 0.68f, 0.53f);
+    else if (match(n, "quad", "easeout")) InitializeBezier(0.25f, 0.46f, 0.45f, 0.94f);
+    else if (match(n, "quad", "easeinout")) InitializeBezier(0.455f, 0.03f, 0.515f, 0.955f);
+    // Cubic
+    else if (match(n, "cubic", "easein")) InitializeBezier(0.55f, 0.055f, 0.675f, 0.19f);
+    else if (match(n, "cubic", "easeout")) InitializeBezier(0.215f, 0.61f, 0.355f, 1.0f);
+    else if (match(n, "cubic", "easeinout")) InitializeBezier(0.645f, 0.045f, 0.355f, 1.0f);
+    // Quartic
+    else if (match(n, "quart", "easein")) InitializeBezier(0.895f, 0.03f, 0.685f, 0.22f);
+    else if (match(n, "quart", "easeout")) InitializeBezier(0.165f, 0.84f, 0.44f, 1.0f);
+    else if (match(n, "quart", "easeinout")) InitializeBezier(0.77f, 0.0f, 0.175f, 1.0f);
+    // Quintic
+    else if (match(n, "quint", "easein")) InitializeBezier(0.755f, 0.05f, 0.855f, 0.06f);
+    else if (match(n, "quint", "easeout")) InitializeBezier(0.23f, 1.0f, 0.32f, 1.0f);
+    else if (match(n, "quint", "easeinout")) InitializeBezier(0.86f, 0.0f, 0.07f, 1.0f);
+    // Exponential
+    else if (match(n, "expo", "easein")) InitializeBezier(0.95f, 0.05f, 0.795f, 0.035f);
+    else if (match(n, "expo", "easeout")) InitializeBezier(0.19f, 1.0f, 0.22f, 1.0f);
+    else if (match(n, "expo", "easeinout")) InitializeBezier(1.0f, 0.0f, 0.0f, 1.0f);
+    // Circular
+    else if (match(n, "circ", "easein")) InitializeBezier(0.6f, 0.04f, 0.98f, 0.335f);
+    else if (match(n, "circ", "easeout")) InitializeBezier(0.075f, 0.82f, 0.165f, 1.0f);
+    else if (match(n, "circ", "easeinout")) InitializeBezier(0.785f, 0.135f, 0.15f, 0.86f);
+    // Elastic
+    else if (match(n, "elastic", "easein")) function_ = EaseInElastic;
+    else if (match(n, "elastic", "easeout")) function_ = EaseOutElastic;
+    else if (match(n, "elastic", "easeinout")) function_ = EaseInOutElastic;
+    // Bounce
+    else if (match(n, "bounce", "easein")) function_ = EaseInBounce;
+    else if (match(n, "bounce", "easeout")) function_ = EaseOutBounce;
+    else if (match(n, "bounce", "easeinout")) function_ = EaseInOutBounce;
     else function_ = None;
+}
+
+inline float
+Interpolator::EaseInElastic(const Interpolator& self, float t, float s, float d)
+{
+    if (1.0f <= t) return s + d;
+    float n1 = 0.3f;
+    float n2 = n1 / 4.0f;
+    return -(d * std::powf(2.0f, 10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPI * 2.0f / n1)) + s;
+}
+inline float
+Interpolator::EaseOutElastic(const Interpolator& self, float t, float s, float d)
+{
+    if (1.0f <= t) return s + d;
+    float n1 = 0.3f;
+    float n2 = n1 / 4.0f;
+    return d * std::powf(2.0f, -10.0f * t) * std::sinf((t - n2) * kPI * 2.0f / n1) + d + s;
+}
+
+inline float
+Interpolator::EaseInOutElastic(const Interpolator& self, float t, float s, float d)
+{
+    if (1.0f <= t) return s + d;
+    t /= 0.5f;
+    float n1 = 0.45f;
+    float n2 = n1 / 4.0f;
+    return (t < 1.0f) ?
+        -0.5f * (d * std::powf(2.0f, 10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPI * 2.0f / n1)) + s :
+        d * std::powf(2.0f, -10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPI * 2.0f / n1) * 0.5f + d + s;
+}
+
+inline float
+Interpolator::EaseInBounce(const Interpolator& self, float t, float s, float d)
+{
+    return d - EaseOutBounce(self, 1.0f - t, 0.0f, d) + s;
+}
+
+inline float
+Interpolator::EaseOutBounce(const Interpolator& self, float t, float s, float d)
+{
+    if (t < 0.3636363636f) {
+        return d * (7.5625f * t * t) + s;
+    }
+    if (t < 0.7272727272f) {
+        t -= 0.5454545455f;
+        return d * (7.5625f * t * t + 0.75f) + s;
+    }
+    if (t < 0.9090909091f) {
+        t -= 0.8181818182f;
+        return d * (7.5625f * t * t + 0.9375f) + s;
+    }
+    t -= 0.9545454545f;
+    return d * (7.5625f * t * t + 0.984375f) + s;
+}
+
+inline float
+Interpolator::EaseInOutBounce(const Interpolator& self, float t, float s, float d)
+{
+    return (t < 0.5f) ?
+        EaseInBounce(self, t * 2.0f, 0.0f, d / 2.0f) * 0.5f + s :
+        EaseOutBounce(self, t * 2.0f - 1.0f, 0.0f, d) * 0.5f + d * 0.5f + s;
 }
 
 inline

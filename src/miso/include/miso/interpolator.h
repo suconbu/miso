@@ -57,14 +57,17 @@ private:
 inline
 Interpolator::Interpolator(const char* name)
 {
+    std::string n(name);
+    auto n_end = std::remove_if(n.begin(), n.end(), [](char c) { return c == ' ' || c == '-' || c == '_'; });
+    n.erase(n_end, n.end());
     // https://developer.mozilla.org/ja/docs/Web/CSS/timing-function
-    if (StringUtils::Compare(name, "step-start", true) == 0) function_ = StepStart;
-    else if (StringUtils::Compare(name, "step-end", true) == 0) function_ = StepEnd;
-    else if (StringUtils::Compare(name, "linear", true) == 0) InitializeBezier(0.0f, 0.0f, 1.0f, 1.0f);
-    else if (StringUtils::Compare(name, "ease", true) == 0) InitializeBezier(0.25f, 0.1f, 0.25f, 1.0f);
-    else if (StringUtils::Compare(name, "ease-in", true) == 0) InitializeBezier(0.42f, 0.0f, 1.0f, 1.0f);
-    else if (StringUtils::Compare(name, "ease-in-out", true) == 0) InitializeBezier(0.42f, 0.0f, 0.58f, 1.0f);
-    else if (StringUtils::Compare(name, "ease-out", true) == 0) InitializeBezier(0.0f, 0.0f, 0.58f, 1.0f);
+    if (StringUtils::Compare(n, "stepstart", true) == 0) function_ = StepStart;
+    else if (StringUtils::Compare(n, "stepend", true) == 0) function_ = StepEnd;
+    else if (StringUtils::Compare(n, "linear", true) == 0) InitializeBezier(0.0f, 0.0f, 1.0f, 1.0f);
+    else if (StringUtils::Compare(n, "ease", true) == 0) InitializeBezier(0.25f, 0.1f, 0.25f, 1.0f);
+    else if (StringUtils::Compare(n, "easein", true) == 0) InitializeBezier(0.42f, 0.0f, 1.0f, 1.0f);
+    else if (StringUtils::Compare(n, "easeinout", true) == 0) InitializeBezier(0.42f, 0.0f, 0.58f, 1.0f);
+    else if (StringUtils::Compare(n, "easeout", true) == 0) InitializeBezier(0.0f, 0.0f, 0.58f, 1.0f);
     else function_ = None;
 }
 

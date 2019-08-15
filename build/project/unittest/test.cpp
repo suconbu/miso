@@ -1038,10 +1038,22 @@ TEST_F(MisoTest, Interpolate)
     EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_start, 0.0f).ToRatio<double>() * 1000) / 1000);
     EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_start, 0.5f).ToRatio<double>() * 1000) / 1000);
     EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_start, 1.0f).ToRatio<double>() * 1000) / 1000);
-    miso::Interpolator step_end("step-end");
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end, 0.0f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end, 0.5f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end, 1.0f).ToRatio<double>() * 1000) / 1000);
+    miso::Interpolator step_end1("step-end");
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end1, 0.0f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end1, 0.5f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end1, 1.0f).ToRatio<double>() * 1000) / 1000);
+    miso::Interpolator step_end2("StepEnd");
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end2, 0.0f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end2, 0.5f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end2, 1.0f).ToRatio<double>() * 1000) / 1000);
+    miso::Interpolator step_end3("step_end");
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end3, 0.0f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end3, 0.5f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end3, 1.0f).ToRatio<double>() * 1000) / 1000);
+    miso::Interpolator step_end4("step end");
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end4, 0.0f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end4, 0.5f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end4, 1.0f).ToRatio<double>() * 1000) / 1000);
 }
 
 TEST_F(MisoTest, Interpolate_Bezier)
@@ -1173,8 +1185,8 @@ TEST_F(Performace, RandomRead1M8B)
             auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
             reader.SetPosition(position);
             reader.ReadBlock((void*)buffer, sizeof(buffer));
-        }
     }
+}
 }
 #endif
 

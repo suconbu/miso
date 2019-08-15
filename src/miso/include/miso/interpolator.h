@@ -214,14 +214,13 @@ Interpolator::InitializeBezier(float x1, float y1, float x2, float y2)
     y2_ = y2;
     function_ = Bezier;
     for (int i = 0; i < kSampleCount; ++i) {
-        samples_[i] = CalculateBezier(i * kSampleStep, x1, x2);
+        samples_[i] = CalculateBezier(static_cast<float>(i) / (kSampleCount - 1), x1, x2);
     }
 }
 
 inline float
 Interpolator::GetT(const Interpolator& self, float x)
 {
-    float interval_start = 0.0;
     int current_sample = 1;
     int last_sample = kSampleCount - 1;
     auto& samples = self.samples_;
@@ -229,10 +228,11 @@ Interpolator::GetT(const Interpolator& self, float x)
     auto x2 = self.x2_;
 
     while (current_sample != last_sample && samples[current_sample] <= x) {
-        interval_start += kSampleStep;
         ++current_sample;
     }
     --current_sample;
+
+    auto interval_start = static_cast<float>(current_sample) / (kSampleCount - 1);
 
     // Interpolate to provide an initial guess for t
     auto dist = (x - samples[current_sample]) / (samples[current_sample + 1] - samples[current_sample]);

@@ -386,18 +386,24 @@ TEST_F(MisoTest, StringUtils_Comapare)
     EXPECT_TRUE(miso::StringUtils::Contains("TOKYOSTATIONHOTEL", "station", true));
     EXPECT_TRUE(miso::StringUtils::Contains("TOKYOSTATIONHOTEL", "STATION", true));
 
-    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("StatioN", "station"));
-    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("station", "Station"));
-    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("station", "STATIC", 3));
-    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("station", "STA", 3));
-    EXPECT_TRUE(0 < miso::StringUtils::CompareIgnoreCase("station", "ST", 3));
-    EXPECT_TRUE(0 < miso::StringUtils::CompareIgnoreCase("station", "S", 3));
-    EXPECT_TRUE(0 < miso::StringUtils::CompareIgnoreCase("station", "", 3));
-    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("", "", 3));
-    EXPECT_TRUE(0 > miso::StringUtils::CompareIgnoreCase("", "Station", 3));
-    EXPECT_TRUE(0 > miso::StringUtils::CompareIgnoreCase("s", "Station", 3));
-    EXPECT_TRUE(0 > miso::StringUtils::CompareIgnoreCase("st", "Station", 3));
-    EXPECT_TRUE(0 == miso::StringUtils::CompareIgnoreCase("sta", "Station", 3));
+    EXPECT_TRUE(0 == miso::StringUtils::Compare("StatioN", "station", true));
+    EXPECT_TRUE(0 == miso::StringUtils::Compare("station", "Station", true));
+    EXPECT_TRUE(0 == miso::StringUtils::CompareN("station", "STATIC", 3, true));
+    EXPECT_TRUE(0 == miso::StringUtils::CompareN("station", "STA", 3, true));
+    EXPECT_TRUE(0 < miso::StringUtils::CompareN("station", "ST", 3, true));
+    EXPECT_TRUE(0 < miso::StringUtils::CompareN("station", "S", 3, true));
+    EXPECT_TRUE(0 < miso::StringUtils::CompareN("station", "", 3, true));
+    EXPECT_TRUE(0 == miso::StringUtils::CompareN("", "", 3, true));
+    EXPECT_TRUE(0 > miso::StringUtils::CompareN("", "Station", 3, true));
+    EXPECT_TRUE(0 > miso::StringUtils::CompareN("s", "Station", 3, true));
+    EXPECT_TRUE(0 > miso::StringUtils::CompareN("st", "Station", 3, true));
+    EXPECT_TRUE(0 == miso::StringUtils::CompareN("sta", "Station", 3, true));
+
+    EXPECT_FALSE(0 == miso::StringUtils::Compare("StatioN", "station"));
+    EXPECT_FALSE(0 == miso::StringUtils::Compare("station", "Station"));
+    EXPECT_FALSE(0 == miso::StringUtils::CompareN("station", "STATIC", 3));
+    EXPECT_FALSE(0 == miso::StringUtils::CompareN("station", "STA", 3));
+    EXPECT_FALSE(0 == miso::StringUtils::CompareN("sta", "Station", 3));
 }
 
 TEST_F(MisoTest, StringUtils_Slice)

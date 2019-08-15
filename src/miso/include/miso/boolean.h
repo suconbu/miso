@@ -46,7 +46,7 @@ Boolean::TryParse(const char* str, Boolean& boolean_out, size_t* count_out)
     bool value = false;
     bool valid = false;
     for (int i = 0; i < sizeof(names) / sizeof(names[0]); ++i) {
-        if (StringUtils::CompareIgnoreCase(start, names[i], strlen(names[i])) == 0) {
+        if (StringUtils::CompareN(start, names[i], strlen(names[i]), true) == 0) {
             value = (i % 2) == 0;
             valid = true;
             break;

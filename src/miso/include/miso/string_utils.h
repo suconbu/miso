@@ -32,7 +32,10 @@ public:
     static bool EndsWith(const std::string& str, const std::string& x, bool ignore_case = false);
     static bool Contains(const char* str, const char* x, bool ignore_case = false);
     static bool Contains(const std::string& str, const std::string& x, bool ignore_case = false);
-    static int CompareIgnoreCase(const char* a, const char* b, size_t count = SIZE_MAX);
+    static int Compare(const char* a, const char* b, bool ignore_case = false);
+    static int Compare(const std::string& a, const std::string& b, bool ignore_case = false);
+    static int CompareN(const char* a, const char* b, size_t count, bool ignore_case = false);
+    static int CompareN(const std::string& a, const std::string& b, size_t count, bool ignore_case = false);
 
 private:
     static constexpr const char* kBlankChars = " \f\n\r\t\v";
@@ -209,8 +212,7 @@ StringUtils::Format(const char* format, ...)
 inline bool
 StringUtils::StartsWith(const char* str, const char* x, bool ignore_case)
 {
-    size_t x_len = strlen(x);
-    return ignore_case ? CompareIgnoreCase(str, x, x_len) == 0 : strncmp(str, x, x_len) == 0;
+    return CompareN(str, x, strlen(x), ignore_case) == 0;
 }
 
 inline bool
@@ -226,7 +228,7 @@ StringUtils::EndsWith(const char* str, const char* x, bool ignore_case)
     size_t x_len = strlen(x);
     if (str_len < x_len) return false;
     auto start = str + str_len - x_len;
-    return ignore_case ? CompareIgnoreCase(start, x, x_len) == 0 : strncmp(start, x, x_len) == 0;
+    return CompareN(start, x, x_len, ignore_case) == 0;
 }
 
 inline bool
@@ -250,14 +252,34 @@ StringUtils::Contains(const std::string& str, const std::string& x, bool ignore_
 }
 
 inline int
-StringUtils::CompareIgnoreCase(const char* a, const char* b, size_t count)
+StringUtils::Compare(const char* a, const char* b, bool ignore_case)
 {
+    return CompareN(a, b, SIZE_MAX, ignore_case);
+}
+
+inline int
+StringUtils::Compare(const std::string& a, const std::string& b, bool ignore_case)
+{
+    return CompareN(a.c_str(), b.c_str(), SIZE_MAX, ignore_case);
+}
+
+inline int
+StringUtils::CompareN(const char* a, const char* b, size_t count, bool ignore_case)
+{
+    if (!ignore_case) return strncmp(a, b, count);
+
     int result = 0;
     for (size_t i = 0; i < count; ++i) {
         result = tolower(a[i]) - tolower(b[i]);
         if (result != 0 || a[i] == '\0') break;
     }
     return result;
+}
+
+inline int
+StringUtils::CompareN(const std::string& a, const std::string& b, size_t count, bool ignore_case)
+{
+    return CompareN(a.c_str(), b.c_str(), count, ignore_case);
 }
 
 } // namespace miso

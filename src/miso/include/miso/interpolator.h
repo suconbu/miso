@@ -58,13 +58,13 @@ inline
 Interpolator::Interpolator(const char* name)
 {
     // https://developer.mozilla.org/ja/docs/Web/CSS/timing-function
-    if (StringUtils::CompareIgnoreCase(name, "step-start") == 0) function_ = StepStart;
-    else if (StringUtils::CompareIgnoreCase(name, "step-end") == 0) function_ = StepEnd;
-    else if (StringUtils::CompareIgnoreCase(name, "linear") == 0) InitializeBezier(0.0f, 0.0f, 1.0f, 1.0f);
-    else if (StringUtils::CompareIgnoreCase(name, "ease") == 0) InitializeBezier(0.25f, 0.1f, 0.25f, 1.0f);
-    else if (StringUtils::CompareIgnoreCase(name, "ease-in") == 0) InitializeBezier(0.42f, 0.0f, 1.0f, 1.0f);
-    else if (StringUtils::CompareIgnoreCase(name, "ease-in-out") == 0) InitializeBezier(0.42f, 0.0f, 0.58f, 1.0f);
-    else if (StringUtils::CompareIgnoreCase(name, "ease-out") == 0) InitializeBezier(0.0f, 0.0f, 0.58f, 1.0f);
+    if (StringUtils::Compare(name, "step-start", true) == 0) function_ = StepStart;
+    else if (StringUtils::Compare(name, "step-end", true) == 0) function_ = StepEnd;
+    else if (StringUtils::Compare(name, "linear", true) == 0) InitializeBezier(0.0f, 0.0f, 1.0f, 1.0f);
+    else if (StringUtils::Compare(name, "ease", true) == 0) InitializeBezier(0.25f, 0.1f, 0.25f, 1.0f);
+    else if (StringUtils::Compare(name, "ease-in", true) == 0) InitializeBezier(0.42f, 0.0f, 1.0f, 1.0f);
+    else if (StringUtils::Compare(name, "ease-in-out", true) == 0) InitializeBezier(0.42f, 0.0f, 0.58f, 1.0f);
+    else if (StringUtils::Compare(name, "ease-out", true) == 0) InitializeBezier(0.0f, 0.0f, 0.58f, 1.0f);
     else function_ = None;
 }
 

@@ -207,8 +207,10 @@ Value::GetInterpolated(const Value& end_value, const Interpolator& interpolator,
     Value value;
     value.type_ = type_;
     if (type_ == ValueType::Array) {
-        if (value.array_->size() != end_value.array_->size()) return Value::GetInvalid();
-        value.array_->resize(array_->size());
+        if (array_->size() != end_value.GetCount()) return Value::GetInvalid();
+        value.array_ = new std::vector<Value>();
+        if (value.array_ == nullptr) return Value::GetInvalid();
+        value.array_->reserve(array_->size());
         for (int i = 0; i < array_->size(); ++i) {
             value.array_->push_back(array_->at(i).GetInterpolated(end_value.array_->at(i), interpolator, progress));
         }

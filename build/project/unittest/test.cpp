@@ -879,6 +879,30 @@ TEST_F(MisoTest, Value)
     ASSERT_EQ(3, moved.GetCount());
 }
 
+TEST_F(MisoTest, Value_Interpolate)
+{
+    {
+        miso::Value a("10 20");
+        miso::Value b("50 50");
+        auto c = a.GetInterpolated(b, miso::Interpolator("linear"), 0.5f);
+        ASSERT_EQ(2, c.GetCount());
+        EXPECT_EQ(30.0, c[0].GetNumeric().GetValue());
+        EXPECT_EQ(35.0, c[1].GetNumeric().GetValue());
+    }
+    {
+        miso::Value a("10 20");
+        miso::Value b("50");
+        auto c = a.GetInterpolated(b, miso::Interpolator("linear"), 0.5f);
+        EXPECT_FALSE(c.IsValid());
+    }
+    {
+        miso::Value a("10 20");
+        miso::Value b("50 50 50");
+        auto c = a.GetInterpolated(b, miso::Interpolator("linear"), 0.5f);
+        EXPECT_FALSE(c.IsValid());
+    }
+}
+
 TEST_F(MisoTest, Boolean)
 {
     TEST_TRACE("");
@@ -1232,8 +1256,8 @@ TEST_F(Performace, RandomRead1M8B)
             auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
             reader.SetPosition(position);
             reader.ReadBlock((void*)buffer, sizeof(buffer));
-        }
     }
+}
 }
 #endif
 

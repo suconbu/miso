@@ -42,7 +42,7 @@ private:
     static float EaseInOutBounce(const Interpolator& self, float t, float s, float d);
 
     static float CalculateBezier(float t, float a1, float a2) { return ((GetA(a1, a2) * t + GetB(a1, a2)) * t + GetC(a1)) * t; }
-    static float CalculateSlope(float t, float a1, float a2) { return 3.0f * GetA(a1, a2) * t * t + 2.0f * GetB(a1, a2) * t + GetC(a1); }
+    static float CalculateSlope(float t, float a1, float a2) { return (3.0f * GetA(a1, a2) * t + 2.0f * GetB(a1, a2)) * t + GetC(a1); }
     static float GetA(float a1, float a2) { return 1.0f - 3.0f * a2 + 3.0f * a1; }
     static float GetB(float a1, float a2) { return 3.0f * a2 - 6.0f * a1; }
     static float GetC(float a1) { return 3.0f * a1; }
@@ -81,7 +81,9 @@ Interpolator::Interpolator(const char* name)
     };
 
     std::string name_str(name);
-    auto name_str_end = std::remove_if(name_str.begin(), name_str.end(), [](char c) { return c == ' ' || c == '-' || c == '_'; });
+    auto name_str_end = std::remove_if(name_str.begin(), name_str.end(), [](char c) {
+        return c == ' ' || c == '-' || c == '_';
+    });
     name_str.erase(name_str_end, name_str.end());
     const char* n = name_str.c_str();
 
@@ -268,14 +270,14 @@ Interpolator::NewtonRaphsonIterate(float x, float guess_t, float x1, float x2)
 {
     for (int i = 0; i < kNewtonIterations; ++i) {
         auto slope = CalculateSlope(guess_t, x1, x2);
-        if (slope == 0.0f) {
-            return guess_t;
-        }
+        if (slope == 0.0f) break;
         auto cx = CalculateBezier(guess_t, x1, x2) - x;
+        if (cx == 0.0f) break;
         guess_t -= cx / slope;
     }
     return guess_t;
 }
+
 inline float
 Interpolator::Bezier(const Interpolator& self, float t, float s, float d)
 {

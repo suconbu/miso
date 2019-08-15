@@ -1045,18 +1045,10 @@ TEST_F(MisoTest, Interpolate)
     EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end1, 0.0f).ToRatio<double>() * 1000) / 1000);
     EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end1, 0.5f).ToRatio<double>() * 1000) / 1000);
     EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end1, 1.0f).ToRatio<double>() * 1000) / 1000);
-    miso::Interpolator step_end2("StepEnd");
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end2, 0.0f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end2, 0.5f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end2, 1.0f).ToRatio<double>() * 1000) / 1000);
-    miso::Interpolator step_end3("step_end");
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end3, 0.0f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end3, 0.5f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end3, 1.0f).ToRatio<double>() * 1000) / 1000);
-    miso::Interpolator step_end4("step end");
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end4, 0.0f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end4, 0.5f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end4, 1.0f).ToRatio<double>() * 1000) / 1000);
+
+    EXPECT_TRUE(miso::Interpolator("StepEnd").IsValid());
+    EXPECT_TRUE(miso::Interpolator("step_end").IsValid());
+    EXPECT_TRUE(miso::Interpolator("step end").IsValid());
 }
 
 TEST_F(MisoTest, Interpolate_Other)
@@ -1133,6 +1125,17 @@ TEST_F(MisoTest, Interpolate_Bezier)
     miso::Interpolator invalid2(0.25f, 0.1f, 1.1f, 1);
     EXPECT_FALSE(invalid2.IsValid());
 }
+
+//TEST_F(MisoTest, Interpolate_Performance)
+//{
+//    miso::Value a("0%");
+//    miso::Value b("100%");
+//
+//    miso::Interpolator ease_in_cubic("easeincubic");
+//    for (int i = 0; i <= 1000000; ++i) {
+//        volatile auto x = a.GetInterpolated(b, ease_in_cubic, i / 1000000.0f).ToRatio<double>();
+//    }
+//}
 
 TEST_F(MisoTest, Value_ParsePerformance)
 {

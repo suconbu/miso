@@ -879,8 +879,20 @@ TEST_F(MisoTest, Value)
     ASSERT_EQ(3, moved.GetCount());
 }
 
+TEST_F(MisoTest, Value_CopyMove)
+{
+    TEST_TRACE("");
+    {
+        miso::Value a("10 20 30 40 50");
+        miso::Value b("100 200");
+
+        a = b;
+    }
+}
+
 TEST_F(MisoTest, Value_Interpolate)
 {
+    TEST_TRACE("");
     {
         miso::Value a("10 20");
         miso::Value b("50 50");

@@ -22,7 +22,7 @@ public:
     Value(Value&& value) noexcept { Move(value, *this); }
     explicit Value(const char* str);
     explicit Value(const std::string& str) : Value(str.c_str()) {}
-    ~Value() { if (type_ == ValueType::Array) delete array_; }
+    ~Value() { Dispose(); }
 
     Value& operator=(const Value& value) { Copy(value, *this); return *this; }
     const Value& operator[](size_t index) { return GetAt(index); }
@@ -45,6 +45,8 @@ private:
     static bool TryParse(const char* str, Value& value_out, size_t* count_out = nullptr);
     static void Copy(const Value& from, Value& to);
     static void Move(Value& from, Value& to);
+
+    void Dispose() { if (type_ == ValueType::Array) delete array_; }
 
     ValueType type_ = ValueType::Invalid;
     union {
@@ -76,6 +78,7 @@ Value::TryParse(const char* str, Value& value_out, size_t* count_out)
 inline void
 Value::Copy(const Value& from, Value& to)
 {
+    to.Dispose();
     to.type_ = from.type_;
     if (from.type_ == ValueType::Array) {
         to.array_ = new std::vector<Value>();
@@ -99,6 +102,7 @@ Value::Copy(const Value& from, Value& to)
 inline void
 Value::Move(Value& from, Value& to)
 {
+    to.Dispose();
     to.type_ = from.type_;
     if (from.type_ == ValueType::Array) {
         to.array_ = from.array_;

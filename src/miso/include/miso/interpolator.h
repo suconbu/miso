@@ -8,9 +8,6 @@
 
 namespace miso {
 
-// Bezier curve calculation was based on:
-// https://github.com/thomasuster/cubic-bezier/blob/master/src/com/thomasuster/CubicBezier.hx
-
 class Interpolator {
 public:
     Interpolator() = delete;
@@ -24,11 +21,11 @@ public:
 private:
     static constexpr int kSampleCount = 11;
     static constexpr float kSampleStep = 1.0f / (kSampleCount - 1);
-    static constexpr int kNewtonIterations = 4;
+    static constexpr int kNewtonRaphsonMaxIterations = 4;
     static constexpr float kNewtonMinSlope = 0.001f;
     static constexpr float kSubdivisionPrecision = 0.0000001f;
     static constexpr int kSubdivisionMaxIterations = 10;
-    static constexpr float kPI = 3.1415926535f;
+    static constexpr float kPi = 3.1415926535f;
 
     static float None(const Interpolator& self, float t, float s, float d) { return StepStart(self, t, s, d); }
     static float Bezier(const Interpolator& self, float t, float s, float d);
@@ -47,8 +44,8 @@ private:
     static float GetB(float a1, float a2) { return 3.0f * a2 - 6.0f * a1; }
     static float GetC(float a1) { return 3.0f * a1; }
     static float GetT(const Interpolator& self, float x);
-    static float BinarySubdivide(float x, float a, float b, float x1, float x2);
     static float NewtonRaphsonIterate(float x, float guess_t, float x1, float x2);
+    static float BinarySubdivide(float x, float a, float b, float x1, float x2);
 
     void InitializeBezier(float x1, float y1, float x2, float y2);
 
@@ -143,7 +140,7 @@ Interpolator::EaseInElastic(const Interpolator& self, float t, float s, float d)
     if (1.0f <= t) return s + d;
     float n1 = 0.3f;
     float n2 = n1 / 4.0f;
-    return -(d * std::powf(2.0f, 10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPI * 2.0f / n1)) + s;
+    return -(d * std::powf(2.0f, 10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPi * 2.0f / n1)) + s;
 }
 inline float
 Interpolator::EaseOutElastic(const Interpolator& self, float t, float s, float d)
@@ -151,7 +148,7 @@ Interpolator::EaseOutElastic(const Interpolator& self, float t, float s, float d
     if (1.0f <= t) return s + d;
     float n1 = 0.3f;
     float n2 = n1 / 4.0f;
-    return d * std::powf(2.0f, -10.0f * t) * std::sinf((t - n2) * kPI * 2.0f / n1) + d + s;
+    return d * std::powf(2.0f, -10.0f * t) * std::sinf((t - n2) * kPi * 2.0f / n1) + d + s;
 }
 
 inline float
@@ -162,8 +159,8 @@ Interpolator::EaseInOutElastic(const Interpolator& self, float t, float s, float
     float n1 = 0.45f;
     float n2 = n1 / 4.0f;
     return (t < 1.0f) ?
-        -0.5f * (d * std::powf(2.0f, 10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPI * 2.0f / n1)) + s :
-        d * std::powf(2.0f, -10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPI * 2.0f / n1) * 0.5f + d + s;
+        -0.5f * (d * std::powf(2.0f, 10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPi * 2.0f / n1)) + s :
+        d * std::powf(2.0f, -10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPi * 2.0f / n1) * 0.5f + d + s;
 }
 
 inline float
@@ -175,19 +172,19 @@ Interpolator::EaseInBounce(const Interpolator& self, float t, float s, float d)
 inline float
 Interpolator::EaseOutBounce(const Interpolator& self, float t, float s, float d)
 {
-    if (t < 0.3636363636f) {
+    if (t < 0.364f) {
         return d * (7.5625f * t * t) + s;
     }
-    if (t < 0.7272727272f) {
-        t -= 0.5454545455f;
-        return d * (7.5625f * t * t + 0.75f) + s;
+    if (t < 0.727f) {
+        t -= 0.545f;
+        return d * (7.563f * t * t + 0.75f) + s;
     }
-    if (t < 0.9090909091f) {
-        t -= 0.8181818182f;
-        return d * (7.5625f * t * t + 0.9375f) + s;
+    if (t < 0.909f) {
+        t -= 0.818f;
+        return d * (7.563f * t * t + 0.938f) + s;
     }
-    t -= 0.9545454545f;
-    return d * (7.5625f * t * t + 0.984375f) + s;
+    t -= 0.955f;
+    return d * (7.563f * t * t + 0.984f) + s;
 }
 
 inline float
@@ -234,18 +231,27 @@ Interpolator::GetT(const Interpolator& self, float x)
 
     auto interval_start = static_cast<float>(current_sample) / (kSampleCount - 1);
 
-    // Interpolate to provide an initial guess for t
     auto dist = (x - samples[current_sample]) / (samples[current_sample + 1] - samples[current_sample]);
-    auto guess_for_t = interval_start + dist * kSampleStep;
+    auto guess_t = interval_start + dist * kSampleStep;
 
-    auto initial_slope = CalculateSlope(guess_for_t, x1, x2);
-    if (initial_slope >= kNewtonMinSlope) {
-        return NewtonRaphsonIterate(x, guess_for_t, x1, x2);
-    } else if (initial_slope == 0.0f) {
-        return guess_for_t;
-    } else {
-        return BinarySubdivide(x, interval_start, interval_start + kSampleStep, x1, x2);
+    auto slope = CalculateSlope(guess_t, x1, x2);
+    return
+        (slope >= kNewtonMinSlope) ? NewtonRaphsonIterate(x, guess_t, x1, x2) :
+        (slope == 0.0f) ? guess_t :
+        BinarySubdivide(x, interval_start, interval_start + kSampleStep, x1, x2);
+}
+
+inline float
+Interpolator::NewtonRaphsonIterate(float x, float t, float x1, float x2)
+{
+    for (int i = 0; i < kNewtonRaphsonMaxIterations; ++i) {
+        auto slope = CalculateSlope(t, x1, x2);
+        if (slope == 0.0f) break;
+        auto cx = CalculateBezier(t, x1, x2) - x;
+        if (cx == 0.0f) break;
+        t -= cx / slope;
     }
+    return t;
 }
 
 inline float
@@ -263,19 +269,6 @@ Interpolator::BinarySubdivide(float x, float a, float b, float x1, float x2)
         }
     } while (std::abs(cx) > kSubdivisionPrecision && ++i < kSubdivisionMaxIterations);
     return ct;
-}
-
-inline float
-Interpolator::NewtonRaphsonIterate(float x, float guess_t, float x1, float x2)
-{
-    for (int i = 0; i < kNewtonIterations; ++i) {
-        auto slope = CalculateSlope(guess_t, x1, x2);
-        if (slope == 0.0f) break;
-        auto cx = CalculateBezier(guess_t, x1, x2) - x;
-        if (cx == 0.0f) break;
-        guess_t -= cx / slope;
-    }
-    return guess_t;
 }
 
 inline float

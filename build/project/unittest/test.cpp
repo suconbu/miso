@@ -1284,8 +1284,8 @@ TEST_F(Performace, RandomRead1M8B)
             auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
             reader.SetPosition(position);
             reader.ReadBlock((void*)buffer, sizeof(buffer));
+        }
     }
-}
 }
 #endif
 
@@ -1361,7 +1361,7 @@ TEST_F(MisoTest, XmlReader_Performance)
                 volatile auto text = reader.GetContentText();
             } else {
                 ;
-}
+            }
         }
     }
 }

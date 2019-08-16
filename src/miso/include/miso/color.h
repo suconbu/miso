@@ -39,6 +39,7 @@ public:
     float A = std::numeric_limits<float>::quiet_NaN();
 
 private:
+    static constexpr float kEqualTolerance = 0.0001f;
     static bool TryParseHex(const char* str, Color& color_out, size_t* count_out);
     static bool TryParseDec(const char* str, Color& color_out, size_t* count_out);
     std::string ToStringHex(const char* format) const;
@@ -354,10 +355,10 @@ inline bool
 Color::operator==(const Color& other) const
 {
     return
-        (std::abs(R - other.R) < 0.0001f) &&
-        (std::abs(G - other.G) < 0.0001f) &&
-        (std::abs(B - other.B) < 0.0001f) &&
-        (std::abs(A - other.A) < 0.0001f);
+        (std::abs(R - other.R) < kEqualTolerance) &&
+        (std::abs(G - other.G) < kEqualTolerance) &&
+        (std::abs(B - other.B) < kEqualTolerance) &&
+        (std::abs(A - other.A) < kEqualTolerance);
 }
 
 inline bool

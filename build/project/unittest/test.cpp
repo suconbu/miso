@@ -858,19 +858,19 @@ TEST_F(MisoTest, Value)
     TEST_TRACE("");
     miso::Value value("1");
     ASSERT_EQ(1, value.GetCount());
-    EXPECT_EQ(1, value.GetNumeric().GetValue());
-    EXPECT_EQ(1, value[0].GetNumeric().GetValue());
+    EXPECT_EQ(1, value.AsNumeric().GetValue());
+    EXPECT_EQ(1, value[0].AsNumeric().GetValue());
 
     miso::Value values("0 1 \t \t 2 rgb ( 12,34 , 56 )10px 20% True hsla(0,0,0,0)");
     ASSERT_EQ(8, values.GetCount());
-    EXPECT_EQ(0, values[0].GetNumeric().GetValue());
-    EXPECT_EQ(1, values[1].GetNumeric().GetValue());
-    EXPECT_EQ(2, values[2].GetNumeric().GetValue());
-    EXPECT_TRUE(values[3].GetColor().IsValid());
-    EXPECT_EQ(10, values[4].GetNumeric().GetValue());
-    EXPECT_EQ(20, values[5].GetNumeric().GetValue());
-    EXPECT_TRUE(values[6].IsTrue());
-    EXPECT_FALSE(values[7].IsTrue());
+    EXPECT_EQ(0, values[0].AsNumeric().GetValue());
+    EXPECT_EQ(1, values[1].AsNumeric().GetValue());
+    EXPECT_EQ(2, values[2].AsNumeric().GetValue());
+    EXPECT_TRUE(values[3].AsColor().IsValid());
+    EXPECT_EQ(10, values[4].AsNumeric().GetValue());
+    EXPECT_EQ(20, values[5].AsNumeric().GetValue());
+    EXPECT_TRUE(values[6].AsBool());
+    EXPECT_FALSE(values[7].AsBool());
 
     miso::Value copy(values);
     ASSERT_EQ(8, copy.GetCount());
@@ -898,8 +898,8 @@ TEST_F(MisoTest, Value_Interpolate)
         miso::Value b("50 50");
         auto c = a.GetInterpolated(b, miso::Interpolator("linear"), 0.5f);
         ASSERT_EQ(2, c.GetCount());
-        EXPECT_EQ(30.0, c[0].GetNumeric().GetValue());
-        EXPECT_EQ(35.0, c[1].GetNumeric().GetValue());
+        EXPECT_EQ(30.0, c[0].AsNumeric().GetValue());
+        EXPECT_EQ(35.0, c[1].AsNumeric().GetValue());
     }
     {
         miso::Value a("10 20");
@@ -1058,29 +1058,31 @@ TEST_F(MisoTest, Color)
     }
 }
 
+const double kNearError = 0.001;
+
 TEST_F(MisoTest, Interpolate)
 {
     miso::Value a("100%");
     miso::Value b("200%");
 
     miso::Interpolator linear("linear");
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, linear, -0.2f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, linear, 0.0f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(1.20, std::round(a.GetInterpolated(b, linear, 0.2f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(1.50, std::round(a.GetInterpolated(b, linear, 0.5f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(1.80, std::round(a.GetInterpolated(b, linear, 0.8f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, linear, 1.0f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, linear, 1.5f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_NEAR(1.00, a.GetInterpolated(b, linear, -0.2f).AsNumeric().ToRatio<double>(), kNearError);
+    EXPECT_NEAR(1.00, a.GetInterpolated(b, linear, 0.0f).AsNumeric().ToRatio<double>(), kNearError);
+    EXPECT_NEAR(1.20, a.GetInterpolated(b, linear, 0.2f).AsNumeric().ToRatio<double>(), kNearError);
+    EXPECT_NEAR(1.50, a.GetInterpolated(b, linear, 0.5f).AsNumeric().ToRatio<double>(), kNearError);
+    EXPECT_NEAR(1.80, a.GetInterpolated(b, linear, 0.8f).AsNumeric().ToRatio<double>(), kNearError);
+    EXPECT_NEAR(2.00, a.GetInterpolated(b, linear, 1.0f).AsNumeric().ToRatio<double>(), kNearError);
+    EXPECT_NEAR(2.00, a.GetInterpolated(b, linear, 1.5f).AsNumeric().ToRatio<double>(), kNearError);
 
     miso::Interpolator step_start("step-start");
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_start, 0.0f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_start, 0.5f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_start, 1.0f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_NEAR(1.00, a.GetInterpolated(b, step_start, 0.0f).AsNumeric().ToRatio<double>(), kNearError);
+    EXPECT_NEAR(2.00, a.GetInterpolated(b, step_start, 0.5f).AsNumeric().ToRatio<double>(), kNearError);
+    EXPECT_NEAR(2.00, a.GetInterpolated(b, step_start, 1.0f).AsNumeric().ToRatio<double>(), kNearError);
 
     miso::Interpolator step_end1("step-end");
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end1, 0.0f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(1.00, std::round(a.GetInterpolated(b, step_end1, 0.5f).ToRatio<double>() * 1000) / 1000);
-    EXPECT_EQ(2.00, std::round(a.GetInterpolated(b, step_end1, 1.0f).ToRatio<double>() * 1000) / 1000);
+    EXPECT_NEAR(1.00, a.GetInterpolated(b, step_end1, 0.0f).AsNumeric().ToRatio<double>(), kNearError);
+    EXPECT_NEAR(1.00, a.GetInterpolated(b, step_end1, 0.5f).AsNumeric().ToRatio<double>(), kNearError);
+    EXPECT_NEAR(2.00, a.GetInterpolated(b, step_end1, 1.0f).AsNumeric().ToRatio<double>(), kNearError);
 
     EXPECT_TRUE(miso::Interpolator("StepEnd").IsValid());
     EXPECT_TRUE(miso::Interpolator("step_end").IsValid());
@@ -1095,36 +1097,36 @@ TEST_F(MisoTest, Interpolate_Other)
     miso::Interpolator ease_in_elastic("EaseInElastic");
     double eq_ease_in_elastic[] = { 0.0, 0.002, -0.002, -0.004, 0.016, -0.016, -0.031, 0.125, -0.125, -0.250, 1.0 };
     for (int i = 0; i <= 10; ++i) {
-        EXPECT_EQ(eq_ease_in_elastic[i], std::round(a.GetInterpolated(b, ease_in_elastic, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+        EXPECT_NEAR(eq_ease_in_elastic[i], a.GetInterpolated(b, ease_in_elastic, i / 10.0f).AsNumeric().ToRatio<double>(), kNearError);
     }
     miso::Interpolator ease_out_elastic("EaseOutElastic");
     double eq_ease_out_elastic[] = { 0.0, 1.25, 1.125, 0.875, 1.031, 1.016, 0.984, 1.004, 1.002, 0.998, 1.0 };
     for (int i = 0; i <= 10; ++i) {
-        EXPECT_EQ(eq_ease_out_elastic[i], std::round(a.GetInterpolated(b, ease_out_elastic, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+        EXPECT_NEAR(eq_ease_out_elastic[i], a.GetInterpolated(b, ease_out_elastic, i / 10.0f).AsNumeric().ToRatio<double>(), kNearError);
     }
     miso::Interpolator ease_inout_elastic("EaseInOutElastic");
     double eq_ease_inout_elastic[] = { 0.0, 0.000, -0.004, 0.024, -0.117, 0.500, 1.117, 0.976, 1.004, 1.000, 1.0 };
     for (int i = 0; i <= 10; ++i) {
-        EXPECT_EQ(eq_ease_inout_elastic[i], std::round(a.GetInterpolated(b, ease_inout_elastic, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+        EXPECT_NEAR(eq_ease_inout_elastic[i], a.GetInterpolated(b, ease_inout_elastic, i / 10.0f).AsNumeric().ToRatio<double>(), kNearError);
     }
 
     miso::Interpolator ease_in_bounce("BounceEaseIn");
     TEST_TRACE("BounceEaseIn");
     double eq_ease_in_bounce[] = { 0.0, 0.012, 0.060, 0.069, 0.228, 0.234, 0.090, 0.319, 0.698, 0.924, 1.0 };
     for (int i = 0; i <= 10; ++i) {
-        EXPECT_EQ(eq_ease_in_bounce[i], std::round(a.GetInterpolated(b, ease_in_bounce, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+        EXPECT_NEAR(eq_ease_in_bounce[i], a.GetInterpolated(b, ease_in_bounce, i / 10.0f).AsNumeric().ToRatio<double>(), kNearError);
     }
     miso::Interpolator ease_out_bounce("BounceEaseOut");
     TEST_TRACE("BounceEaseOut");
     double eq_ease_out_bounce[] = { 0.0, 0.076, 0.303, 0.681, 0.910, 0.766, 0.773, 0.931, 0.940, 0.988, 1.0 };
     for (int i = 0; i <= 10; ++i) {
-        EXPECT_EQ(eq_ease_out_bounce[i], std::round(a.GetInterpolated(b, ease_out_bounce, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+        EXPECT_NEAR(eq_ease_out_bounce[i], a.GetInterpolated(b, ease_out_bounce, i / 10.0f).AsNumeric().ToRatio<double>(), kNearError);
     }
     miso::Interpolator ease_inout_bounce("BounceEaseInOut");
     TEST_TRACE("BounceEaseInOut");
     double eq_ease_inout_bounce[] = { 0.0, 0.015, 0.057, 0.022, 0.174, 0.500, 0.651, 0.955, 0.886, 0.970, 1.0 };
     for (int i = 0; i <= 10; ++i) {
-        EXPECT_EQ(eq_ease_inout_bounce[i], std::round(a.GetInterpolated(b, ease_inout_bounce, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+        EXPECT_NEAR(eq_ease_inout_bounce[i], a.GetInterpolated(b, ease_inout_bounce, i / 10.0f).AsNumeric().ToRatio<double>(), kNearError);
     }
 }
 
@@ -1135,25 +1137,25 @@ TEST_F(MisoTest, Interpolate_Bezier)
 
     miso::Interpolator liner(0, 0, 1, 1);
     for (int i = 0; i <= 10; ++i) {
-        EXPECT_EQ(i / 10.0, std::round(a.GetInterpolated(b, liner, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+        EXPECT_NEAR(i / 10.0, a.GetInterpolated(b, liner, i / 10.0f).AsNumeric().ToRatio<double>(), kNearError);
     }
 
     miso::Interpolator ease(0.25f, 0.1f, 0.25f, 1);
     double eq_ease[] = { 0.0, 0.095, 0.295, 0.513, 0.683, 0.802, 0.885, 0.941, 0.976, 0.994, 1.0 };
     for (int i = 0; i <= 10; ++i) {
-        EXPECT_EQ(eq_ease[i], std::round(a.GetInterpolated(b, ease, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+        EXPECT_NEAR(eq_ease[i], a.GetInterpolated(b, ease, i / 10.0f).AsNumeric().ToRatio<double>(), kNearError);
     }
 
     miso::Interpolator ease_inout(0.42f, 0, 0.58f, 1);
     double eq_ease_inout[] = { 0.0, 0.02, 0.082, 0.187, 0.332, 0.5, 0.668, 0.813, 0.918, 0.98, 1.0 };
     for (int i = 0; i <= 10; ++i) {
-        EXPECT_EQ(eq_ease_inout[i], std::round(a.GetInterpolated(b, ease_inout, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+        EXPECT_NEAR(eq_ease_inout[i], a.GetInterpolated(b, ease_inout, i / 10.0f).AsNumeric().ToRatio<double>(), kNearError);
     }
 
     miso::Interpolator tame(0.1f, -0.6f, 0.2f, 0);
     double eq_tame[] = { 0.0, -0.239, -0.152, -0.005, 0.151, 0.307, 0.457, 0.601, 0.74, 0.872, 1.0 };
     for (int i = 0; i <= 10; ++i) {
-        EXPECT_EQ(eq_tame[i], std::round(a.GetInterpolated(b, tame, i / 10.0f).ToRatio<double>() * 1000) / 1000);
+        EXPECT_NEAR(eq_tame[i], a.GetInterpolated(b, tame, i / 10.0f).AsNumeric().ToRatio<double>(), kNearError);
     }
 
     miso::Interpolator invalid1(-0.1f, 0.1f, 0.25f, 1);
@@ -1268,8 +1270,8 @@ TEST_F(Performace, RandomRead1M8B)
             auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
             reader.SetPosition(position);
             reader.ReadBlock((void*)buffer, sizeof(buffer));
+        }
     }
-}
 }
 #endif
 
@@ -1285,7 +1287,7 @@ TEST_F(MisoTest, XmlReader_OutputXml)
         if (type == miso::XmlNodeType::StartElement || type == miso::XmlNodeType::EmptyElement) {
             printf("<%s", reader.GetElementName().c_str());
             for (auto a : reader.GetAllAttributes()) {
-                printf(" %s='%s'", a.GetName().c_str(), a.GetNumeric().GetValue().c_str());
+                printf(" %s='%s'", a.GetName().c_str(), a.AsNumeric().GetValue().c_str());
             }
             if (type == miso::XmlNodeType::EmptyElement) printf("/");
             printf(">");
@@ -1337,7 +1339,7 @@ TEST_F(MisoTest, XmlReader_Performance)
                 }
                 for (auto a : reader.GetAllAttributes()) {
                     volatile auto a_name = a.GetName();
-                    volatile auto a_value = a.GetNumeric().GetValue();
+                    volatile auto a_value = a.AsNumeric().GetValue();
                 }
             } else if (type == miso::XmlNodeType::EndElement) {
                 volatile auto name = reader.GetElementName();

@@ -28,14 +28,11 @@ public:
     const Value& operator[](size_t index) { return GetAt(index); }
 
     bool IsValid() const;
-    bool IsTrue() const;
     size_t GetCount() const { return (type_ == ValueType::Array) ? array_->size() : 1; }
     const Value& GetAt(size_t index) const;
-    const Numeric& GetNumeric() const { return (type_ == ValueType::Numeric) ? numeric_ : Numeric::GetInvalid(); }
-    const Color& GetColor() const { return (type_ == ValueType::Color) ? color_ : Color::GetInvalid(); }
-    template<typename T> T ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value = std::numeric_limits<T>::quiet_NaN()) const;
-    template<typename T> T ToRatio(T default_value = std::numeric_limits<T>::quiet_NaN()) const;
-    template<typename T> T ToMilliseconds(T default_value = std::numeric_limits<T>::quiet_NaN()) const;
+    bool AsBool(size_t index = 0) const;
+    const Numeric& AsNumeric(size_t index = 0) const;
+    const Color& AsColor(size_t index = 0) const;
     Value GetInterpolated(const Value& end_value, const Interpolator& interpolator, float progress) const;
     std::string ToString(const char* format = nullptr) const;
 
@@ -64,15 +61,47 @@ Value::TryParse(const char* str, Value& value_out, size_t* count_out)
         value_out.type_ = ValueType::Boolean;
         return true;
     }
-    if (Color::TryParse(str, value_out.color_, count_out)) {
-        value_out.type_ = ValueType::Color;
-        return true;
-    }
     if (Numeric::TryParse(str, value_out.numeric_, count_out)) {
         value_out.type_ = ValueType::Numeric;
         return true;
     }
+    if (Color::TryParse(str, value_out.color_, count_out)) {
+        value_out.type_ = ValueType::Color;
+        return true;
+    }
     return false;
+}
+
+inline
+Value::Value(const char* str) : Value()
+{
+    auto values = new std::vector<Value>();
+    if (values == nullptr) return;
+
+    values->reserve(10);
+    auto s = str;
+    for (; *s != '\0'; ++s) {
+        if (!isspace(*s)) {
+            Value value;
+            size_t count;
+            if (!TryParse(s, value, &count)) break;
+            values->push_back(std::move(value));
+            s += (count - 1);
+        }
+    }
+    if (*s == '\0') {
+        if (values->size() > 1) {
+            type_ = ValueType::Array;
+            array_ = values;
+            values = nullptr;
+        } else if (values->size() == 1) {
+            Copy(values->at(0), *this);
+            delete values;
+            values = nullptr;
+        } else {
+            ;
+        }
+    }
 }
 
 inline void
@@ -129,17 +158,6 @@ Value::IsValid() const
         false;
 }
 
-inline bool
-Value::IsTrue() const
-{
-    return
-        (type_ == ValueType::Boolean) ? boolean_.IsTrue() :
-        (type_ == ValueType::Numeric) ? (numeric_.IsValid() && numeric_.GetValue() != 0.0) :
-        (type_ == ValueType::Color) ? (color_.IsValid() && color_.ToUint32() != 0) :
-        (type_ == ValueType::Array) ? true :
-        false;
-}
-
 inline const Value&
 Value::GetAt(size_t index) const
 {
@@ -149,60 +167,25 @@ Value::GetAt(size_t index) const
         GetInvalid();
 }
 
-inline
-Value::Value(const char* str) : Value()
+inline bool
+Value::AsBool(size_t index) const
 {
-    auto values = new std::vector<Value>();
-    if (values == nullptr) return;
-
-    values->reserve(10);
-    auto s = str;
-    for (; *s != '\0'; ++s) {
-        if (!isspace(*s)) {
-            Value value;
-            size_t count;
-            if (!TryParse(s, value, &count)) break;
-            values->push_back(std::move(value));
-            s += (count - 1);
-        }
-    }
-    if (*s == '\0') {
-        if (values->size() > 1) {
-            type_ = ValueType::Array;
-            array_ = values;
-            values = nullptr;
-        } else if (values->size() == 1) {
-            Copy(values->at(0), *this);
-            delete values;
-            values = nullptr;
-        } else {
-            ;
-        }
-    }
+    auto v = GetAt(index);
+    return (v.type_ == ValueType::Boolean) ? v.boolean_.IsTrue() : false;
 }
 
-template<typename T> inline T
-Value::ToLength(float view_width, float view_height, float pixel_scale, float base_length, T default_value) const
+inline const Numeric&
+Value::AsNumeric(size_t index) const
 {
-    return (type_ == ValueType::Numeric) ?
-        numeric_.ToLength(view_width, view_height, pixel_scale, base_length, default_value) :
-        default_value;
+    auto v = GetAt(index);
+    return (v.type_ == ValueType::Numeric) ? v.numeric_ : Numeric::GetInvalid();
 }
 
-template<typename T> inline T
-Value::ToRatio(T default_value) const
+inline const Color&
+Value::AsColor(size_t index) const
 {
-    return (type_ == ValueType::Numeric) ?
-        numeric_.ToRatio(default_value) :
-        default_value;
-}
-
-template<typename T> inline T
-Value::ToMilliseconds(T default_value) const
-{
-    return (type_ == ValueType::Numeric) ?
-        numeric_.ToMilliseconds(default_value) :
-        default_value;
+    auto v = GetAt(index);
+    return (v.type_ == ValueType::Color) ? v.color_ : Color::GetInvalid();
 }
 
 inline Value

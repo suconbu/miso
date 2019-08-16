@@ -21,6 +21,10 @@ public:
 inline void
 ColorSpace::HslToRgb(float h, float s, float l, float* r_out, float* g_out, float* b_out)
 {
+    h = std::max(0.0f, std::min(h, 1.0f));
+    s = std::max(0.0f, std::min(s, 1.0f));
+    l = std::max(0.0f, std::min(l, 1.0f));
+
     auto hueToRgb = [](float p, float q, float t) {
         if (t < 0.0f) t += 1.0f;
         if (t > 1.0f) t -= 1.0f;
@@ -51,6 +55,10 @@ ColorSpace::HslToRgb(float h, float s, float l, float* r_out, float* g_out, floa
 inline void
 ColorSpace::RgbToHsl(float r, float g, float b, float* h_out, float* s_out, float* l_out)
 {
+    r = std::max(0.0f, std::min(r, 1.0f));
+    g = std::max(0.0f, std::min(g, 1.0f));
+    b = std::max(0.0f, std::min(b, 1.0f));
+
     auto max = std::max(r, std::max(g, b));
     auto min = std::min(r, std::min(g, b));
 
@@ -73,6 +81,10 @@ ColorSpace::RgbToHsl(float r, float g, float b, float* h_out, float* s_out, floa
 inline void
 ColorSpace::HsvToRgb(float h, float s, float v, float* r_out, float* g_out, float* b_out)
 {
+    h = std::max(0.0f, std::min(h, 1.0f));
+    s = std::max(0.0f, std::min(s, 1.0f));
+    v = std::max(0.0f, std::min(v, 1.0f));
+
     auto i = std::floor(h * 6.0f);
     auto f = (h * 6.0f) - i;
     auto p = v * (1 - s);
@@ -92,6 +104,10 @@ ColorSpace::HsvToRgb(float h, float s, float v, float* r_out, float* g_out, floa
 inline void
 ColorSpace::RgbToHsv(float r, float g, float b, float* h_out, float* s_out, float* v_out)
 {
+    r = std::max(0.0f, std::min(r, 1.0f));
+    g = std::max(0.0f, std::min(g, 1.0f));
+    b = std::max(0.0f, std::min(b, 1.0f));
+
     auto max = std::max(r, std::max(g, b));
     auto min = std::min(r, std::min(g, b));
 

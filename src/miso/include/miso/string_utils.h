@@ -212,7 +212,8 @@ StringUtils::Format(const char* format, ...)
 inline bool
 StringUtils::StartsWith(const char* str, const char* x, bool ignore_case)
 {
-    return CompareN(str, x, strlen(x), ignore_case) == 0;
+    size_t x_len = (x != nullptr) ? strlen(x) : 0;
+    return CompareN(str, x, x_len, ignore_case) == 0;
 }
 
 inline bool
@@ -224,8 +225,8 @@ StringUtils::StartsWith(const std::string& str, const std::string& x, bool ignor
 inline bool
 StringUtils::EndsWith(const char* str, const char* x, bool ignore_case)
 {
-    size_t str_len = strlen(str);
-    size_t x_len = strlen(x);
+    size_t str_len = (str != nullptr) ? strlen(str) : 0;
+    size_t x_len = (x != nullptr) ? strlen(x) : 0;
     if (str_len < x_len) return false;
     auto start = str + str_len - x_len;
     return CompareN(start, x, x_len, ignore_case) == 0;
@@ -266,6 +267,12 @@ StringUtils::Compare(const std::string& a, const std::string& b, bool ignore_cas
 inline int
 StringUtils::CompareN(const char* a, const char* b, size_t count, bool ignore_case)
 {
+    if (a == nullptr) {
+        return (b == nullptr) ? 0 : -1;
+    } else if (b == nullptr) {
+        return 1;
+    }
+
     if (!ignore_case) return strncmp(a, b, count);
 
     int result = 0;

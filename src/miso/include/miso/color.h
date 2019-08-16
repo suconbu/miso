@@ -268,10 +268,10 @@ Color::ToString(const char* format) const
     std::string s = "";
     if (!IsValid()) return s;
 
-    s = ToStringHex(format);
+    s = ToStringHex(f);
     if (!s.empty()) return s;
 
-    s = ToStringDec(format);
+    s = ToStringDec(f);
     if (!s.empty()) return s;
 
     return s;

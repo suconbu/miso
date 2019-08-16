@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iterator>
 #include <string>
+#include <sstream>
 #include <vector>
 
 #include "miso/boolean.h"
@@ -89,18 +90,19 @@ Value::Value(const char* str) : Value()
             s += (count - 1);
         }
     }
-    if (*s == '\0') {
-        if (values->size() > 1) {
-            type_ = ValueType::Array;
-            array_ = values;
-            values = nullptr;
-        } else if (values->size() == 1) {
-            Copy(values->at(0), *this);
-            delete values;
-            values = nullptr;
-        } else {
-            ;
-        }
+
+    if (*s != '\0') return;
+
+    if (values->size() > 1) {
+        type_ = ValueType::Array;
+        array_ = values;
+        values = nullptr;
+    } else if (values->size() == 1) {
+        Copy(values->at(0), *this);
+        delete values;
+        values = nullptr;
+    } else {
+        ;
     }
 }
 
@@ -216,11 +218,20 @@ Value::GetInterpolated(const Value& end_value, const Interpolator& interpolator,
 inline std::string
 Value::ToString(const char* format) const
 {
-    return
-        (type_ == ValueType::Boolean) ? boolean_.ToString(format) :
-        (type_ == ValueType::Numeric) ? numeric_.ToString(format) :
-        (type_ == ValueType::Color) ? color_.ToString(format) :
-        "";
+    if (type_ == ValueType::Array) {
+        std::stringstream s;
+        for (int i = 0; i < array_->size() - 1; ++i) {
+            s << array_->at(i).ToString(format) << " ";
+        }
+        s << array_->at(array_->size() - 1).ToString(format);
+        return s.str();
+    } else {
+        return
+            (type_ == ValueType::Boolean) ? boolean_.ToString(format) :
+            (type_ == ValueType::Numeric) ? numeric_.ToString(format) :
+            (type_ == ValueType::Color) ? color_.ToString(format) :
+            "";
+    }
 }
 
 } // namespace miso

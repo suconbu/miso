@@ -399,6 +399,10 @@ TEST_F(MisoTest, StringUtils_Comapare)
     EXPECT_TRUE(0 > miso::StringUtils::CompareN("st", "Station", 3, true));
     EXPECT_TRUE(0 == miso::StringUtils::CompareN("sta", "Station", 3, true));
 
+    EXPECT_TRUE(0 == miso::StringUtils::CompareN(nullptr, nullptr, 3));
+    EXPECT_TRUE(0 < miso::StringUtils::CompareN("", nullptr, 3));
+    EXPECT_TRUE(0 > miso::StringUtils::CompareN(nullptr, "", 3));
+
     EXPECT_FALSE(0 == miso::StringUtils::Compare("StatioN", "station"));
     EXPECT_FALSE(0 == miso::StringUtils::Compare("station", "Station"));
     EXPECT_FALSE(0 == miso::StringUtils::CompareN("station", "STATIC", 3));
@@ -871,6 +875,7 @@ TEST_F(MisoTest, Value)
     EXPECT_EQ(20, values[5].AsNumeric().GetValue());
     EXPECT_TRUE(values[6].AsBool());
     EXPECT_FALSE(values[7].AsBool());
+    EXPECT_STREQ("0 1 2 #0c2238 10px 20% true #000000", values.ToString().c_str());
 
     miso::Value copy(values);
     ASSERT_EQ(8, copy.GetCount());

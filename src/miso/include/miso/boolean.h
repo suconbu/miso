@@ -19,6 +19,9 @@ public:
     explicit Boolean(const std::string& str) : Boolean(str.c_str()) {}
     explicit Boolean(bool value) : value_(value) {}
 
+    bool operator==(const Boolean& other) const { return IsTrue() == other.IsTrue(); }
+    bool operator!=(const Boolean& other) const { return !(*this == other); }
+
     bool IsValid() const { return valid_; }
     bool IsTrue() const { return valid_ && value_; }
     Boolean GetInterpolated(const Boolean& end_value, const Interpolator& interpolator, float progress) const;

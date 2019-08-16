@@ -27,6 +27,8 @@ public:
 
     Value& operator=(const Value& value) { Copy(value, *this); return *this; }
     const Value& operator[](size_t index) { return GetAt(index); }
+    bool operator==(const Value& value) const { return Equal(*this, value); }
+    bool operator!=(const Value& value) const { return !Equal(*this, value); }
 
     bool IsValid() const;
     size_t GetCount() const { return (type_ == ValueType::Array) ? array_->size() : 1; }
@@ -43,6 +45,7 @@ private:
     static bool TryParse(const char* str, Value& value_out, size_t* count_out = nullptr);
     static void Copy(const Value& from, Value& to);
     static void Move(Value& from, Value& to);
+    static bool Equal(const Value& a, const Value& b);
 
     void Dispose() { if (type_ == ValueType::Array) delete array_; }
 
@@ -150,6 +153,28 @@ Value::Move(Value& from, Value& to)
 }
 
 inline bool
+Value::Equal(const Value& a, const Value& b)
+{
+    if (a.type_ != b.type_) return false;
+
+    if (a.type_ == ValueType::Array) {
+        if (a.array_->size() != b.array_->size()) return false;
+        for (int i = 0; i < a.array_->size(); ++i) {
+            if (a.GetAt(i) != b.GetAt(i)) return false;
+        }
+        return true;
+    } else if (a.type_ == ValueType::Boolean) {
+        return a.boolean_ == b.boolean_;
+    } else if (a.type_ == ValueType::Numeric) {
+        return a.numeric_ == b.numeric_;
+    } else if (a.type_ == ValueType::Color) {
+        return a.color_ == b.color_;
+    } else {
+        return false;
+    }
+}
+
+inline bool
 Value::IsValid() const
 {
     return
@@ -194,9 +219,10 @@ inline Value
 Value::GetInterpolated(const Value& end_value, const Interpolator& interpolator, float progress) const
 {
     Value value;
+    if (type_ != end_value.type_) return Value::GetInvalid();
     value.type_ = type_;
     if (type_ == ValueType::Array) {
-        if (array_->size() != end_value.GetCount()) return Value::GetInvalid();
+        if (array_->size() != end_value.array_->size()) return Value::GetInvalid();
         value.array_ = new std::vector<Value>();
         if (value.array_ == nullptr) return Value::GetInvalid();
         value.array_->reserve(array_->size());

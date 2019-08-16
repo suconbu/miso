@@ -878,10 +878,19 @@ TEST_F(MisoTest, Value)
     EXPECT_STREQ("0 1 2 #0c2238 10px 20% true #000000", values.ToString().c_str());
 
     miso::Value copy(values);
-    ASSERT_EQ(8, copy.GetCount());
+    EXPECT_EQ(8, copy.GetCount());
 
     auto moved = ValueMoveTest();
-    ASSERT_EQ(3, moved.GetCount());
+    EXPECT_EQ(3, moved.GetCount());
+
+    miso::Value v1("123");
+    miso::Value v2("123");
+    miso::Value v3("12.3");
+    miso::Value v4("#123");
+    EXPECT_TRUE(v1 == v2);
+    EXPECT_FALSE(v1 != v2);
+    EXPECT_TRUE(v1 != v3);
+    EXPECT_TRUE(v1 != v4);
 }
 
 TEST_F(MisoTest, Value_CopyMove)
@@ -1275,8 +1284,8 @@ TEST_F(Performace, RandomRead1M8B)
             auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
             reader.SetPosition(position);
             reader.ReadBlock((void*)buffer, sizeof(buffer));
-        }
     }
+}
 }
 #endif
 
@@ -1352,7 +1361,7 @@ TEST_F(MisoTest, XmlReader_Performance)
                 volatile auto text = reader.GetContentText();
             } else {
                 ;
-            }
+}
         }
     }
 }

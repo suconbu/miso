@@ -78,6 +78,8 @@ TEST(Test, Initialize)
     // Create a local static instance for avoid false detection of memory leak.
     // miso::Numeric::GetUnitToSuffixMap
     miso::Numeric a("0%");
+    // miso::Color::FromHtmlColorName
+    miso::Color::FromHtmlColorName("white");
 }
 
 TEST_F(MisoTest, BinaryReader_SizeAndPosition)
@@ -1074,6 +1076,11 @@ TEST_F(MisoTest, Color)
         a = miso::Color::TryParse("rgb ( 12% 34% 56%   ");
         EXPECT_FALSE(a.IsValid());
     }
+    {
+        auto red = miso::Color::FromHtmlColorName("red");
+        EXPECT_TRUE(red.IsValid());
+        EXPECT_EQ(0xFF0000FF, red.ToUint32());
+    }
 }
 
 const double kNearError = 0.001;
@@ -1288,8 +1295,8 @@ TEST_F(Performace, RandomRead1M8B)
             auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
             reader.SetPosition(position);
             reader.ReadBlock((void*)buffer, sizeof(buffer));
+        }
     }
-}
 }
 #endif
 

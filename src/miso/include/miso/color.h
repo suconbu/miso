@@ -14,15 +14,14 @@ namespace miso {
 class Color {
 public:
     static const Color& GetInvalid() { const static Color invalid; return invalid; }
-    static bool TryParse(const char* str, Color& color_out, size_t* count_out = nullptr);
+    static Color TryParse(const char* str, size_t* consumed_out = nullptr);
     static Color FromHsla(float h, float s, float l, float a);
     static Color FromHsva(float h, float s, float v, float a);
     //static Color FromName(const char* name);
 
-    Color() = default;
     explicit Color(float r, float g, float b, float a) : R(r), G(g), B(b), A(a) {}
     explicit Color(uint32_t rgba) : R(((rgba >> 24) & 0xFF) / 255.0f), G(((rgba >> 16) & 0xFF) / 255.0f), B(((rgba >> 8) & 0xFF) / 255.0f), A(((rgba >> 0) & 0xFF) / 255.0f) {}
-    explicit Color(const char* str) { TryParse(str, *this); }
+    explicit Color(const char* str) { *this = TryParse(str); }
     explicit Color(const std::string& str) : Color(str.c_str()) {}
 
     bool operator==(const Color& other) const;
@@ -40,8 +39,11 @@ public:
 
 private:
     static constexpr float kEqualTolerance = 0.0001f;
-    static bool TryParseHex(const char* str, Color& color_out, size_t* count_out);
-    static bool TryParseDec(const char* str, Color& color_out, size_t* count_out);
+    static bool TryParseHex(const char* str, Color& color_out, size_t* consumed_out);
+    static bool TryParseDec(const char* str, Color& color_out, size_t* consumed_out);
+
+    Color() = default;
+
     std::string ToStringHex(const char* format) const;
     std::string ToStringDec(const char* format) const;
 };
@@ -62,16 +64,17 @@ Color::FromHsva(float h, float s, float v, float a)
     return Color(r, g, b, a);
 }
 
-inline bool
-Color::TryParse(const char* str, Color& color_out, size_t* count_out)
+inline Color
+Color::TryParse(const char* str, size_t* consumed_out)
 {
-    if (TryParseHex(str, color_out, count_out)) return true;
-    if (TryParseDec(str, color_out, count_out)) return true;
-    return false;
+    Color color;
+    if (TryParseHex(str, color, consumed_out)) return color;
+    if (TryParseDec(str, color, consumed_out)) return color;
+    return color;
 }
 
 inline bool
-Color::TryParseHex(const char* str, Color& color_out, size_t* count_out)
+Color::TryParseHex(const char* str, Color& color_out, size_t* consumed_out)
 {
     if (str == nullptr) return false;
 
@@ -127,13 +130,13 @@ Color::TryParseHex(const char* str, Color& color_out, size_t* count_out)
     color_out.G = g;
     color_out.B = b;
     color_out.A = a;
-    if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
+    if (consumed_out != nullptr) *consumed_out = static_cast<size_t>(s - start);
 
     return true;
 }
 
 inline bool
-Color::TryParseDec(const char* str, Color& color_out, size_t* count_out)
+Color::TryParseDec(const char* str, Color& color_out, size_t* consumed_out)
 {
     if (str == nullptr) return false;
 
@@ -187,9 +190,9 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* count_out)
             if (!paren || value_index < value_count) return false;
             paren = false;
         } else {
-            Numeric numeric;
             size_t count;
-            if (Numeric::TryParse(s, numeric, &count)) {
+            auto numeric = Numeric::TryParse(s, &count);
+            if (numeric.IsValid()) {
                 if (numeric.GetUnit() == NumericUnit::Parcent || numeric.IsFloat()) {
                     float v = numeric.ToRatio(0.0f);
                     value[value_index] = std::max(0.0f, std::min(v, 1.0f));
@@ -220,7 +223,7 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* count_out)
     } else {
         return false;
     }
-    if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
+    if (consumed_out != nullptr) *consumed_out = static_cast<size_t>(s - start);
 
     return true;
 }

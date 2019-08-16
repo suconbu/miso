@@ -12,10 +12,10 @@ namespace miso {
 
 class Boolean {
 public:
-    static bool TryParse(const char* str, Boolean& boolean_out, size_t* count_out = nullptr);
+    static const Boolean& GetInvalid() { const static Boolean invalid; return invalid; }
+    static Boolean TryParse(const char* str, size_t* consumed_out = nullptr);
 
-    Boolean() = default;
-    explicit Boolean(const char* str) : Boolean() { Boolean::TryParse(str, *this); }
+    explicit Boolean(const char* str) : Boolean() { *this = Boolean::TryParse(str); }
     explicit Boolean(const std::string& str) : Boolean(str.c_str()) {}
     explicit Boolean(bool value) : value_(value) {}
 
@@ -28,14 +28,16 @@ public:
     std::string ToString(const char* format = nullptr) const;
 
 private:
+    Boolean() = default;
+
     bool value_ = false;
     bool valid_ = false;
 };
 
-inline bool
-Boolean::TryParse(const char* str, Boolean& boolean_out, size_t* count_out)
+inline Boolean
+Boolean::TryParse(const char* str, size_t* consumed_out)
 {
-    if (str == nullptr || *str == '\0') return false;
+    if (str == nullptr || *str == '\0') return GetInvalid();
 
     auto s = str;
     auto start = s;
@@ -43,7 +45,7 @@ Boolean::TryParse(const char* str, Boolean& boolean_out, size_t* count_out)
     while (isalpha(*s)) ++s;
 
     auto count = static_cast<size_t>(s - start);
-    if (count < 2) return false;
+    if (count < 2) return GetInvalid();
 
     const char* names[] = { "true", "false", "on", "off", "yes", "no" };
     bool value = false;
@@ -55,13 +57,14 @@ Boolean::TryParse(const char* str, Boolean& boolean_out, size_t* count_out)
             break;
         }
     }
-    if (!valid) return false;
+    if (!valid) return GetInvalid();
 
-    boolean_out.value_ = value;
-    boolean_out.valid_ = valid;
-    if (count_out != nullptr) *count_out = count;
+    Boolean boolean;
+    boolean.value_ = value;
+    boolean.valid_ = valid;
+    if (consumed_out != nullptr) *consumed_out = count;
 
-    return true;
+    return boolean;
 }
 
 inline Boolean

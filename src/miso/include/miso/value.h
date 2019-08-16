@@ -42,7 +42,7 @@ public:
 private:
     enum class ValueType { Invalid, Array, Boolean, Numeric, Color };
 
-    static bool TryParse(const char* str, Value& value_out, size_t* count_out = nullptr);
+    static Value TryParse(const char* str, size_t* consumed_out = nullptr);
     static void Copy(const Value& from, Value& to);
     static void Move(Value& from, Value& to);
     static bool Equal(const Value& a, const Value& b);
@@ -58,22 +58,18 @@ private:
     };
 };
 
-inline bool
-Value::TryParse(const char* str, Value& value_out, size_t* count_out)
+inline Value
+Value::TryParse(const char* str, size_t* consumed_out)
 {
-    if (Boolean::TryParse(str, value_out.boolean_, count_out)) {
-        value_out.type_ = ValueType::Boolean;
-        return true;
+    Value value;
+    if ((value.boolean_ = Boolean::TryParse(str, consumed_out)).IsValid()) {
+        value.type_ = ValueType::Boolean;
+    } else if ((value.numeric_ = Numeric::TryParse(str, consumed_out)).IsValid()) {
+        value.type_ = ValueType::Numeric;
+    } else if ((value.color_ = Color::TryParse(str, consumed_out)).IsValid()) {
+        value.type_ = ValueType::Color;
     }
-    if (Numeric::TryParse(str, value_out.numeric_, count_out)) {
-        value_out.type_ = ValueType::Numeric;
-        return true;
-    }
-    if (Color::TryParse(str, value_out.color_, count_out)) {
-        value_out.type_ = ValueType::Color;
-        return true;
-    }
-    return false;
+    return value;
 }
 
 inline
@@ -86,9 +82,9 @@ Value::Value(const char* str) : Value()
     auto s = str;
     for (; *s != '\0'; ++s) {
         if (!isspace(*s)) {
-            Value value;
             size_t count;
-            if (!TryParse(s, value, &count)) break;
+            auto value = TryParse(s, &count);
+            if (!value.IsValid()) break;
             values->push_back(std::move(value));
             s += (count - 1);
         }

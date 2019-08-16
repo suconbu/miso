@@ -21,10 +21,9 @@ enum class NumericUnit {
 class Numeric {
 public:
     static const Numeric& GetInvalid() { const static Numeric invalid; return invalid; }
-    static bool TryParse(const char* str, Numeric& numeric_out, size_t* count_out = nullptr);
+    static Numeric TryParse(const char* str, size_t* consumed_out = nullptr);
 
-    Numeric() = default;
-    explicit Numeric(const char* str) : Numeric() { Numeric::TryParse(str, *this); }
+    explicit Numeric(const char* str) : Numeric() { *this = Numeric::TryParse(str); }
     explicit Numeric(const std::string& str) : Numeric(str.c_str()) {}
     explicit Numeric(double value, NumericUnit unit) : value_(value), unit_(unit), float_(value_ != floor(value_)) {}
 
@@ -44,15 +43,17 @@ public:
 private:
     static const std::map<NumericUnit, const char*>& GetUnitToSuffixMap();
 
+    Numeric() = default;
+
     double value_ = std::numeric_limits<double>::quiet_NaN();
     NumericUnit unit_ = NumericUnit::NaN;
     bool float_ = false;
 };
 
-inline bool
-Numeric::TryParse(const char* str, Numeric& numeric_out, size_t* count_out)
+inline Numeric
+Numeric::TryParse(const char* str, size_t* consumed_out)
 {
-    if (str == nullptr || *str == '\0') return false;
+    if (str == nullptr || *str == '\0') return GetInvalid();
 
     // [+-]?(\d+(\.(\d+)?)?)|(\.\d+)?(\w+|%)
     auto s = str;
@@ -65,7 +66,7 @@ Numeric::TryParse(const char* str, Numeric& numeric_out, size_t* count_out)
         ++s;
     }
 
-    if (*s != '.' && !isdigit(*s)) return false;
+    if (*s != '.' && !isdigit(*s)) return GetInvalid();
 
     // Digits
     auto digit_start = s;
@@ -82,13 +83,13 @@ Numeric::TryParse(const char* str, Numeric& numeric_out, size_t* count_out)
                 denominator *= base;
             }
         } else if (*s == '.') {
-            if (denominator != 0) return false;
+            if (denominator != 0) return GetInvalid();
             denominator = base;
         } else {
             break;
         }
     }
-    if (s == digit_start) return false;
+    if (s == digit_start) return GetInvalid();
 
     // Unit
     auto unit = NumericUnit::NaN;
@@ -101,16 +102,17 @@ Numeric::TryParse(const char* str, Numeric& numeric_out, size_t* count_out)
             break;
         }
     }
-    if (unit == NumericUnit::NaN) return false;
+    if (unit == NumericUnit::NaN) return GetInvalid();
 
     if (negative) value = -value;
 
-    numeric_out.value_ = value;
-    numeric_out.unit_ = unit;
-    numeric_out.float_ = (denominator != 0);
-    if (count_out != nullptr) *count_out = static_cast<size_t>(s - start);
+    Numeric numeric;
+    numeric.value_ = value;
+    numeric.unit_ = unit;
+    numeric.float_ = (denominator != 0);
+    if (consumed_out != nullptr) *consumed_out = static_cast<size_t>(s - start);
 
-    return true;
+    return numeric;
 }
 
 inline const std::map<NumericUnit, const char*>&

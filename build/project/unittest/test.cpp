@@ -934,19 +934,18 @@ TEST_F(MisoTest, Boolean)
     TEST_TRACE("");
     {
         size_t count = 0;
-        miso::Boolean a;
-        EXPECT_TRUE(miso::Boolean::TryParse("true-", a, &count));
+        miso::Boolean a = miso::Boolean::TryParse("true-", &count);
+        EXPECT_TRUE(a.IsValid());
         EXPECT_TRUE(a.IsTrue());
         EXPECT_EQ(4, count);
-        EXPECT_TRUE(miso::Boolean::TryParse("false ", a, &count));
+        a = miso::Boolean::TryParse("false ", &count);
+        EXPECT_TRUE(a.IsValid());
         EXPECT_FALSE(a.IsTrue());
         EXPECT_EQ(5, count);
-        EXPECT_FALSE(miso::Boolean::TryParse("truu ", a, &count));
+        a = miso::Boolean::TryParse("truu ", &count);
+        EXPECT_FALSE(a.IsValid());
     }
     {
-        miso::Boolean a;
-        EXPECT_FALSE(a.IsValid());
-        EXPECT_FALSE(a.IsTrue());
         miso::Boolean b("true");
         EXPECT_TRUE(b.IsValid());
         EXPECT_TRUE(b.IsTrue());
@@ -975,9 +974,6 @@ TEST_F(MisoTest, Boolean)
         EXPECT_FALSE(i.IsTrue());
     }
     {
-        miso::Boolean a;
-        EXPECT_FALSE(a.IsValid());
-        EXPECT_FALSE(a.IsTrue());
         miso::Boolean b("True");
         EXPECT_TRUE(b.IsValid());
         EXPECT_TRUE(b.IsTrue());
@@ -1053,22 +1049,30 @@ TEST_F(MisoTest, Color)
         EXPECT_EQ("#1f578fff", rgbr.ToString("hex8"));
     }
     {
-        miso::Color a;
         size_t count;
-        EXPECT_TRUE(miso::Color::TryParse("rgb(12%,34%,56%)", a, &count));
+        miso::Color a = miso::Color::TryParse("rgb(12%,34%,56%)", &count);
+        EXPECT_TRUE(a.IsValid());
         EXPECT_EQ(16, count);
-        EXPECT_TRUE(miso::Color::TryParse("rgb ( 12% , 34% , 56%  ) ", a, &count));
+        a = miso::Color::TryParse("rgb ( 12% , 34% , 56%  ) ", &count);
+        EXPECT_TRUE(a.IsValid());
         EXPECT_EQ(24, count);
-        EXPECT_TRUE(miso::Color::TryParse("rgb 12% , 34% , 56%   ", a, &count));
+        a = miso::Color::TryParse("rgb 12% , 34% , 56%   ", &count);
+        EXPECT_TRUE(a.IsValid());
         EXPECT_EQ(19, count);
-        EXPECT_TRUE(miso::Color::TryParse("rgb 12% 34% 56%   ", a, &count));
+        a = miso::Color::TryParse("rgb 12% 34% 56%   ", &count);
+        EXPECT_TRUE(a.IsValid());
         EXPECT_EQ(15, count);
-        EXPECT_FALSE(miso::Color::TryParse("rgb ( 12% , 34% ) 56% ) ", a));
-        EXPECT_FALSE(miso::Color::TryParse("rgb ) 12% 34% 56% ) ", a));
-        EXPECT_FALSE(miso::Color::TryParse("rgb ( 12% 34% 56% ( ", a));
-        EXPECT_TRUE(miso::Color::TryParse("rgb 12% 34% 56% ( ", a, &count));
+        a = miso::Color::TryParse("rgb ( 12% , 34% ) 56% ) ");
+        EXPECT_FALSE(a.IsValid());
+        a = miso::Color::TryParse("rgb ) 12% 34% 56% ) ");
+        EXPECT_FALSE(a.IsValid());
+        a = miso::Color::TryParse("rgb ( 12% 34% 56% ( ");
+        EXPECT_FALSE(a.IsValid());
+        a = miso::Color::TryParse("rgb 12% 34% 56% ( ", &count);
+        EXPECT_TRUE(a.IsValid());
         EXPECT_EQ(15, count);
-        EXPECT_FALSE(miso::Color::TryParse("rgb ( 12% 34% 56%   ", a));
+        a = miso::Color::TryParse("rgb ( 12% 34% 56%   ");
+        EXPECT_FALSE(a.IsValid());
     }
 }
 
@@ -1284,8 +1288,8 @@ TEST_F(Performace, RandomRead1M8B)
             auto position = (size_t)((size - 1) * (float)rand() / RAND_MAX);
             reader.SetPosition(position);
             reader.ReadBlock((void*)buffer, sizeof(buffer));
-        }
     }
+}
 }
 #endif
 

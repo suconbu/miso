@@ -1,40 +1,20 @@
-#ifndef MISO_BOOLEAN_H_
-#define MISO_BOOLEAN_H_
+#include "miso/boolean.hpp"
 
-#include <cmath>
-#include <map>
 #include <string>
 
-#include "miso/interpolator.h"
-#include "miso/string_utils.h"
+#include "miso/interpolator.hpp"
+#include "miso/string_utils.hpp"
 
 namespace miso {
 
-class Boolean {
-public:
-    static const Boolean& GetInvalid() { const static Boolean invalid; return invalid; }
-    static Boolean TryParse(const char* str, size_t* consumed_out = nullptr);
+MISO_INLINE const Boolean&
+Boolean::GetInvalid()
+{
+    const static Boolean invalid;
+    return invalid;
+}
 
-    explicit Boolean(const char* str) : Boolean() { *this = Boolean::TryParse(str); }
-    explicit Boolean(const std::string& str) : Boolean(str.c_str()) {}
-    explicit Boolean(bool value) : value_(value) {}
-
-    bool operator==(const Boolean& other) const { return IsTrue() == other.IsTrue(); }
-    bool operator!=(const Boolean& other) const { return !(*this == other); }
-
-    bool IsValid() const { return valid_; }
-    bool IsTrue() const { return valid_ && value_; }
-    Boolean GetInterpolated(const Boolean& end_value, const Interpolator& interpolator, float progress) const;
-    std::string ToString(const char* format = nullptr) const;
-
-private:
-    Boolean() = default;
-
-    bool value_ = false;
-    bool valid_ = false;
-};
-
-inline Boolean
+MISO_INLINE Boolean
 Boolean::TryParse(const char* str, size_t* consumed_out)
 {
     if (str == nullptr || *str == '\0') return GetInvalid();
@@ -67,7 +47,7 @@ Boolean::TryParse(const char* str, size_t* consumed_out)
     return boolean;
 }
 
-inline Boolean
+MISO_INLINE Boolean
 Boolean::GetInterpolated(const Boolean& end_value, const Interpolator& interpolator, float progress) const
 {
     float start = value_ ? 1.0f : 0.0f;
@@ -75,7 +55,7 @@ Boolean::GetInterpolated(const Boolean& end_value, const Interpolator& interpola
     return Boolean(interpolator.Interpolate(start, end, progress));
 }
 
-inline std::string
+MISO_INLINE std::string
 Boolean::ToString(const char* format) const
 {
     (void)format;
@@ -83,5 +63,3 @@ Boolean::ToString(const char* format) const
 }
 
 } // namespace miso
-
-#endif // MISO_BOOLEAN_H_

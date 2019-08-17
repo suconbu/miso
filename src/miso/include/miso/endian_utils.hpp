@@ -1,5 +1,7 @@
-#ifndef MISO_ENDIAN_H_
-#define MISO_ENDIAN_H_
+#ifndef MISO_ENDIAN_UTILS_HPP_
+#define MISO_ENDIAN_UTILS_HPP_
+
+#include "miso/common.h"
 
 #include <memory>
 
@@ -54,4 +56,4 @@ EndianUtils::Flip(const T value)
 
 } // namespace miso
 
-#endif // MISO_ENDIAN_H_
+#endif // MISO_ENDIAN_UTILS_HPP_

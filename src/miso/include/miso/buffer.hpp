@@ -1,8 +1,8 @@
-#ifndef MISO_BUFFER_H_
-#define MISO_BUFFER_H_
+#ifndef MISO_BUFFER_HPP_
+#define MISO_BUFFER_HPP_
 
-#include <memory.h>
-#include <cstdint>
+#include "miso/common.h"
+
 #include <memory>
 
 namespace miso {
@@ -13,10 +13,10 @@ public:
     using Allocator = TAllocator;
 
     explicit Buffer(size_t size = 0, Allocator& allocator = Allocator());
-    Buffer(const uint8_t* source, size_t size, Allocator& allocator = Allocator());
-    Buffer(const Buffer<Allocator>& other) : Buffer(other, other.buffer_size_, other.allocator_) {}
+    explicit Buffer(const uint8_t* source, size_t size, Allocator& allocator = Allocator());
+    Buffer(const Buffer<Allocator>& other);
     Buffer(Buffer<Allocator>&& other) noexcept;
-    ~Buffer() { allocator_.deallocate(buffer_, buffer_size_); }
+    ~Buffer();
 
     Buffer& operator=(const Buffer<Allocator>&) = delete;
     operator uint8_t*() const { return buffer_; }
@@ -45,8 +45,13 @@ template<typename TAllocator> inline
 Buffer<TAllocator>::Buffer(const uint8_t* source, size_t size, Allocator& allocator) :
     Buffer(size, allocator)
 {
-    memcpy(buffer_, source, sizeof(uint8_t) * size);
+    std::memcpy(buffer_, source, sizeof(uint8_t) * size);
 }
+
+template<typename TAllocator> inline
+Buffer<TAllocator>::Buffer(const Buffer<Allocator>& other) :
+    Buffer(other, other.buffer_size_, other.allocator_)
+{}
 
 template<typename TAllocator> inline
 Buffer<TAllocator>::Buffer(Buffer<Allocator>&& other) noexcept :
@@ -60,6 +65,12 @@ Buffer<TAllocator>::Buffer(Buffer<Allocator>&& other) noexcept :
     other.used_size_ = 0;
 }
 
+template<typename TAllocator> inline
+Buffer<TAllocator>::~Buffer()
+{
+    allocator_.deallocate(buffer_, buffer_size_);
+}
+
 template<typename TAllocator> inline void
 Buffer<TAllocator>::Resize(size_t new_size, bool preserve_content)
 {
@@ -68,7 +79,7 @@ Buffer<TAllocator>::Resize(size_t new_size, bool preserve_content)
         auto new_buffer_size = new_size;
         auto new_buffer = allocator_.allocate(new_buffer_size);
         if (preserve_content && buffer_ != nullptr) {
-            memcpy(new_buffer, buffer_, buffer_size_);
+            std::memcpy(new_buffer, buffer_, buffer_size_);
         }
         allocator_.deallocate(buffer_, buffer_size_);
         buffer_ = new_buffer;
@@ -79,4 +90,4 @@ Buffer<TAllocator>::Resize(size_t new_size, bool preserve_content)
 
 } // namespace miso
 
-#endif // MISO_BUFFER_H_
+#endif // MISO_BUFFER_HPP_

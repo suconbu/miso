@@ -12,6 +12,7 @@
 #define DEBUG_CLIENTBLOCK
 #endif
 
+//#define MISO_HEADER_ONLY
 #include "miso/miso.h"
 #include "gtest/gtest.h"
 

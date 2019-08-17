@@ -1,7 +1,7 @@
-#ifndef MISO_STREAM_H_
-#define MISO_STREAM_H_
+#ifndef MISO_STREAM_HPP_
+#define MISO_STREAM_HPP_
 
-#include <cstdint>
+#include "miso/common.h"
 
 namespace miso {
 
@@ -23,4 +23,4 @@ protected:
 
 } // namespace miso
 
-#endif // MISO_STREAM_H_
+#endif // MISO_STREAM_HPP_

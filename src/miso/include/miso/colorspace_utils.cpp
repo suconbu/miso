@@ -1,25 +1,12 @@
-#ifndef MISO_COLOR_SPACE_H_
-#define MISO_COLOR_SPACE_H_
+#include "miso/colorspace_utils.hpp"
+
+#include <algorithm>
+#include <cmath>
 
 namespace miso {
 
-enum class ColorSpaceType { Invalid, Rgb, Hsl, Hsv };
-
-class ColorSpace {
-public:
-    ColorSpace() = delete;
-
-    // HSL
-    static void HslToRgb(float h, float s, float l, float* r_out, float* g_out, float* b_out);
-    static void RgbToHsl(float r, float g, float b, float* h_out, float* s_out, float* l_out);
-
-    // HSV
-    static void HsvToRgb(float h, float s, float v, float* r_out, float* g_out, float* b_out);
-    static void RgbToHsv(float r, float g, float b, float* h_out, float* s_out, float* v_out);
-};
-
-inline void
-ColorSpace::HslToRgb(float h, float s, float l, float* r_out, float* g_out, float* b_out)
+MISO_INLINE void
+ColorSpaceUtils::HslToRgb(float h, float s, float l, float* r_out, float* g_out, float* b_out)
 {
     h = std::max(0.0f, std::min(h, 1.0f));
     s = std::max(0.0f, std::min(s, 1.0f));
@@ -52,8 +39,8 @@ ColorSpace::HslToRgb(float h, float s, float l, float* r_out, float* g_out, floa
     if (b_out != nullptr) *b_out = b;
 }
 
-inline void
-ColorSpace::RgbToHsl(float r, float g, float b, float* h_out, float* s_out, float* l_out)
+MISO_INLINE void
+ColorSpaceUtils::RgbToHsl(float r, float g, float b, float* h_out, float* s_out, float* l_out)
 {
     r = std::max(0.0f, std::min(r, 1.0f));
     g = std::max(0.0f, std::min(g, 1.0f));
@@ -78,8 +65,8 @@ ColorSpace::RgbToHsl(float r, float g, float b, float* h_out, float* s_out, floa
     if (l_out != nullptr) *l_out = l;
 }
 
-inline void
-ColorSpace::HsvToRgb(float h, float s, float v, float* r_out, float* g_out, float* b_out)
+MISO_INLINE void
+ColorSpaceUtils::HsvToRgb(float h, float s, float v, float* r_out, float* g_out, float* b_out)
 {
     h = std::max(0.0f, std::min(h, 1.0f));
     s = std::max(0.0f, std::min(s, 1.0f));
@@ -101,8 +88,8 @@ ColorSpace::HsvToRgb(float h, float s, float v, float* r_out, float* g_out, floa
     if (b_out != nullptr) *b_out = b6[m];
 }
 
-inline void
-ColorSpace::RgbToHsv(float r, float g, float b, float* h_out, float* s_out, float* v_out)
+MISO_INLINE void
+ColorSpaceUtils::RgbToHsv(float r, float g, float b, float* h_out, float* s_out, float* v_out)
 {
     r = std::max(0.0f, std::min(r, 1.0f));
     g = std::max(0.0f, std::min(g, 1.0f));
@@ -128,5 +115,3 @@ ColorSpace::RgbToHsv(float r, float g, float b, float* h_out, float* s_out, floa
 }
 
 } // namespace miso
-
-#endif // MISO_COLOR_SPACE_H_

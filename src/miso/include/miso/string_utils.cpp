@@ -1,5 +1,4 @@
-#ifndef MISO_STRING_H_
-#define MISO_STRING_H_
+#include "string_utils.hpp"
 
 #include <stdarg.h>
 #include <algorithm>
@@ -10,40 +9,7 @@
 
 namespace miso {
 
-class StringUtils {
-public:
-    StringUtils() = delete;
-
-    static std::string ReadFile(const std::string& filepath);
-    static void WriteFile(const std::string& filepath, const std::string& content);
-    static std::vector<std::string> Split(const std::string& str);
-    static std::vector<std::string> Split(const std::string& str, const std::string& delim, bool trim_empty = false);
-    static std::string Join(const std::vector<std::string>& tokens, const std::string& delim, const bool trim_empty = false);
-    static std::string Trim(const std::string& str, const std::string& blank = kBlankChars);
-    static std::string Slice(const std::string& str, int start, int end = INT_MAX);
-    static std::string Repeat(const std::string& str, size_t times);
-    static std::string ReplaceAll(const std::string& str, const std::string& old_sub_str, const std::string& new_sub_str);
-    static std::string ToUpper(const std::string& str);
-    static std::string ToLower(const std::string& str);
-    static std::string Format(const char* format, ...);
-    static bool StartsWith(const char* str, const char* x, bool ignore_case = false);
-    static bool StartsWith(const std::string& str, const std::string& x, bool ignore_case = false);
-    static bool EndsWith(const char* str, const char* x, bool ignore_case = false);
-    static bool EndsWith(const std::string& str, const std::string& x, bool ignore_case = false);
-    static bool Contains(const char* str, const char* x, bool ignore_case = false);
-    static bool Contains(const std::string& str, const std::string& x, bool ignore_case = false);
-    static int Compare(const char* a, const char* b, bool ignore_case = false);
-    static int Compare(const std::string& a, const std::string& b, bool ignore_case = false);
-    static int CompareN(const char* a, const char* b, size_t count, bool ignore_case = false);
-    static int CompareN(const std::string& a, const std::string& b, size_t count, bool ignore_case = false);
-
-private:
-    static constexpr const char* kBlankChars = " \f\n\r\t\v";
-};
-
-// Implemented referred to https://github.com/HondaDai/StringUtils
-
-inline std::string
+MISO_INLINE std::string
 StringUtils::ReadFile(const std::string& filepath)
 {
     std::ifstream ifs(filepath.c_str());
@@ -54,7 +20,7 @@ StringUtils::ReadFile(const std::string& filepath)
     return content;
 }
 
-inline void
+MISO_INLINE void
 StringUtils::WriteFile(const std::string& filepath, const std::string& content)
 {
     std::ofstream ofs(filepath.c_str());
@@ -63,7 +29,7 @@ StringUtils::WriteFile(const std::string& filepath, const std::string& content)
 }
 
 // Split string by blank chars.
-inline std::vector<std::string>
+MISO_INLINE std::vector<std::string>
 StringUtils::Split(const std::string& str)
 {
     std::vector<std::string> tokens;
@@ -84,7 +50,7 @@ StringUtils::Split(const std::string& str)
 
 // Split string by specific string.
 // If 'delim' is empty string, the returns vector contains one element consisting of the entire 'str'.
-inline std::vector<std::string>
+MISO_INLINE std::vector<std::string>
 StringUtils::Split(const std::string& str, const std::string& delim, bool trim_empty)
 {
     std::vector<std::string> tokens;
@@ -110,7 +76,7 @@ StringUtils::Split(const std::string& str, const std::string& delim, bool trim_e
     return tokens;
 }
 
-inline std::string
+MISO_INLINE std::string
 StringUtils::Join(const std::vector<std::string>& tokens, const std::string& delim, const bool trim_empty)
 {
     std::stringstream joined;
@@ -127,7 +93,7 @@ StringUtils::Join(const std::vector<std::string>& tokens, const std::string& del
     return joined.str();
 }
 
-inline std::string
+MISO_INLINE std::string
 StringUtils::Trim(const std::string& str, const std::string& blank)
 {
     size_t s = str.size();
@@ -149,7 +115,7 @@ StringUtils::Trim(const std::string& str, const std::string& blank)
     return (s <= e) ? str.substr(s, e - s + 1) : "";
 }
 
-inline std::string
+MISO_INLINE std::string
 StringUtils::Slice(const std::string& str, int start, int end)
 {
     int len = static_cast<int>(str.length());
@@ -159,7 +125,7 @@ StringUtils::Slice(const std::string& str, int start, int end)
     return str.substr(s, count);
 }
 
-inline std::string
+MISO_INLINE std::string
 StringUtils::Repeat(const std::string& str, size_t times)
 {
     std::stringstream repeated;
@@ -169,13 +135,13 @@ StringUtils::Repeat(const std::string& str, size_t times)
     return repeated.str();
 }
 
-inline std::string
+MISO_INLINE std::string
 StringUtils::ReplaceAll(const std::string& str, const std::string& old_sub_str, const std::string& new_sub_str)
 {
     return Join(Split(str, old_sub_str, false), new_sub_str, false);
 }
 
-inline std::string
+MISO_INLINE std::string
 StringUtils::ToUpper(const std::string& str)
 {
     std::string s(str);
@@ -183,7 +149,7 @@ StringUtils::ToUpper(const std::string& str)
     return s;
 }
 
-inline std::string
+MISO_INLINE std::string
 StringUtils::ToLower(const std::string& str)
 {
     std::string s(str);
@@ -191,7 +157,7 @@ StringUtils::ToLower(const std::string& str)
     return s;
 }
 
-inline std::string
+MISO_INLINE std::string
 StringUtils::Format(const char* format, ...)
 {
     va_list args1;
@@ -209,20 +175,20 @@ StringUtils::Format(const char* format, ...)
     return std::string(buffer.data());
 }
 
-inline bool
+MISO_INLINE bool
 StringUtils::StartsWith(const char* str, const char* x, bool ignore_case)
 {
     size_t x_len = (x != nullptr) ? strlen(x) : 0;
     return CompareN(str, x, x_len, ignore_case) == 0;
 }
 
-inline bool
+MISO_INLINE bool
 StringUtils::StartsWith(const std::string& str, const std::string& x, bool ignore_case)
 {
     return StartsWith(str.c_str(), x.c_str(), ignore_case);
 }
 
-inline bool
+MISO_INLINE bool
 StringUtils::EndsWith(const char* str, const char* x, bool ignore_case)
 {
     size_t str_len = (str != nullptr) ? strlen(str) : 0;
@@ -232,19 +198,19 @@ StringUtils::EndsWith(const char* str, const char* x, bool ignore_case)
     return CompareN(start, x, x_len, ignore_case) == 0;
 }
 
-inline bool
+MISO_INLINE bool
 StringUtils::EndsWith(const std::string& str, const std::string& x, bool ignore_case)
 {
     return EndsWith(str.c_str(), x.c_str(), ignore_case);
 }
 
-inline bool
+MISO_INLINE bool
 StringUtils::Contains(const char* str, const char* x, bool ignore_case)
 {
     return Contains(std::string(str), std::string(x), ignore_case);
 }
 
-inline bool
+MISO_INLINE bool
 StringUtils::Contains(const std::string& str, const std::string& x, bool ignore_case)
 {
     return ignore_case ?
@@ -252,19 +218,19 @@ StringUtils::Contains(const std::string& str, const std::string& x, bool ignore_
         str.find(x) != std::string::npos;
 }
 
-inline int
+MISO_INLINE int
 StringUtils::Compare(const char* a, const char* b, bool ignore_case)
 {
     return CompareN(a, b, SIZE_MAX, ignore_case);
 }
 
-inline int
+MISO_INLINE int
 StringUtils::Compare(const std::string& a, const std::string& b, bool ignore_case)
 {
     return CompareN(a.c_str(), b.c_str(), SIZE_MAX, ignore_case);
 }
 
-inline int
+MISO_INLINE int
 StringUtils::CompareN(const char* a, const char* b, size_t count, bool ignore_case)
 {
     if (a == nullptr) {
@@ -283,12 +249,10 @@ StringUtils::CompareN(const char* a, const char* b, size_t count, bool ignore_ca
     return result;
 }
 
-inline int
+MISO_INLINE int
 StringUtils::CompareN(const std::string& a, const std::string& b, size_t count, bool ignore_case)
 {
     return CompareN(a.c_str(), b.c_str(), count, ignore_case);
 }
 
 } // namespace miso
-
-#endif // MISO_STRING_H_

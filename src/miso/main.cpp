@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-int main()
+void hello()
 {
     std::cout << "Hello miso!!\n" << std::endl;
 }

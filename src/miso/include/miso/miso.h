@@ -1,21 +1,23 @@
-#ifndef MISO_MISO_H_
-#define MISO_MISO_H_
+#ifndef MISO_MISO_HPP_
+#define MISO_MISO_HPP_
 
-#define _CRT_SECURE_NO_WARNINGS
+// Available defines
+// -----------------
+// MISO_HEADER_ONLY
 
-#include "miso/binary_reader.h"
-#include "miso/buffer.h"
-#include "miso/color.h"
-#include "miso/color_space.h"
-#include "miso/endian.h"
-#include "miso/interpolator.h"
-#include "miso/value.h"
-#include "miso/boolean.h"
-#include "miso/numeric.h"
-#include "miso/stream.h"
-#include "miso/memory_stream.h"
-#include "miso/file_stream.h"
-#include "miso/string_utils.h"
-#include "miso/xml_reader.h"
+#include "miso/binary_reader.hpp"
+#include "miso/boolean.hpp"
+#include "miso/buffer.hpp"
+#include "miso/color.hpp"
+#include "miso/colorspace_utils.hpp"
+#include "miso/endian_utils.hpp"
+#include "miso/file_stream.hpp"
+#include "miso/interpolator.hpp"
+#include "miso/memory_stream.hpp"
+#include "miso/numeric.hpp"
+#include "miso/stream.hpp"
+#include "miso/string_utils.hpp"
+#include "miso/value.hpp"
+#include "miso/xml_reader.hpp"
 
-#endif // MISO_MISO_H_
+#endif // MISO_MISO_HPP_

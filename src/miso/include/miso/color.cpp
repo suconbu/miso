@@ -1,71 +1,39 @@
-#ifndef MISO_COLOR_H_
-#define MISO_COLOR_H_
+#include "miso/color.hpp"
 
-#include <stdint.h>
-#include <string>
 #include <algorithm>
+#include <map>
+#include <string>
 
-#include "miso/color_space.h"
-#include "miso/numeric.h"
-#include "miso/string_utils.h"
+#include "miso/colorspace_utils.hpp"
+#include "miso/numeric.hpp"
+#include "miso/string_utils.hpp"
 
 namespace miso {
 
-class Color {
-public:
-    static const Color& GetInvalid() { const static Color invalid; return invalid; }
-    static Color TryParse(const char* str, size_t* consumed_out = nullptr);
-    static Color FromHsla(float h, float s, float l, float a);
-    static Color FromHsva(float h, float s, float v, float a);
-    static Color FromHtmlColorName(const char* name);
-    static Color FromHtmlColorName(const std::string& name) { return FromHtmlColorName(name.c_str()); }
+MISO_INLINE const Color&
+Color::GetInvalid()
+{
+    static const Color invalid;
+    return invalid;
+}
 
-    explicit Color(float r, float g, float b, float a) : R(r), G(g), B(b), A(a) {}
-    explicit Color(uint32_t rgba) : R(((rgba >> 24) & 0xFF) / 255.0f), G(((rgba >> 16) & 0xFF) / 255.0f), B(((rgba >> 8) & 0xFF) / 255.0f), A(((rgba >> 0) & 0xFF) / 255.0f) {}
-    explicit Color(const char* str) { *this = TryParse(str); }
-    explicit Color(const std::string& str) : Color(str.c_str()) {}
-
-    bool operator==(const Color& other) const;
-    bool operator!=(const Color& other) const;
-
-    bool IsValid() const { return !std::isnan(R) && !std::isnan(G) && !std::isnan(B) && !std::isnan(A); }
-    uint32_t ToUint32() const;
-    Color GetInterpolated(const Color& end_value, const Interpolator& interpolator, float progress) const;
-    std::string ToString(const char* format = nullptr) const;
-
-    float R = std::numeric_limits<float>::quiet_NaN();
-    float G = std::numeric_limits<float>::quiet_NaN();
-    float B = std::numeric_limits<float>::quiet_NaN();
-    float A = std::numeric_limits<float>::quiet_NaN();
-
-private:
-    static constexpr float kEqualTolerance = 0.0001f;
-    static bool TryParseHex(const char* str, Color& color_out, size_t* consumed_out);
-    static bool TryParseDec(const char* str, Color& color_out, size_t* consumed_out);
-
-    Color() = default;
-
-    std::string ToStringHex(const char* format) const;
-    std::string ToStringDec(const char* format) const;
-};
-
-inline Color
+MISO_INLINE Color
 Color::FromHsla(float h, float s, float l, float a)
 {
     float r, g, b;
-    ColorSpace::HslToRgb(h, s, l, &r, &g, &b);
+    ColorSpaceUtils::HslToRgb(h, s, l, &r, &g, &b);
     return Color(r, g, b, a);
 }
 
-inline Color
+MISO_INLINE Color
 Color::FromHsva(float h, float s, float v, float a)
 {
     float r, g, b;
-    ColorSpace::HsvToRgb(h, s, v, &r, &g, &b);
+    ColorSpaceUtils::HsvToRgb(h, s, v, &r, &g, &b);
     return Color(r, g, b, a);
 }
 
-inline Color
+MISO_INLINE Color
 Color::FromHtmlColorName(const char* name)
 {
     static const std::map<std::string, const char*> named_colors = {
@@ -222,7 +190,7 @@ Color::FromHtmlColorName(const char* name)
     return (p != named_colors.end()) ? Color(p->second) : Color();
 }
 
-inline Color
+MISO_INLINE Color
 Color::TryParse(const char* str, size_t* consumed_out)
 {
     Color color;
@@ -231,7 +199,7 @@ Color::TryParse(const char* str, size_t* consumed_out)
     return color;
 }
 
-inline bool
+MISO_INLINE bool
 Color::TryParseHex(const char* str, Color& color_out, size_t* consumed_out)
 {
     if (str == nullptr) return false;
@@ -293,7 +261,7 @@ Color::TryParseHex(const char* str, Color& color_out, size_t* consumed_out)
     return true;
 }
 
-inline bool
+MISO_INLINE bool
 Color::TryParseDec(const char* str, Color& color_out, size_t* consumed_out)
 {
     if (str == nullptr) return false;
@@ -302,34 +270,34 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* consumed_out)
     auto start = s;
 
     int value_count = 0;
-    auto format = ColorSpaceType::Invalid;
+    auto format = ColorSpace::Invalid;
     if (StringUtils::StartsWith(s, "rgba")) {
         value_count = 4;
-        format = ColorSpaceType::Rgb;
+        format = ColorSpace::Rgb;
     } else if (StringUtils::StartsWith(s, "rgb")) {
         value_count = 3;
-        format = ColorSpaceType::Rgb;
+        format = ColorSpace::Rgb;
     } else if (StringUtils::StartsWith(s, "hsla")) {
         value_count = 4;
-        format = ColorSpaceType::Hsl;
+        format = ColorSpace::Hsl;
     } else if (StringUtils::StartsWith(s, "hsl")) {
         value_count = 3;
-        format = ColorSpaceType::Hsl;
+        format = ColorSpace::Hsl;
     } else if (StringUtils::StartsWith(s, "hsva")) {
         value_count = 4;
-        format = ColorSpaceType::Hsv;
+        format = ColorSpace::Hsv;
     } else if (StringUtils::StartsWith(s, "hsv")) {
         value_count = 3;
-        format = ColorSpaceType::Hsv;
+        format = ColorSpace::Hsv;
     } else {
         return false;
     }
     s += value_count;
 
     int vmax[4] = {};
-    if (format == ColorSpaceType::Rgb) {
+    if (format == ColorSpace::Rgb) {
         vmax[0] = vmax[1] = vmax[2] = vmax[3] = 255;
-    } else if (format == ColorSpaceType::Hsl || format == ColorSpaceType::Hsv) {
+    } else if (format == ColorSpace::Hsl || format == ColorSpace::Hsv) {
         vmax[0] = 360;
         vmax[1] = vmax[2] = vmax[3] = 100;
     } else {
@@ -370,13 +338,13 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* consumed_out)
     if (paren || value_index < value_count) return false;
 
 
-    if (format == ColorSpaceType::Rgb) {
+    if (format == ColorSpace::Rgb) {
         color_out.R = value[0]; color_out.G = value[1]; color_out.B = value[2]; color_out.A = value[3];
-    } else if (format == ColorSpaceType::Hsl) {
-        ColorSpace::HslToRgb(value[0], value[1], value[2], &color_out.R, &color_out.G, &color_out.B);
+    } else if (format == ColorSpace::Hsl) {
+        ColorSpaceUtils::HslToRgb(value[0], value[1], value[2], &color_out.R, &color_out.G, &color_out.B);
         color_out.A = value[3];
-    } else if (format == ColorSpaceType::Hsv) {
-        ColorSpace::HsvToRgb(value[0], value[1], value[2], &color_out.R, &color_out.G, &color_out.B);
+    } else if (format == ColorSpace::Hsv) {
+        ColorSpaceUtils::HsvToRgb(value[0], value[1], value[2], &color_out.R, &color_out.G, &color_out.B);
         color_out.A = value[3];
     } else {
         return false;
@@ -386,7 +354,7 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* consumed_out)
     return true;
 }
 
-inline uint32_t
+MISO_INLINE uint32_t
 Color::ToUint32() const
 {
     auto r = static_cast<uint8_t>(R * 255.0f + 0.5f);
@@ -396,7 +364,7 @@ Color::ToUint32() const
     return (r << 24) | (g << 16) | (b << 8) | a;
 }
 
-inline Color
+MISO_INLINE Color
 Color::GetInterpolated(const Color& end_value, const Interpolator& interpolator, float progress) const
 {
     return Color(
@@ -422,7 +390,7 @@ Color::GetInterpolated(const Color& end_value, const Interpolator& interpolator,
 // hsv%     | hsv(h:0-100%,s:0-100%,v:0-100%)
 // hsva     | hsv(h:0-360,s:0-100,v:0-100,a:0-255)
 // hsva%    | hsv(h:0-100%,s:0-100%,v:0-100%,a:0-100%)
-inline std::string
+MISO_INLINE std::string
 Color::ToString(const char* format) const
 {
     auto f = (format == nullptr) ? "hex" : format;
@@ -439,7 +407,7 @@ Color::ToString(const char* format) const
     return s;
 }
 
-inline std::string
+MISO_INLINE std::string
 Color::ToStringHex(const char* format) const
 {
     auto f = format;
@@ -464,7 +432,7 @@ Color::ToStringHex(const char* format) const
     }
 }
 
-inline std::string
+MISO_INLINE std::string
 Color::ToStringDec(const char* format) const
 {
     auto f = format;
@@ -477,11 +445,11 @@ Color::ToStringDec(const char* format) const
         vmax[0] = vmax[1] = vmax[2] = vmax[3] = 255.0f;
     } else if (StringUtils::StartsWith(f, "hsl", true)) {
         prefix = "hsl";
-        ColorSpace::RgbToHsl(R, G, B, &v[0], &v[1], &v[2]); v[3] = A;
+        ColorSpaceUtils::RgbToHsl(R, G, B, &v[0], &v[1], &v[2]); v[3] = A;
         vmax[0] = 360.0f; vmax[1] = vmax[2] = vmax[3] = 100.0f;
     } else if (StringUtils::StartsWith(f, "hsv", true)) {
         prefix = "hsv";
-        ColorSpace::RgbToHsv(R, G, B, &v[0], &v[1], &v[2]); v[3] = A;
+        ColorSpaceUtils::RgbToHsv(R, G, B, &v[0], &v[1], &v[2]); v[3] = A;
         vmax[0] = 360.0f; vmax[1] = vmax[2] = vmax[3] = 100.0f;
     } else {
         return "";
@@ -512,7 +480,7 @@ Color::ToStringDec(const char* format) const
         StringUtils::Format(format, prefix, vi[0], vi[1], vi[2]);
 }
 
-inline bool
+MISO_INLINE bool
 Color::operator==(const Color& other) const
 {
     return
@@ -522,12 +490,10 @@ Color::operator==(const Color& other) const
         (std::abs(A - other.A) < kEqualTolerance);
 }
 
-inline bool
+MISO_INLINE bool
 Color::operator!=(const Color& other) const
 {
     return !(*this == other);
 }
 
 } // namespace miso
-
-#endif // MISO_COLOR_H_

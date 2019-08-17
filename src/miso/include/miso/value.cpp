@@ -1,5 +1,4 @@
-#ifndef MISO_VALUE_H_
-#define MISO_VALUE_H_
+#include "miso/value.hpp"
 
 #include <algorithm>
 #include <iterator>
@@ -7,58 +6,21 @@
 #include <sstream>
 #include <vector>
 
-#include "miso/boolean.h"
-#include "miso/color.h"
-#include "miso/numeric.h"
-#include "miso/string_utils.h"
+#include "miso/boolean.hpp"
+#include "miso/color.hpp"
+#include "miso/numeric.hpp"
+#include "miso/string_utils.hpp"
 
 namespace miso {
 
-class Value {
-public:
-    static const Value& GetInvalid() { static const Value invalid; return invalid; }
+MISO_INLINE const Value&
+Value::GetInvalid()
+{
+    static const Value invalid;
+    return invalid;
+}
 
-    Value() {};
-    Value(const Value& value) { Copy(value, *this); }
-    Value(Value&& value) noexcept { Move(value, *this); }
-    explicit Value(const char* str);
-    explicit Value(const std::string& str) : Value(str.c_str()) {}
-    ~Value() { Dispose(); }
-
-    Value& operator=(const Value& value) { Copy(value, *this); return *this; }
-    const Value& operator[](size_t index) { return GetAt(index); }
-    bool operator==(const Value& value) const { return Equal(*this, value); }
-    bool operator!=(const Value& value) const { return !Equal(*this, value); }
-
-    bool IsValid() const;
-    size_t GetCount() const { return (type_ == ValueType::Array) ? array_->size() : 1; }
-    const Value& GetAt(size_t index) const;
-    bool AsBool(size_t index = 0) const;
-    const Numeric& AsNumeric(size_t index = 0) const;
-    const Color& AsColor(size_t index = 0) const;
-    Value GetInterpolated(const Value& end_value, const Interpolator& interpolator, float progress) const;
-    std::string ToString(const char* format = nullptr) const;
-
-private:
-    enum class ValueType { Invalid, Array, Boolean, Numeric, Color };
-
-    static Value TryParse(const char* str, size_t* consumed_out = nullptr);
-    static void Copy(const Value& from, Value& to);
-    static void Move(Value& from, Value& to);
-    static bool Equal(const Value& a, const Value& b);
-
-    void Dispose() { if (type_ == ValueType::Array) delete array_; }
-
-    ValueType type_ = ValueType::Invalid;
-    union {
-        std::vector<Value>* array_ = 0;
-        Boolean boolean_;
-        Numeric numeric_;
-        Color color_;
-    };
-};
-
-inline Value
+MISO_INLINE Value
 Value::TryParse(const char* str, size_t* consumed_out)
 {
     Value value;
@@ -72,7 +34,7 @@ Value::TryParse(const char* str, size_t* consumed_out)
     return value;
 }
 
-inline
+MISO_INLINE
 Value::Value(const char* str) : Value()
 {
     auto values = new std::vector<Value>();
@@ -105,7 +67,13 @@ Value::Value(const char* str) : Value()
     }
 }
 
-inline void
+MISO_INLINE
+Value::~Value()
+{
+    Dispose();
+}
+
+MISO_INLINE void
 Value::Copy(const Value& from, Value& to)
 {
     to.Dispose();
@@ -129,7 +97,7 @@ Value::Copy(const Value& from, Value& to)
     }
 }
 
-inline void
+MISO_INLINE void
 Value::Move(Value& from, Value& to)
 {
     to.Dispose();
@@ -148,7 +116,7 @@ Value::Move(Value& from, Value& to)
     }
 }
 
-inline bool
+MISO_INLINE bool
 Value::Equal(const Value& a, const Value& b)
 {
     if (a.type_ != b.type_) return false;
@@ -170,7 +138,7 @@ Value::Equal(const Value& a, const Value& b)
     }
 }
 
-inline bool
+MISO_INLINE bool
 Value::IsValid() const
 {
     return
@@ -181,7 +149,7 @@ Value::IsValid() const
         false;
 }
 
-inline const Value&
+MISO_INLINE const Value&
 Value::GetAt(size_t index) const
 {
     return
@@ -190,28 +158,28 @@ Value::GetAt(size_t index) const
         GetInvalid();
 }
 
-inline bool
+MISO_INLINE bool
 Value::AsBool(size_t index) const
 {
     auto v = GetAt(index);
     return (v.type_ == ValueType::Boolean) ? v.boolean_.IsTrue() : false;
 }
 
-inline const Numeric&
+MISO_INLINE const Numeric&
 Value::AsNumeric(size_t index) const
 {
     auto v = GetAt(index);
     return (v.type_ == ValueType::Numeric) ? v.numeric_ : Numeric::GetInvalid();
 }
 
-inline const Color&
+MISO_INLINE const Color&
 Value::AsColor(size_t index) const
 {
     auto v = GetAt(index);
     return (v.type_ == ValueType::Color) ? v.color_ : Color::GetInvalid();
 }
 
-inline Value
+MISO_INLINE Value
 Value::GetInterpolated(const Value& end_value, const Interpolator& interpolator, float progress) const
 {
     Value value;
@@ -237,7 +205,7 @@ Value::GetInterpolated(const Value& end_value, const Interpolator& interpolator,
     return value;
 }
 
-inline std::string
+MISO_INLINE std::string
 Value::ToString(const char* format) const
 {
     if (type_ == ValueType::Array) {
@@ -257,5 +225,3 @@ Value::ToString(const char* format) const
 }
 
 } // namespace miso
-
-#endif // MISO_VALUE_H_

@@ -1,76 +1,23 @@
-#ifndef MISO_XML_READER_H_
-#define MISO_XML_READER_H_
+#include "miso/xml_reader.hpp"
 
 #include <string>
-#include <map>
 #include <vector>
+
+#include "miso/string_utils.hpp"
 
 namespace miso {
 
-namespace libxml {
-#include "libxml/xmlreader.h"
-}
-
-class XmlAttribute {
-public:
-    XmlAttribute(const char* name, const char* value) : name_(name), value_(value) {}
-
-    const std::string& GetName() const { return name_; }
-    const std::string& GetValue() const { return value_; }
-
-private:
-    std::string name_;
-    std::string value_;
-};
-
-enum class XmlNodeType { None, StartElement, EmptyElement, EndElement, Text };
-
-class XmlReader {
-public:
-    explicit XmlReader(const char* filename);
-    XmlReader(const char* buffer, size_t size);
-    XmlReader(XmlReader&& other) noexcept;
-    ~XmlReader();
-
-    bool CanRead() const { return reader_ != nullptr && !reached_to_end_; }
-    bool HasError() { return !errors_.empty(); }
-    const std::vector<std::string>& GetErrors() { return errors_; }
-    bool Read();
-    bool MoveToElement(const char* element_name = nullptr, const char* attribute_name = nullptr, const char* attribute_value = nullptr);
-    bool MoveToElementInCurrentLevel(const char* element_name = nullptr, const char* attribute_name = nullptr, const char* attribute_value = nullptr);
-    bool MoveToEndElement() { return MoveToEndElementInside(false); }
-    bool MoveToEndOfParentElement() { return MoveToEndElementInside(true); }
-    XmlNodeType GetNodeType() const { return node_type_; }
-    std::string GetElementName() const;
-    std::string GetContentText() const;
-    const std::string GetAttributeValueString(const char* name) const;
-    const std::vector<XmlAttribute> GetAllAttributes() const;
-    int GetNestingLevel() const { return libxml::xmlTextReaderDepth(reader_); }
-
-private:
-    XmlReader(libxml::xmlParserInputBufferPtr buffer);
-    bool MoveToElementInside(const char* element_name, const char* attribute_name, const char* attribute_value, bool current_level);
-    bool MoveToEndElementInside(bool end_of_parent);
-    static void ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities severity, libxml::xmlTextReaderLocatorPtr locator);
-
-    libxml::xmlParserInputBufferPtr buffer_;
-    libxml::xmlTextReaderPtr reader_;
-    XmlNodeType node_type_;
-    bool reached_to_end_;
-    std::vector<std::string> errors_;
-};
-
-inline
+MISO_INLINE
 XmlReader::XmlReader(const char* filename) :
     XmlReader(libxml::xmlParserInputBufferCreateFilename(filename, libxml::XML_CHAR_ENCODING_UTF8))
 {}
 
-inline
+MISO_INLINE
 XmlReader::XmlReader(const char* buffer, size_t size) :
     XmlReader(libxml::xmlParserInputBufferCreateStatic(buffer, static_cast<int>(size), libxml::XML_CHAR_ENCODING_UTF8))
 {}
 
-inline
+MISO_INLINE
 XmlReader::XmlReader(libxml::xmlParserInputBufferPtr buffer) :
     buffer_(buffer),
     reader_(libxml::xmlNewTextReader(buffer, nullptr)),
@@ -84,7 +31,7 @@ XmlReader::XmlReader(libxml::xmlParserInputBufferPtr buffer) :
     }
 }
 
-inline
+MISO_INLINE
 XmlReader::XmlReader(XmlReader&& other) noexcept :
     buffer_(other.buffer_), reader_(other.reader_)
 {
@@ -92,14 +39,14 @@ XmlReader::XmlReader(XmlReader&& other) noexcept :
     other.buffer_ = nullptr;
 }
 
-inline
+MISO_INLINE
 XmlReader::~XmlReader()
 {
     libxml::xmlFreeTextReader(reader_);
     libxml::xmlFreeParserInputBuffer(buffer_);
 }
 
-inline bool
+MISO_INLINE bool
 XmlReader::Read()
 {
     if (reader_ == nullptr) return false;
@@ -129,19 +76,19 @@ XmlReader::Read()
     return true;
 }
 
-inline bool
+MISO_INLINE bool
 XmlReader::MoveToElement(const char* element_name, const char* attribute_name, const char* attribute_value)
 {
     return MoveToElementInside(element_name, attribute_name, attribute_value, false);
 }
 
-inline bool
+MISO_INLINE bool
 XmlReader::MoveToElementInCurrentLevel(const char* element_name, const char* attribute_name, const char* attribute_value)
 {
     return MoveToElementInside(element_name, attribute_name, attribute_value, true);
 }
 
-inline bool
+MISO_INLINE bool
 XmlReader::MoveToElementInside(const char* element_name, const char* attribute_name, const char* attribute_value, bool only_current_level)
 {
     int count = 1;
@@ -197,7 +144,7 @@ XmlReader::MoveToElementInside(const char* element_name, const char* attribute_n
     return true;
 }
 
-inline bool
+MISO_INLINE bool
 XmlReader::MoveToEndElementInside(bool end_of_parent)
 {
     int count = 1;
@@ -229,7 +176,7 @@ XmlReader::MoveToEndElementInside(bool end_of_parent)
     return true;
 }
 
-inline std::string
+MISO_INLINE std::string
 XmlReader::GetElementName() const
 {
     std::string name_str;
@@ -243,7 +190,7 @@ XmlReader::GetElementName() const
 }
 
 
-inline std::string
+MISO_INLINE std::string
 XmlReader::GetContentText() const
 {
     std::string text_str;
@@ -254,7 +201,7 @@ XmlReader::GetContentText() const
     return text_str;
 }
 
-inline const std::string
+MISO_INLINE const std::string
 XmlReader::GetAttributeValueString(const char* name) const
 {
     std::string value_str;
@@ -271,7 +218,7 @@ XmlReader::GetAttributeValueString(const char* name) const
 }
 
 
-inline const std::vector<XmlAttribute>
+MISO_INLINE const std::vector<XmlAttribute>
 XmlReader::GetAllAttributes() const
 {
     std::vector<XmlAttribute> attributes;
@@ -290,7 +237,7 @@ XmlReader::GetAllAttributes() const
     return attributes;
 }
 
-inline void
+MISO_INLINE void
 XmlReader::ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities severity, libxml::xmlTextReaderLocatorPtr locator)
 {
     (void)locator;
@@ -302,5 +249,3 @@ XmlReader::ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities 
 }
 
 } // namespace miso
-
-#endif // MISO_XML_READER_H_

@@ -1,63 +1,14 @@
-#ifndef MISO_INTERPOLATOR_H_
-#define MISO_INTERPOLATOR_H_
+#include "miso/interpolator.hpp"
 
-#include <array>
+#include <algorithm>
 #include <cmath>
+#include <string>
 
-#include "miso/string_utils.h"
+#include "miso/string_utils.hpp"
 
 namespace miso {
 
-class Interpolator {
-public:
-    Interpolator() = delete;
-    explicit Interpolator(const char* name);
-    explicit Interpolator(const std::string& name) : Interpolator(name.c_str()) {}
-    explicit Interpolator(float x1, float y1, float x2, float y2);
-
-    bool IsValid() { return function_ != None; }
-    float Interpolate(float start, float end, float progress) const { return function_(*this, progress, start, end - start); }
-
-private:
-    static constexpr int kSampleCount = 11;
-    static constexpr float kSampleStep = 1.0f / (kSampleCount - 1);
-    static constexpr int kNewtonRaphsonMaxIterations = 4;
-    static constexpr float kNewtonMinSlope = 0.001f;
-    static constexpr float kSubdivisionPrecision = 0.0000001f;
-    static constexpr int kSubdivisionMaxIterations = 10;
-    static constexpr float kPi = 3.1415926535f;
-
-    static float None(const Interpolator& self, float t, float s, float d) { return StepStart(self, t, s, d); }
-    static float Bezier(const Interpolator& self, float t, float s, float d);
-    static float StepStart(const Interpolator& self, float t, float s, float d) { (void)self;  return (t <= 0.0f) ? s : (s + d); }
-    static float StepEnd(const Interpolator& self, float t, float s, float d) { (void)self; return (t < 1.0f) ? s : (s + d); }
-    static float EaseInElastic(const Interpolator& self, float t, float s, float d);
-    static float EaseOutElastic(const Interpolator& self, float t, float s, float d);
-    static float EaseInOutElastic(const Interpolator& self, float t, float s, float d);
-    static float EaseInBounce(const Interpolator& self, float t, float s, float d);
-    static float EaseOutBounce(const Interpolator& self, float t, float s, float d);
-    static float EaseInOutBounce(const Interpolator& self, float t, float s, float d);
-
-    static float CalculateBezier(float t, float a1, float a2) { return ((GetA(a1, a2) * t + GetB(a1, a2)) * t + GetC(a1)) * t; }
-    static float CalculateSlope(float t, float a1, float a2) { return (3.0f * GetA(a1, a2) * t + 2.0f * GetB(a1, a2)) * t + GetC(a1); }
-    static float GetA(float a1, float a2) { return 1.0f - 3.0f * a2 + 3.0f * a1; }
-    static float GetB(float a1, float a2) { return 3.0f * a2 - 6.0f * a1; }
-    static float GetC(float a1) { return 3.0f * a1; }
-    static float GetT(const Interpolator& self, float x);
-    static float NewtonRaphsonIterate(float x, float guess_t, float x1, float x2);
-    static float BinarySubdivide(float x, float a, float b, float x1, float x2);
-
-    void InitializeBezier(float x1, float y1, float x2, float y2);
-
-    float(*function_)(const Interpolator&, float, float, float) = None;
-    float x1_ = 0.0f;
-    float y1_ = 0.0f;
-    float x2_ = 0.0f;
-    float y2_ = 0.0f;
-    std::array<float, kSampleCount> samples_;
-};
-
-inline
+MISO_INLINE
 Interpolator::Interpolator(const char* name)
 {
     // Testing for (a == b + c) or (a == c + b) with ignore case
@@ -134,7 +85,7 @@ Interpolator::Interpolator(const char* name)
     else function_ = None;
 }
 
-inline float
+MISO_INLINE float
 Interpolator::EaseInElastic(const Interpolator& self, float t, float s, float d)
 {
     if (1.0f <= t) return s + d;
@@ -142,7 +93,7 @@ Interpolator::EaseInElastic(const Interpolator& self, float t, float s, float d)
     float n2 = n1 / 4.0f;
     return -(d * std::powf(2.0f, 10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPi * 2.0f / n1)) + s;
 }
-inline float
+MISO_INLINE float
 Interpolator::EaseOutElastic(const Interpolator& self, float t, float s, float d)
 {
     if (1.0f <= t) return s + d;
@@ -151,7 +102,7 @@ Interpolator::EaseOutElastic(const Interpolator& self, float t, float s, float d
     return d * std::powf(2.0f, -10.0f * t) * std::sinf((t - n2) * kPi * 2.0f / n1) + d + s;
 }
 
-inline float
+MISO_INLINE float
 Interpolator::EaseInOutElastic(const Interpolator& self, float t, float s, float d)
 {
     if (1.0f <= t) return s + d;
@@ -163,13 +114,13 @@ Interpolator::EaseInOutElastic(const Interpolator& self, float t, float s, float
         d * std::powf(2.0f, -10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPi * 2.0f / n1) * 0.5f + d + s;
 }
 
-inline float
+MISO_INLINE float
 Interpolator::EaseInBounce(const Interpolator& self, float t, float s, float d)
 {
     return d - EaseOutBounce(self, 1.0f - t, 0.0f, d) + s;
 }
 
-inline float
+MISO_INLINE float
 Interpolator::EaseOutBounce(const Interpolator& self, float t, float s, float d)
 {
     if (t < 0.364f) {
@@ -187,7 +138,7 @@ Interpolator::EaseOutBounce(const Interpolator& self, float t, float s, float d)
     return d * (7.563f * t * t + 0.984f) + s;
 }
 
-inline float
+MISO_INLINE float
 Interpolator::EaseInOutBounce(const Interpolator& self, float t, float s, float d)
 {
     return (t < 0.5f) ?
@@ -195,14 +146,14 @@ Interpolator::EaseInOutBounce(const Interpolator& self, float t, float s, float 
         EaseOutBounce(self, t * 2.0f - 1.0f, 0.0f, d) * 0.5f + d * 0.5f + s;
 }
 
-inline
+MISO_INLINE
 Interpolator::Interpolator(float x1, float y1, float x2, float y2)
 {
     if (x1 < 0.0f || 1.0f < x2) return;
     InitializeBezier(x1, y1, x2, y2);
 }
 
-inline void
+MISO_INLINE void
 Interpolator::InitializeBezier(float x1, float y1, float x2, float y2)
 {
     x1_ = x1;
@@ -215,7 +166,7 @@ Interpolator::InitializeBezier(float x1, float y1, float x2, float y2)
     }
 }
 
-inline float
+MISO_INLINE float
 Interpolator::GetT(const Interpolator& self, float x)
 {
     int current_sample = 1;
@@ -241,7 +192,7 @@ Interpolator::GetT(const Interpolator& self, float x)
         BinarySubdivide(x, interval_start, interval_start + kSampleStep, x1, x2);
 }
 
-inline float
+MISO_INLINE float
 Interpolator::NewtonRaphsonIterate(float x, float t, float x1, float x2)
 {
     for (int i = 0; i < kNewtonRaphsonMaxIterations; ++i) {
@@ -254,7 +205,7 @@ Interpolator::NewtonRaphsonIterate(float x, float t, float x1, float x2)
     return t;
 }
 
-inline float
+MISO_INLINE float
 Interpolator::BinarySubdivide(float x, float a, float b, float x1, float x2)
 {
     float cx, ct;
@@ -271,7 +222,7 @@ Interpolator::BinarySubdivide(float x, float a, float b, float x1, float x2)
     return ct;
 }
 
-inline float
+MISO_INLINE float
 Interpolator::Bezier(const Interpolator& self, float t, float s, float d)
 {
     return
@@ -281,5 +232,3 @@ Interpolator::Bezier(const Interpolator& self, float t, float s, float d)
 }
 
 } // namespace miso
-
-#endif // MISO_INTERPOLATOR_H_

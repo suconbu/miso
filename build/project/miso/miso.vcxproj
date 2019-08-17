@@ -19,38 +19,36 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\miso\include\miso\binary_reader.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\boolean.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\buffer.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\color.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\colorspace_utils.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\common.h" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\endian_utils.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\file_stream.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\interpolator.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\memory_stream.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\miso.h" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\value.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\numeric.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\stream.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\string_utils.hpp" />
-    <ClInclude Include="..\..\..\src\miso\include\miso\xml_reader.hpp" />
+    <ClCompile Include="..\..\..\src\binary_reader.cpp" />
+    <ClCompile Include="..\..\..\src\boolean.cpp" />
+    <ClCompile Include="..\..\..\src\color.cpp" />
+    <ClCompile Include="..\..\..\src\colorspace_utils.cpp" />
+    <ClCompile Include="..\..\..\src\file_stream.cpp" />
+    <ClCompile Include="..\..\..\src\interpolator.cpp" />
+    <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\src\memory_stream.cpp" />
+    <ClCompile Include="..\..\..\src\numeric.cpp" />
+    <ClCompile Include="..\..\..\src\string_utils.cpp" />
+    <ClCompile Include="..\..\..\src\value.cpp" />
+    <ClCompile Include="..\..\..\src\xml_reader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\miso\include\miso\binary_reader.cpp" />
-    <ClCompile Include="..\..\..\src\miso\include\miso\boolean.cpp" />
-    <ClCompile Include="..\..\..\src\miso\include\miso\color.cpp" />
-    <ClCompile Include="..\..\..\src\miso\include\miso\colorspace_utils.cpp" />
-    <ClCompile Include="..\..\..\src\miso\main.cpp" />
-    <ClCompile Include="..\..\..\src\miso\include\miso\file_stream.cpp" />
-    <ClCompile Include="..\..\..\src\miso\include\miso\interpolator.cpp" />
-    <ClCompile Include="..\..\..\src\miso\include\miso\memory_stream.cpp" />
-    <ClCompile Include="..\..\..\src\miso\include\miso\numeric.cpp" />
-    <ClCompile Include="..\..\..\src\miso\include\miso\value.cpp" />
-    <ClCompile Include="..\..\..\src\miso\include\miso\xml_reader.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\src\miso\include\miso\string_utils.cpp" />
+    <ClInclude Include="..\..\..\include\miso\binary_reader.hpp" />
+    <ClInclude Include="..\..\..\include\miso\boolean.hpp" />
+    <ClInclude Include="..\..\..\include\miso\buffer.hpp" />
+    <ClInclude Include="..\..\..\include\miso\color.hpp" />
+    <ClInclude Include="..\..\..\include\miso\colorspace_utils.hpp" />
+    <ClInclude Include="..\..\..\include\miso\common.h" />
+    <ClInclude Include="..\..\..\include\miso\endian_utils.hpp" />
+    <ClInclude Include="..\..\..\include\miso\file_stream.hpp" />
+    <ClInclude Include="..\..\..\include\miso\interpolator.hpp" />
+    <ClInclude Include="..\..\..\include\miso\memory_stream.hpp" />
+    <ClInclude Include="..\..\..\include\miso\miso.h" />
+    <ClInclude Include="..\..\..\include\miso\numeric.hpp" />
+    <ClInclude Include="..\..\..\include\miso\stream.hpp" />
+    <ClInclude Include="..\..\..\include\miso\string_utils.hpp" />
+    <ClInclude Include="..\..\..\include\miso\value.hpp" />
+    <ClInclude Include="..\..\..\include\miso\xml_reader.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -132,7 +130,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src\miso\include;$(SolutionDir)..\src\miso;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -157,7 +155,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src\miso\include;$(SolutionDir)..\src\miso;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -184,7 +182,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src\miso\include;$(SolutionDir)..\src\miso;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -213,7 +211,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src\miso\include;$(SolutionDir)..\src\miso;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>

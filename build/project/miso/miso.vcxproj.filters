@@ -7,96 +7,96 @@
     <Filter Include="include\miso">
       <UniqueIdentifier>{d4d88f54-6321-43cd-9553-cbd854359987}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{855b3ae9-c482-44a3-9a65-44d988cc04c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\miso\include\miso\miso.h">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\string_utils.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\endian_utils.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\binary_reader.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\boolean.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\buffer.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\color.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\colorspace_utils.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\file_stream.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\interpolator.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\memory_stream.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\numeric.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\stream.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\value.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\xml_reader.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\miso\include\miso\common.h">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\src\miso\main.cpp" />
-    <ClCompile Include="..\..\..\src\miso\include\miso\endian.cpp">
-      <Filter>include\miso</Filter>
+    <ClCompile Include="..\..\..\src\memory_stream.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\numeric.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\string_utils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\value.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\xml_reader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\binary_reader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\boolean.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\color.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\colorspace_utils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\file_stream.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\interpolator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\main.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\src\miso\include\miso\binary_reader.cpp">
+    <ClInclude Include="..\..\..\include\miso\endian_utils.hpp">
       <Filter>include\miso</Filter>
-    </None>
-    <None Include="..\..\..\src\miso\include\miso\boolean.cpp">
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\file_stream.hpp">
       <Filter>include\miso</Filter>
-    </None>
-    <None Include="..\..\..\src\miso\include\miso\color.cpp">
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\interpolator.hpp">
       <Filter>include\miso</Filter>
-    </None>
-    <None Include="..\..\..\src\miso\include\miso\colorspace_utils.cpp">
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\memory_stream.hpp">
       <Filter>include\miso</Filter>
-    </None>
-    <None Include="..\..\..\src\miso\include\miso\file_stream.cpp">
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\numeric.hpp">
       <Filter>include\miso</Filter>
-    </None>
-    <None Include="..\..\..\src\miso\include\miso\interpolator.cpp">
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\stream.hpp">
       <Filter>include\miso</Filter>
-    </None>
-    <None Include="..\..\..\src\miso\include\miso\memory_stream.cpp">
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\string_utils.hpp">
       <Filter>include\miso</Filter>
-    </None>
-    <None Include="..\..\..\src\miso\include\miso\numeric.cpp">
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\value.hpp">
       <Filter>include\miso</Filter>
-    </None>
-    <None Include="..\..\..\src\miso\include\miso\string_utils.cpp">
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\xml_reader.hpp">
       <Filter>include\miso</Filter>
-    </None>
-    <None Include="..\..\..\src\miso\include\miso\value.cpp">
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\common.h">
       <Filter>include\miso</Filter>
-    </None>
-    <None Include="..\..\..\src\miso\include\miso\xml_reader.cpp">
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\miso.h">
       <Filter>include\miso</Filter>
-    </None>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\binary_reader.hpp">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\boolean.hpp">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\buffer.hpp">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\color.hpp">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\colorspace_utils.hpp">
+      <Filter>include\miso</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

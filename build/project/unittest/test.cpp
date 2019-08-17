@@ -619,6 +619,31 @@ TEST_F(MisoTest, XmlReader_MoveToElement)
     }
 }
 
+TEST_F(MisoTest, MoveToElementInCurrentLevel)
+{
+    TEST_TRACE("");
+    {
+        miso::XmlReader reader("test2.xml");
+        ASSERT_TRUE(reader.CanRead());
+        EXPECT_TRUE(reader.MoveToElement(nullptr, "id", "element2.2"));
+        EXPECT_TRUE(reader.MoveToElementInCurrentLevel(nullptr, "tag", "*"));
+        EXPECT_STREQ("element2.5", reader.GetAttributeValueString("id").c_str());
+    }
+    {
+        miso::XmlReader reader("test2.xml");
+        ASSERT_TRUE(reader.CanRead());
+        EXPECT_TRUE(reader.MoveToElement(nullptr, "id", "element2.4"));
+        EXPECT_FALSE(reader.MoveToElementInCurrentLevel(nullptr, "tag", "y"));
+    }
+    {
+        miso::XmlReader reader("test2.xml");
+        ASSERT_TRUE(reader.CanRead());
+        EXPECT_TRUE(reader.MoveToElement(nullptr, "id", "element2.4.1"));
+        EXPECT_FALSE(reader.MoveToElementInCurrentLevel(nullptr, "tag", "x"));
+        EXPECT_STREQ("element", reader.GetElementName().c_str());
+    }
+}
+
 TEST_F(MisoTest, XmlReader_MoveToEndElement)
 {
     TEST_TRACE("");
@@ -1370,10 +1395,10 @@ TEST_F(MisoTest, XmlReader_Performance)
                 volatile auto name = reader.GetElementName();
             } else if (type == miso::XmlNodeType::Text) {
                 volatile auto text = reader.GetContentText();
-            } else {
+        } else {
                 ;
             }
-        }
     }
 }
+    }
 #endif

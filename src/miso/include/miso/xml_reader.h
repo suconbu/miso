@@ -37,6 +37,7 @@ public:
     const std::vector<std::string>& GetErrors() { return errors_; }
     bool Read();
     bool MoveToElement(const char* element_name = nullptr, const char* attribute_name = nullptr, const char* attribute_value = nullptr);
+    bool MoveToElementInCurrentLevel(const char* element_name = nullptr, const char* attribute_name = nullptr, const char* attribute_value = nullptr);
     bool MoveToEndElement() { return MoveToEndElementInside(false); }
     bool MoveToEndOfParentElement() { return MoveToEndElementInside(true); }
     XmlNodeType GetNodeType() const { return node_type_; }
@@ -48,6 +49,7 @@ public:
 
 private:
     XmlReader(libxml::xmlParserInputBufferPtr buffer);
+    bool MoveToElementInside(const char* element_name, const char* attribute_name, const char* attribute_value, bool current_level);
     bool MoveToEndElementInside(bool end_of_parent);
     static void ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities severity, libxml::xmlTextReaderLocatorPtr locator);
 
@@ -130,6 +132,23 @@ XmlReader::Read()
 inline bool
 XmlReader::MoveToElement(const char* element_name, const char* attribute_name, const char* attribute_value)
 {
+    return MoveToElementInside(element_name, attribute_name, attribute_value, false);
+}
+
+inline bool
+XmlReader::MoveToElementInCurrentLevel(const char* element_name, const char* attribute_name, const char* attribute_value)
+{
+    return MoveToElementInside(element_name, attribute_name, attribute_value, true);
+}
+
+inline bool
+XmlReader::MoveToElementInside(const char* element_name, const char* attribute_name, const char* attribute_value, bool only_current_level)
+{
+    int count = 1;
+    if (node_type_ == XmlNodeType::StartElement) {
+        ++count;
+    }
+
     while (true) {
         if (libxml::xmlTextReaderRead(reader_) != 1) {
             reached_to_end_ = true;
@@ -138,27 +157,40 @@ XmlReader::MoveToElement(const char* element_name, const char* attribute_name, c
 
         auto type = libxml::xmlTextReaderNodeType(reader_);
         if (type == libxml::XML_READER_TYPE_ELEMENT) {
-            if (element_name != nullptr) {
-                auto name = reinterpret_cast<const char*>(libxml::xmlTextReaderConstName(reader_));
-                if (name == nullptr || strcmp(element_name, name) != 0) continue;
-            }
-            if (attribute_name != nullptr) {
-                auto value = reinterpret_cast<char*>(
-                    libxml::xmlTextReaderGetAttribute(reader_, reinterpret_cast<const libxml::xmlChar*>(attribute_name)));
-                if (value == nullptr ||
-                    (attribute_value != nullptr && strcmp(attribute_value, value) != 0)) {
-                    libxml::xmlFree(value);
-                    continue;
+            bool found = false;
+            do {
+                if (only_current_level && count != 1) {
+                    break;
                 }
-            }
+                if (element_name != nullptr) {
+                    auto name = reinterpret_cast<const char*>(libxml::xmlTextReaderConstName(reader_));
+                    if (name == nullptr || strcmp(element_name, name) != 0) break;
+                }
+                if (attribute_name != nullptr) {
+                    auto value = reinterpret_cast<char*>(
+                        libxml::xmlTextReaderGetAttribute(reader_, reinterpret_cast<const libxml::xmlChar*>(attribute_name)));
+                    if (value == nullptr ||
+                        (attribute_value != nullptr && strcmp(attribute_value, value) != 0)) {
+                        libxml::xmlFree(value);
+                        break;
+                    }
+                }
+                found = true;
+            } while (false);
 
-            if (libxml::xmlTextReaderIsEmptyElement(reader_) == 1) {
-                node_type_ = XmlNodeType::EmptyElement;
-            } else {
-                node_type_ = XmlNodeType::StartElement;
+            bool empty_element = (libxml::xmlTextReaderIsEmptyElement(reader_) == 1);
+            if (found) {
+                node_type_ = empty_element ? XmlNodeType::EmptyElement : XmlNodeType::StartElement;
+                break;
             }
-
-            break;
+            if (only_current_level && !empty_element) {
+                ++count;
+            }
+        } else if (type == libxml::XML_READER_TYPE_END_ELEMENT) {
+            if (only_current_level && --count == 0) {
+                node_type_ = XmlNodeType::EndElement;
+                return false;
+            }
         }
     }
 

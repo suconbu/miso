@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root name="root_name">
+
+  <element id="element1"/>
+
+  <element id="element2">
+    <element id="element2.1">
+      <element id="element2.1.1">
+        :
+      </element>
+      <element id="element2.1.2">
+        :
+      </element>
+    </element>
+    <element id="element2.2"/>
+    <element id="element2.3" tag="x"/>
+    <element id="element2.4" tag="y">
+      <element id="element2.4.1" tag="z">
+        :
+      </element>
+      <element id="element2.4.2" tag="*">
+        :
+      </element>
+      <element id="element2.4.3" tag="*"/>
+    </element>
+    <element id="element2.5" tag="*">
+      :
+    </element>
+    <element id="element2.6"/>
+  </element>
+
+  <element id="element3" tag="*">
+    <element id="element3.1">
+      <element id="element3.1.1">
+        :
+      </element>
+      <element id="element3.1.2">
+        :
+      </element>
+    </element>
+    <element id="element3.2">
+      <element id="element3.2.1">
+        :
+      </element>
+    </element>
+    <element id="element3.3"/>
+  </element>
+</root>

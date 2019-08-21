@@ -954,6 +954,14 @@ TEST_F(MisoTest, Value_Interpolate)
         auto c = a.GetInterpolated(b, miso::Interpolator("linear"), 0.5f);
         EXPECT_FALSE(c.IsValid());
     }
+    {
+        miso::Value a("false");
+        miso::Value b("true");
+        EXPECT_FALSE(a.GetInterpolated(b, miso::Interpolator("linear"), 0.0f).AsBool());
+        EXPECT_FALSE(a.GetInterpolated(b, miso::Interpolator("linear"), 0.4f).AsBool());
+        EXPECT_TRUE(a.GetInterpolated(b, miso::Interpolator("linear"), 0.5f).AsBool());
+        EXPECT_TRUE(a.GetInterpolated(b, miso::Interpolator("linear"), 1.0f).AsBool());
+    }
 }
 
 TEST_F(MisoTest, Boolean)

@@ -16,7 +16,7 @@ public:
 
     explicit Boolean(const char* str) : Boolean() { *this = Boolean::TryParse(str); }
     explicit Boolean(const std::string& str) : Boolean(str.c_str()) {}
-    explicit Boolean(bool value) : value_(value) {}
+    explicit Boolean(bool value) : value_(value), valid_(true) {}
 
     bool operator==(const Boolean& other) const { return IsTrue() == other.IsTrue(); }
     bool operator!=(const Boolean& other) const { return !(*this == other); }

@@ -41,7 +41,7 @@ Boolean::TryParse(const char* str, size_t* consumed_out)
 
     Boolean boolean;
     boolean.value_ = value;
-    boolean.valid_ = valid;
+    boolean.valid_ = true;
     if (consumed_out != nullptr) *consumed_out = count;
 
     return boolean;
@@ -52,7 +52,7 @@ Boolean::GetInterpolated(const Boolean& end_value, const Interpolator& interpola
 {
     float start = value_ ? 1.0f : 0.0f;
     float end = end_value.value_ ? 1.0f : 0.0f;
-    return Boolean(interpolator.Interpolate(start, end, progress));
+    return Boolean(0.5f <= interpolator.Interpolate(start, end, progress));
 }
 
 MISO_INLINE std::string

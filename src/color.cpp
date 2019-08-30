@@ -269,7 +269,7 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* consumed_out)
     auto s = str;
     auto start = s;
 
-    int value_count = 0;
+    size_t value_count = 0;
     auto format = ColorSpace::Invalid;
     if (StringUtils::StartsWith(s, "rgba")) {
         value_count = 4;

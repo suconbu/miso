@@ -123,7 +123,7 @@ Value::Equal(const Value& a, const Value& b)
 
     if (a.type_ == ValueType::Array) {
         if (a.array_->size() != b.array_->size()) return false;
-        for (int i = 0; i < a.array_->size(); ++i) {
+        for (size_t i = 0; i < a.array_->size(); ++i) {
             if (a.GetAt(i) != b.GetAt(i)) return false;
         }
         return true;
@@ -161,21 +161,21 @@ Value::GetAt(size_t index) const
 MISO_INLINE bool
 Value::AsBool(size_t index) const
 {
-    auto v = GetAt(index);
+    auto& v = GetAt(index);
     return (v.type_ == ValueType::Boolean) ? v.boolean_.IsTrue() : false;
 }
 
 MISO_INLINE const Numeric&
 Value::AsNumeric(size_t index) const
 {
-    auto v = GetAt(index);
+    auto& v = GetAt(index);
     return (v.type_ == ValueType::Numeric) ? v.numeric_ : Numeric::GetInvalid();
 }
 
 MISO_INLINE const Color&
 Value::AsColor(size_t index) const
 {
-    auto v = GetAt(index);
+    auto& v = GetAt(index);
     return (v.type_ == ValueType::Color) ? v.color_ : Color::GetInvalid();
 }
 
@@ -190,7 +190,7 @@ Value::GetInterpolated(const Value& end_value, const Interpolator& interpolator,
         value.array_ = new std::vector<Value>();
         if (value.array_ == nullptr) return Value::GetInvalid();
         value.array_->reserve(array_->size());
-        for (int i = 0; i < array_->size(); ++i) {
+        for (size_t i = 0; i < array_->size(); ++i) {
             value.array_->push_back(array_->at(i).GetInterpolated(end_value.array_->at(i), interpolator, progress));
         }
     } else if (type_ == ValueType::Boolean) {
@@ -210,7 +210,7 @@ Value::ToString(const char* format) const
 {
     if (type_ == ValueType::Array) {
         std::stringstream s;
-        for (int i = 0; i < array_->size() - 1; ++i) {
+        for (size_t i = 0; i < array_->size() - 1; ++i) {
             s << array_->at(i).ToString(format) << " ";
         }
         s << array_->at(array_->size() - 1).ToString(format);

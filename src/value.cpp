@@ -110,26 +110,6 @@ Value::Move(Value& from, Value& to)
 }
 
 MISO_INLINE bool
-Value::Equal(const Value& a, const Value& b)
-{
-    if (a.type_ != b.type_) return false;
-
-    if (a.type_ == ValueType::Array) {
-        if (a.array_->size() != b.array_->size()) return false;
-        for (size_t i = 0; i < a.array_->size(); ++i) {
-            if (a.GetAt(i) != b.GetAt(i)) return false;
-        }
-        return true;
-    } else if (a.type_ == ValueType::Numeric) {
-        return a.numeric_ == b.numeric_;
-    } else if (a.type_ == ValueType::Color) {
-        return a.color_ == b.color_;
-    } else {
-        return false;
-    }
-}
-
-MISO_INLINE bool
 Value::IsValid() const
 {
     return
@@ -234,6 +214,32 @@ Value::ToString(const char* format) const
             (type_ == ValueType::Color) ? color_.ToString(format) :
             "";
     }
+}
+
+MISO_INLINE bool
+Value::operator==(const Value& other) const
+{
+    if (type_ != other.type_) return false;
+
+    if (type_ == ValueType::Array) {
+        if (array_->size() != other.array_->size()) return false;
+        for (size_t i = 0; i < array_->size(); ++i) {
+            if (GetAt(i) != other.GetAt(i)) return false;
+        }
+        return true;
+    } else if (type_ == ValueType::Numeric) {
+        return numeric_ == other.numeric_;
+    } else if (type_ == ValueType::Color) {
+        return color_ == other.color_;
+    } else {
+        return false;
+    }
+}
+
+MISO_INLINE bool
+Value::operator!=(const Value& other) const
+{
+    return !(*this == other);
 }
 
 } // namespace miso

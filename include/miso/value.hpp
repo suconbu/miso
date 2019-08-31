@@ -24,8 +24,8 @@ public:
 
     Value& operator=(const Value& value) { Copy(value, *this); return *this; }
     const Value& operator[](size_t index) { return GetAt(index); }
-    bool operator==(const Value& value) const { return Equal(*this, value); }
-    bool operator!=(const Value& value) const { return !Equal(*this, value); }
+    bool operator==(const Value& other) const;
+    bool operator!=(const Value& value) const;
     Value operator*(double multiplier) const;
 
     bool IsValid() const;
@@ -43,7 +43,6 @@ private:
     static Value TryParse(const char* str, size_t* consumed_out = nullptr);
     static void Copy(const Value& from, Value& to);
     static void Move(Value& from, Value& to);
-    static bool Equal(const Value& a, const Value& b);
 
     void Dispose() { if (type_ == ValueType::Array) delete array_; }
 

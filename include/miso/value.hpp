@@ -48,7 +48,7 @@ private:
     static void Copy(const Value& from, Value& to);
     static void Move(Value& from, Value& to);
 
-    void Dispose() { if (type_ == ValueType::Array) delete array_; }
+    void Dispose();
 
     ValueType type_ = ValueType::Invalid;
     union {

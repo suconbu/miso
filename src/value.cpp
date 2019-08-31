@@ -49,19 +49,19 @@ Value::Value(const char* str) : Value()
         }
     }
 
-    if (*s != '\0') return;
-
-    if (values->size() > 1) {
+    if (*s != '\0') {
+        ;
+    } else if (values->size() > 1) {
         type_ = ValueType::Array;
         array_ = values;
         values = nullptr;
     } else if (values->size() == 1) {
         Copy(values->at(0), *this);
-        delete values;
-        values = nullptr;
     } else {
         ;
     }
+    delete values;
+    values = nullptr;
 }
 
 MISO_INLINE
@@ -106,6 +106,15 @@ Value::Move(Value& from, Value& to)
         to.color_ = from.color_;
     } else {
         ;
+    }
+}
+
+MISO_INLINE void
+Value::Dispose()
+{
+    if (type_ == ValueType::Array) {
+        delete array_;
+        array_ = nullptr;
     }
 }
 

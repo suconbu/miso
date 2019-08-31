@@ -81,8 +81,11 @@ TEST(Test, Initialize)
     // Create a local static instance for avoid false detection of memory leak.
     // miso::Numeric::GetUnitToSuffixMap
     miso::Numeric a("0%");
-    // miso::Color::FromHtmlColorName
-    miso::Color::FromHtmlColorName("white");
+    (void)miso::Value::GetInvalid();
+    (void)miso::Numeric::GetInvalid();
+    (void)miso::Color::GetInvalid();
+    (void)miso::Color::FromHtmlColorName("white");
+    (void)miso::Interpolator::GetInterpolator("linear");
 }
 
 TEST_F(MisoTest, BinaryReader_SizeAndPosition)

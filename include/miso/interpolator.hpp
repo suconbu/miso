@@ -57,7 +57,7 @@ private:
     float y1_ = 0.0f;
     float x2_ = 0.0f;
     float y2_ = 0.0f;
-    std::array<float, kSampleCount> samples_;
+    std::array<float, kSampleCount> samples_ = {};
 };
 
 } // namespace miso

@@ -34,14 +34,14 @@ private:
 
     void FillBuffer();
 
-    uint8_t buffer_[kBufferSize];
-    FILE *fp_;
-    size_t stream_size_;
-    size_t offset_;
-    uint8_t *current_;
-    uint8_t *begin_;
-    uint8_t *end_;
-    bool reached_to_end_;
+    uint8_t buffer_[kBufferSize] = {};
+    FILE* fp_ = nullptr;
+    size_t stream_size_ = 0;
+    size_t offset_ = 0;
+    uint8_t* current_ = nullptr;
+    uint8_t* begin_ = nullptr;
+    uint8_t* end_ = nullptr;
+    bool reached_to_end_ = false;
 };
 
 template<typename TAllocator>

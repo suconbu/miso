@@ -173,7 +173,9 @@ Interpolator::GetT(const Interpolator& self, float x)
 
     auto interval_start = static_cast<float>(current_sample) / (kSampleCount - 1);
 
-    auto dist = (x - samples[current_sample]) / (samples[current_sample + 1] - samples[current_sample]);
+    auto denom = samples[current_sample + 1] - samples[current_sample];
+    denom = (denom == 0.0f) ? 0.0000001f : denom;
+    auto dist = (x - samples[current_sample]) / denom;
     auto guess_t = interval_start + dist * kSampleStep;
 
     auto slope = CalculateSlope(guess_t, x1, x2);

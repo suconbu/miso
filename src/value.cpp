@@ -221,12 +221,12 @@ Value::operator*(double multiplier) const
         if (value.array_ == nullptr) return Value::GetInvalid();
         value.array_->reserve(array_->size());
         for (size_t i = 0; i < array_->size(); ++i) {
-            value.array_->push_back(array_->at(i) * multiplier);// .GetMultiplied(multiplier));
+            value.array_->push_back(array_->at(i) * multiplier);
         }
     } else if (type_ == ValueType::Numeric) {
-        value.numeric_ = numeric_ * multiplier;// Numeric::GetZero().GetInterpolated(numeric_, Interpolator("linear"), multiplier);
+        value.numeric_ = numeric_ * multiplier;
     } else if (type_ == ValueType::Color) {
-        value.color_ = color_ * multiplier;// Color::GetZero().GetInterpolated(color_, Interpolator("linear"), multiplier);
+        value.color_ = color_ * multiplier;
     } else {
         ;
     }

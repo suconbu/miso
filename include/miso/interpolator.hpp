@@ -10,15 +10,18 @@ namespace miso {
 
 class Interpolator {
 public:
-    Interpolator() = delete;
-    explicit Interpolator(const char* name);
-    explicit Interpolator(const std::string& name) : Interpolator(name.c_str()) {}
+    static const Interpolator& GetInterpolator(const char* name);
+    static const Interpolator& GetInterpolator(const std::string& name) { return GetInterpolator(name.c_str()); }
+
+    Interpolator() = default;
     explicit Interpolator(float x1, float y1, float x2, float y2);
 
-    bool IsValid() { return function_ != None; }
+    bool IsValid() const { return function_ != None; }
     float Interpolate(float start, float end, float progress) const { return function_(*this, progress, start, end - start); }
 
 private:
+    using Function = float(*)(const Interpolator&, float, float, float);
+
     static constexpr int kSampleCount = 11;
     static constexpr float kSampleStep = 1.0f / (kSampleCount - 1);
     static constexpr int kNewtonRaphsonMaxIterations = 4;
@@ -47,9 +50,9 @@ private:
     static float NewtonRaphsonIterate(float x, float guess_t, float x1, float x2);
     static float BinarySubdivide(float x, float a, float b, float x1, float x2);
 
-    void InitializeBezier(float x1, float y1, float x2, float y2);
+    explicit Interpolator(Function function) : function_(function) {}
 
-    float(*function_)(const Interpolator&, float, float, float) = None;
+    Function function_ = None;
     float x1_ = 0.0f;
     float y1_ = 0.0f;
     float x2_ = 0.0f;

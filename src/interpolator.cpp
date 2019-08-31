@@ -3,86 +3,97 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
+#include <map>
 
 #include "miso/string_utils.hpp"
 
 namespace miso {
 
-MISO_INLINE
-Interpolator::Interpolator(const char* name)
+MISO_INLINE const Interpolator&
+Interpolator::GetInterpolator(const char* name)
 {
-    // Testing for (a == b + c) or (a == c + b) with ignore case
-    // e.g.
-    // a:"EaseInSine" b:"sine" c:"easein" -> true
-    // a:"SineEaseIn" b:"sine" c:"easein" -> true
-    // a:"EaseSineIn" b:"sine" c:"easein" -> false
-    auto match = [](const char* a, const char* b, const char* c) {
-        auto b_len = strlen(b);
-        auto c_len = strlen(c);
-        if (StringUtils::CompareN(a, b, b_len, true) == 0) {
-            return StringUtils::Compare(a + b_len, c, true) == 0;
-        } else if (StringUtils::CompareN(a, c, c_len, true) == 0) {
-            return StringUtils::Compare(a + c_len, b, true) == 0;
-        } else {
-            return false;
-        }
-    };
-
     std::string name_str(name);
     auto name_str_end = std::remove_if(name_str.begin(), name_str.end(), [](char c) {
         return c == ' ' || c == '-' || c == '_';
     });
     name_str.erase(name_str_end, name_str.end());
+    name_str = StringUtils::ToLower(name_str);
+    static const auto ease = { std::string("easein"), std::string("easeout"), std::string("easeinout") };
+    for (auto& e : ease) {
+        if (StringUtils::EndsWith(name_str, e)) {
+            name_str.erase(name_str.size() - e.size(), e.size());
+            name_str = e + name_str;
+            break;
+        }
+    }
     const char* n = name_str.c_str();
 
+    static const Interpolator invalid;
     // https://developer.mozilla.org/ja/docs/Web/CSS/timing-function
     // https://on-ze.com/archives/6697
+    static const std::map<std::string, Interpolator> interpolators = {
+        // CSS compatible
+        { "stepstart", Interpolator(StepStart) },
+        { "stepend", Interpolator(StepEnd) },
+        { "linear", Interpolator(0.0f, 0.0f, 1.0f, 1.0f) },
+        { "ease", Interpolator(0.25f, 0.1f, 0.25f, 1.0f) },
+        { "easein", Interpolator(0.42f, 0.0f, 1.0f, 1.0f) },
+        { "easeinout", Interpolator(0.42f, 0.0f, 0.58f, 1.0f) },
+        { "easeout", Interpolator(0.0f, 0.0f, 0.58f, 1.0f) },
+        // Sine
+        { "easeinsine", Interpolator(0.47f, 0.0f, 0.745f, 0.715f) },
+        { "easeoutsine", Interpolator(0.39f, 0.575f, 0.565f, 1.0f) },
+        { "easeinoutsine", Interpolator(0.445f, 0.05f, 0.55f, 0.95f) },
+        // Quad
+        { "quadeasein", Interpolator(0.55f, 0.085f, 0.68f, 0.53f) },
+        { "quadeaseout", Interpolator(0.25f, 0.46f, 0.45f, 0.94f) },
+        { "quadeaseinout", Interpolator(0.455f, 0.03f, 0.515f, 0.955f) },
+        // Cubic
+        { "easeincubic", Interpolator(0.55f, 0.055f, 0.675f, 0.19f) },
+        { "easeoutcubic", Interpolator(0.215f, 0.61f, 0.355f, 1.0f) },
+        { "easeinoutcubic", Interpolator(0.645f, 0.045f, 0.355f, 1.0f) },
+        // Quartic
+        { "easeinquart", Interpolator(0.895f, 0.03f, 0.685f, 0.22f) },
+        { "easeoutquart", Interpolator(0.165f, 0.84f, 0.44f, 1.0f) },
+        { "easeinoutquart", Interpolator(0.77f, 0.0f, 0.175f, 1.0f) },
+        // Quintic
+        { "easeinquint", Interpolator(0.755f, 0.05f, 0.855f, 0.06f) },
+        { "easeoutquint", Interpolator(0.23f, 1.0f, 0.32f, 1.0f) },
+        { "easeinoutquint", Interpolator(0.86f, 0.0f, 0.07f, 1.0f) },
+        // Exponential
+        { "easeinexpo", Interpolator(0.95f, 0.05f, 0.795f, 0.035f) },
+        { "easeoutexpo", Interpolator(0.19f, 1.0f, 0.22f, 1.0f) },
+        { "easeinoutexpo", Interpolator(1.0f, 0.0f, 0.0f, 1.0f) },
+        // Circular
+        { "aseincirce", Interpolator(0.6f, 0.04f, 0.98f, 0.335f) },
+        { "aseoutcirce", Interpolator(0.075f, 0.82f, 0.165f, 1.0f) },
+        { "aseinoutcirce", Interpolator(0.785f, 0.135f, 0.15f, 0.86f) },
+        // Elastic
+        { "easeinelastic", Interpolator(EaseInElastic) },
+        { "easeoutelastic", Interpolator(EaseOutElastic) },
+        { "easeinoutelastic", Interpolator(EaseInOutElastic) },
+        // Bounce
+        { "easeinbounce", Interpolator(EaseInBounce) },
+        { "easeoutbounce", Interpolator(EaseOutBounce) },
+        { "easeinoutbounce", Interpolator(EaseInOutBounce) },
+    };
+    auto found = interpolators.find(n);
+    return (found != interpolators.end()) ? found->second : invalid;
+}
 
-    // CSS compatible easings
-    if (StringUtils::Compare(n, "stepstart", true) == 0) function_ = StepStart;
-    else if (StringUtils::Compare(n, "stepend", true) == 0) function_ = StepEnd;
-    else if (StringUtils::Compare(n, "linear", true) == 0) InitializeBezier(0.0f, 0.0f, 1.0f, 1.0f);
-    else if (StringUtils::Compare(n, "ease", true) == 0) InitializeBezier(0.25f, 0.1f, 0.25f, 1.0f);
-    else if (StringUtils::Compare(n, "easein", true) == 0) InitializeBezier(0.42f, 0.0f, 1.0f, 1.0f);
-    else if (StringUtils::Compare(n, "easeinout", true) == 0) InitializeBezier(0.42f, 0.0f, 0.58f, 1.0f);
-    else if (StringUtils::Compare(n, "easeout", true) == 0) InitializeBezier(0.0f, 0.0f, 0.58f, 1.0f);
-    // Sine
-    else if (match(n, "sine", "easein")) InitializeBezier(0.47f, 0.0f, 0.745f, 0.715f);
-    else if (match(n, "sine", "easeout")) InitializeBezier(0.39f, 0.575f, 0.565f, 1.0f);
-    else if (match(n, "sine", "easeinout")) InitializeBezier(0.445f, 0.05f, 0.55f, 0.95f);
-    // Quad
-    else if (match(n, "quad", "easein")) InitializeBezier(0.55f, 0.085f, 0.68f, 0.53f);
-    else if (match(n, "quad", "easeout")) InitializeBezier(0.25f, 0.46f, 0.45f, 0.94f);
-    else if (match(n, "quad", "easeinout")) InitializeBezier(0.455f, 0.03f, 0.515f, 0.955f);
-    // Cubic
-    else if (match(n, "cubic", "easein")) InitializeBezier(0.55f, 0.055f, 0.675f, 0.19f);
-    else if (match(n, "cubic", "easeout")) InitializeBezier(0.215f, 0.61f, 0.355f, 1.0f);
-    else if (match(n, "cubic", "easeinout")) InitializeBezier(0.645f, 0.045f, 0.355f, 1.0f);
-    // Quartic
-    else if (match(n, "quart", "easein")) InitializeBezier(0.895f, 0.03f, 0.685f, 0.22f);
-    else if (match(n, "quart", "easeout")) InitializeBezier(0.165f, 0.84f, 0.44f, 1.0f);
-    else if (match(n, "quart", "easeinout")) InitializeBezier(0.77f, 0.0f, 0.175f, 1.0f);
-    // Quintic
-    else if (match(n, "quint", "easein")) InitializeBezier(0.755f, 0.05f, 0.855f, 0.06f);
-    else if (match(n, "quint", "easeout")) InitializeBezier(0.23f, 1.0f, 0.32f, 1.0f);
-    else if (match(n, "quint", "easeinout")) InitializeBezier(0.86f, 0.0f, 0.07f, 1.0f);
-    // Exponential
-    else if (match(n, "expo", "easein")) InitializeBezier(0.95f, 0.05f, 0.795f, 0.035f);
-    else if (match(n, "expo", "easeout")) InitializeBezier(0.19f, 1.0f, 0.22f, 1.0f);
-    else if (match(n, "expo", "easeinout")) InitializeBezier(1.0f, 0.0f, 0.0f, 1.0f);
-    // Circular
-    else if (match(n, "circ", "easein")) InitializeBezier(0.6f, 0.04f, 0.98f, 0.335f);
-    else if (match(n, "circ", "easeout")) InitializeBezier(0.075f, 0.82f, 0.165f, 1.0f);
-    else if (match(n, "circ", "easeinout")) InitializeBezier(0.785f, 0.135f, 0.15f, 0.86f);
-    // Elastic
-    else if (match(n, "elastic", "easein")) function_ = EaseInElastic;
-    else if (match(n, "elastic", "easeout")) function_ = EaseOutElastic;
-    else if (match(n, "elastic", "easeinout")) function_ = EaseInOutElastic;
-    // Bounce
-    else if (match(n, "bounce", "easein")) function_ = EaseInBounce;
-    else if (match(n, "bounce", "easeout")) function_ = EaseOutBounce;
-    else if (match(n, "bounce", "easeinout")) function_ = EaseInOutBounce;
-    else function_ = None;
+MISO_INLINE
+Interpolator::Interpolator(float x1, float y1, float x2, float y2)
+{
+    if (x1 < 0.0f || 1.0f < x2) return;
+
+    function_ = Bezier;
+    x1_ = x1;
+    y1_ = y1;
+    x2_ = x2;
+    y2_ = y2;
+    for (int i = 0; i < kSampleCount; ++i) {
+        samples_[i] = CalculateBezier(static_cast<float>(i) / (kSampleCount - 1), x1, x2);
+    }
 }
 
 MISO_INLINE float
@@ -144,26 +155,6 @@ Interpolator::EaseInOutBounce(const Interpolator& self, float t, float s, float 
     return (t < 0.5f) ?
         EaseInBounce(self, t * 2.0f, 0.0f, d / 2.0f) * 0.5f + s :
         EaseOutBounce(self, t * 2.0f - 1.0f, 0.0f, d) * 0.5f + d * 0.5f + s;
-}
-
-MISO_INLINE
-Interpolator::Interpolator(float x1, float y1, float x2, float y2)
-{
-    if (x1 < 0.0f || 1.0f < x2) return;
-    InitializeBezier(x1, y1, x2, y2);
-}
-
-MISO_INLINE void
-Interpolator::InitializeBezier(float x1, float y1, float x2, float y2)
-{
-    x1_ = x1;
-    y1_ = y1;
-    x2_ = x2;
-    y2_ = y2;
-    function_ = Bezier;
-    for (int i = 0; i < kSampleCount; ++i) {
-        samples_[i] = CalculateBezier(static_cast<float>(i) / (kSampleCount - 1), x1, x2);
-    }
 }
 
 MISO_INLINE float

@@ -1056,14 +1056,23 @@ TEST_F(MisoTest, Value_Restore)
             EXPECT_TRUE(n == m);
         }
     }
-    //{
-    //    miso::Value v("hsv(20,40,80)");
-    //    auto n = v.AsColor();
-    //    miso::Value w(n.ToString());
-    //    auto m = w.AsColor();
-    //    EXPECT_TRUE(v == w);
-    //    EXPECT_TRUE(n == m);
-    //}
+}
+
+TEST_F(MisoTest, Value_Add)
+{
+    TEST_TRACE("");
+    {
+        miso::Value v("1");
+        v = v.Added(miso::Value("2%"));
+        v = v.Added(miso::Value("#123"));
+        EXPECT_EQ(3, v.GetCount());
+        EXPECT_DOUBLE_EQ(1, v.AsNumeric(0).GetValue());
+        EXPECT_DOUBLE_EQ(2, v.AsNumeric(1).GetValue());
+        EXPECT_EQ(miso::NumericUnit::Parcent, v.AsNumeric(1).GetUnit());
+        EXPECT_EQ(0x112233FF, v.AsColor(2).ToUint32());
+
+        EXPECT_EQ(v, miso::Value("1 2% #123"));
+    }
 }
 
 TEST_F(MisoTest, Boolean)

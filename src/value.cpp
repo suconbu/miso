@@ -138,6 +138,22 @@ Value::GetAt(size_t index) const
         GetInvalid();
 }
 
+MISO_INLINE Value
+Value::Added(const Value& value) const
+{
+    Value v;
+    if (type_ == ValueType::Array) {
+        v = *this;
+    } else {
+        v.type_ = ValueType::Array;
+        v.array_ = new std::vector<Value>();
+        if (v.array_ == nullptr) return GetInvalid();
+        v.array_->push_back(*this);
+    }
+    v.array_->push_back(value);
+    return v;
+}
+
 MISO_INLINE const Numeric&
 Value::AsNumeric(size_t index) const
 {

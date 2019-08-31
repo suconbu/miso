@@ -34,6 +34,7 @@ public:
     bool IsTrue() const;
     size_t GetCount() const { return (type_ == ValueType::Array) ? array_->size() : 1; }
     const Value& GetAt(size_t index) const;
+    Value Added(const Value& value) const;
     const Numeric& AsNumeric(size_t index = 0) const;
     const Color& AsColor(size_t index = 0) const;
     Value GetInterpolated(const Value& end_value, const Interpolator& interpolator, float progress) const;

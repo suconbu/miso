@@ -8,6 +8,7 @@ class MisoTest : public ::testing::Test {
 protected:
     virtual void SetUp()
     {
+        SetCurrentDirectory("..\\..\\..\\test");
         _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
         _CrtMemCheckpoint(&G_MEMORY_STATE);
     }

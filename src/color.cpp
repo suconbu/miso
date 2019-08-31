@@ -194,16 +194,15 @@ MISO_INLINE Color
 Color::TryParse(const char* str, size_t* consumed_out)
 {
     Color color;
-    if (TryParseHex(str, color, consumed_out)) return color;
-    if (TryParseDec(str, color, consumed_out)) return color;
+    if (str == nullptr || *str == '\0') return color;
+    if (TryParseHex(str, &color, consumed_out)) return color;
+    if (TryParseDec(str, &color, consumed_out)) return color;
     return color;
 }
 
 MISO_INLINE bool
-Color::TryParseHex(const char* str, Color& color_out, size_t* consumed_out)
+Color::TryParseHex(const char* str, Color* color_out, size_t* consumed_out)
 {
-    if (str == nullptr) return false;
-
     auto s = str;
     auto start = s;
 
@@ -252,20 +251,22 @@ Color::TryParseHex(const char* str, Color& color_out, size_t* consumed_out)
         return false;
     }
 
-    color_out.R = r;
-    color_out.G = g;
-    color_out.B = b;
-    color_out.A = a;
-    if (consumed_out != nullptr) *consumed_out = static_cast<size_t>(s - start);
+    if (color_out != nullptr) {
+        color_out->R = r;
+        color_out->G = g;
+        color_out->B = b;
+        color_out->A = a;
+    }
+    if (consumed_out != nullptr) {
+        *consumed_out = static_cast<size_t>(s - start);
+    }
 
     return true;
 }
 
 MISO_INLINE bool
-Color::TryParseDec(const char* str, Color& color_out, size_t* consumed_out)
+Color::TryParseDec(const char* str, Color* color_out, size_t* consumed_out)
 {
-    if (str == nullptr) return false;
-
     auto s = str;
     auto start = s;
 
@@ -337,19 +338,22 @@ Color::TryParseDec(const char* str, Color& color_out, size_t* consumed_out)
 
     if (paren || value_index < value_count) return false;
 
-
-    if (format == ColorSpace::Rgb) {
-        color_out.R = value[0]; color_out.G = value[1]; color_out.B = value[2]; color_out.A = value[3];
-    } else if (format == ColorSpace::Hsl) {
-        ColorSpaceUtils::HslToRgb(value[0], value[1], value[2], &color_out.R, &color_out.G, &color_out.B);
-        color_out.A = value[3];
-    } else if (format == ColorSpace::Hsv) {
-        ColorSpaceUtils::HsvToRgb(value[0], value[1], value[2], &color_out.R, &color_out.G, &color_out.B);
-        color_out.A = value[3];
-    } else {
-        return false;
+    if (color_out != nullptr) {
+        if (format == ColorSpace::Rgb) {
+            color_out->R = value[0]; color_out->G = value[1]; color_out->B = value[2]; color_out->A = value[3];
+        } else if (format == ColorSpace::Hsl) {
+            ColorSpaceUtils::HslToRgb(value[0], value[1], value[2], &color_out->R, &color_out->G, &color_out->B);
+            color_out->A = value[3];
+        } else if (format == ColorSpace::Hsv) {
+            ColorSpaceUtils::HsvToRgb(value[0], value[1], value[2], &color_out->R, &color_out->G, &color_out->B);
+            color_out->A = value[3];
+        } else {
+            return false;
+        }
     }
-    if (consumed_out != nullptr) *consumed_out = static_cast<size_t>(s - start);
+    if (consumed_out != nullptr) {
+        *consumed_out = static_cast<size_t>(s - start);
+    }
 
     return true;
 }

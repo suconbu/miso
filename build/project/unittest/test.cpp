@@ -900,9 +900,9 @@ TEST_F(MisoTest, Value)
     EXPECT_TRUE(values[3].AsColor().IsValid());
     EXPECT_EQ(10, values[4].AsNumeric().GetValue());
     EXPECT_EQ(20, values[5].AsNumeric().GetValue());
-    EXPECT_TRUE(values[6].AsBool());
-    EXPECT_FALSE(values[7].AsBool());
-    EXPECT_STREQ("0 1 2 #0c2238 10px 20% true #000000", values.ToString().c_str());
+    EXPECT_TRUE(values[6].IsTrue());
+    EXPECT_FALSE(values[7].IsTrue());
+    EXPECT_STREQ("0 1 2 #0c2238 10px 20% 1 #000000", values.ToString().c_str());
 
     miso::Value copy(values);
     EXPECT_EQ(8, copy.GetCount());
@@ -957,11 +957,27 @@ TEST_F(MisoTest, Value_Interpolate)
     {
         miso::Value a("false");
         miso::Value b("true");
-        EXPECT_FALSE(a.GetInterpolated(b, miso::Interpolator("linear"), 0.0f).AsBool());
-        EXPECT_FALSE(a.GetInterpolated(b, miso::Interpolator("linear"), 0.4f).AsBool());
-        EXPECT_TRUE(a.GetInterpolated(b, miso::Interpolator("linear"), 0.5f).AsBool());
-        EXPECT_TRUE(a.GetInterpolated(b, miso::Interpolator("linear"), 1.0f).AsBool());
+        EXPECT_FALSE(a.GetInterpolated(b, miso::Interpolator("linear"), 0.0f).IsTrue());
+        EXPECT_TRUE(a.GetInterpolated(b, miso::Interpolator("linear"), 0.4f).IsTrue());
+        EXPECT_TRUE(a.GetInterpolated(b, miso::Interpolator("linear"), 0.5f).IsTrue());
+        EXPECT_TRUE(a.GetInterpolated(b, miso::Interpolator("linear"), 1.0f).IsTrue());
     }
+}
+
+TEST_F(MisoTest, Value_Multiply)
+{
+    TEST_TRACE("");
+    //{
+    //    miso::Value a("true false");
+    //    miso::Value b("10 20 30");
+    //    miso::Value c("rgb(0,50,100) hsl(50,50,100)");
+    //    auto ai = a.GetMultiplied(0.3);
+    //    EXPECT_TRUE(ai[0].IsTrue());
+    //    EXPECT_FALSE(ai[1].IsTrue());
+    //    ai = a.GetMultiplied(0.0);
+    //    EXPECT_FALSE(ai[0].IsTrue());
+    //    EXPECT_FALSE(ai[1].IsTrue());
+    //}
 }
 
 TEST_F(MisoTest, Boolean)
@@ -969,53 +985,53 @@ TEST_F(MisoTest, Boolean)
     TEST_TRACE("");
     {
         size_t count = 0;
-        miso::Boolean a = miso::Boolean::TryParse("true-", &count);
+        miso::Numeric a = miso::Numeric::TryParse("true-", &count);
         EXPECT_TRUE(a.IsValid());
         EXPECT_TRUE(a.IsTrue());
         EXPECT_EQ(4, count);
-        a = miso::Boolean::TryParse("false ", &count);
+        a = miso::Numeric::TryParse("false ", &count);
         EXPECT_TRUE(a.IsValid());
         EXPECT_FALSE(a.IsTrue());
         EXPECT_EQ(5, count);
-        a = miso::Boolean::TryParse("truu ", &count);
+        a = miso::Numeric::TryParse("truu ", &count);
         EXPECT_FALSE(a.IsValid());
     }
     {
-        miso::Boolean b("true");
+        miso::Numeric b("true");
         EXPECT_TRUE(b.IsValid());
         EXPECT_TRUE(b.IsTrue());
-        miso::Boolean c("on");
+        miso::Numeric c("on");
         EXPECT_TRUE(c.IsValid());
         EXPECT_TRUE(c.IsTrue());
-        miso::Boolean d("yes");
+        miso::Numeric d("yes");
         EXPECT_TRUE(d.IsValid());
         EXPECT_TRUE(d.IsTrue());
 
-        miso::Boolean e("false");
+        miso::Numeric e("false");
         EXPECT_TRUE(e.IsValid());
         EXPECT_FALSE(e.IsTrue());
-        miso::Boolean f("off");
+        miso::Numeric f("off");
         EXPECT_TRUE(f.IsValid());
         EXPECT_FALSE(f.IsTrue());
-        miso::Boolean g("no");
+        miso::Numeric g("no");
         EXPECT_TRUE(g.IsValid());
         EXPECT_FALSE(g.IsTrue());
 
-        miso::Boolean h("tru");
+        miso::Numeric h("tru");
         EXPECT_FALSE(h.IsValid());
         EXPECT_FALSE(h.IsTrue());
-        miso::Boolean i("fal");
+        miso::Numeric i("fal");
         EXPECT_FALSE(i.IsValid());
         EXPECT_FALSE(i.IsTrue());
     }
     {
-        miso::Boolean b("True");
+        miso::Numeric b("True");
         EXPECT_TRUE(b.IsValid());
         EXPECT_TRUE(b.IsTrue());
-        miso::Boolean c("oN");
+        miso::Numeric c("oN");
         EXPECT_TRUE(c.IsValid());
         EXPECT_TRUE(c.IsTrue());
-        miso::Boolean d("YeS");
+        miso::Numeric d("YeS");
         EXPECT_TRUE(d.IsValid());
         EXPECT_TRUE(d.IsTrue());
     }

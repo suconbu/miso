@@ -27,6 +27,7 @@ public:
     bool operator!=(const Color& other) const;
 
     bool IsValid() const { return !std::isnan(R) && !std::isnan(G) && !std::isnan(B) && !std::isnan(A); }
+    bool IsTrue() const { return IsValid() && (R != 0.0f || G != 0.0f || B != 0.0f || A != 0.0f); }
     uint32_t ToUint32() const;
     Color GetInterpolated(const Color& end_value, const Interpolator& interpolator, float progress) const;
     std::string ToString(const char* format = nullptr) const;
@@ -38,8 +39,8 @@ public:
 
 private:
     static constexpr float kEqualTolerance = 0.0001f;
-    static bool TryParseHex(const char* str, Color& color_out, size_t* consumed_out);
-    static bool TryParseDec(const char* str, Color& color_out, size_t* consumed_out);
+    static bool TryParseHex(const char* str, Color* color_out, size_t* consumed_out);
+    static bool TryParseDec(const char* str, Color* color_out, size_t* consumed_out);
 
     Color() = default;
 

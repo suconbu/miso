@@ -32,6 +32,7 @@ public:
     bool operator!=(const Numeric& other) const;
 
     bool IsValid() const { return unit_ != NumericUnit::NaN; }
+    bool IsTrue() const { return unit_ != NumericUnit::NaN && value_ != 0.0; }
     bool IsFloat() const { return float_; }
     double GetValue() const { return value_; }
     NumericUnit GetUnit() const { return unit_; }
@@ -43,6 +44,8 @@ public:
 
 private:
     static const std::map<NumericUnit, const char*>& GetUnitToSuffixMap();
+    static bool TryParseBoolean(const char* str, Numeric* numeric_out, size_t* consumed_out);
+    static bool TryParseNumeric(const char* str, Numeric* numeric_out, size_t* consumed_out);
 
     Numeric() = default;
 

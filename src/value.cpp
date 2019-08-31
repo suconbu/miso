@@ -6,7 +6,6 @@
 #include <sstream>
 #include <vector>
 
-#include "miso/boolean.hpp"
 #include "miso/color.hpp"
 #include "miso/numeric.hpp"
 #include "miso/string_utils.hpp"
@@ -24,9 +23,7 @@ MISO_INLINE Value
 Value::TryParse(const char* str, size_t* consumed_out)
 {
     Value value;
-    if ((value.boolean_ = Boolean::TryParse(str, consumed_out)).IsValid()) {
-        value.type_ = ValueType::Boolean;
-    } else if ((value.numeric_ = Numeric::TryParse(str, consumed_out)).IsValid()) {
+    if ((value.numeric_ = Numeric::TryParse(str, consumed_out)).IsValid()) {
         value.type_ = ValueType::Numeric;
     } else if ((value.color_ = Color::TryParse(str, consumed_out)).IsValid()) {
         value.type_ = ValueType::Color;
@@ -86,8 +83,6 @@ Value::Copy(const Value& from, Value& to)
         } else {
             to.type_ = ValueType::Invalid;
         }
-    } else if (from.type_ == ValueType::Boolean) {
-        to.boolean_ = from.boolean_;
     } else if (from.type_ == ValueType::Numeric) {
         to.numeric_ = from.numeric_;
     } else if (from.type_ == ValueType::Color) {
@@ -105,8 +100,6 @@ Value::Move(Value& from, Value& to)
     if (from.type_ == ValueType::Array) {
         to.array_ = from.array_;
         from.array_ = nullptr;
-    } else if (from.type_ == ValueType::Boolean) {
-        to.boolean_ = from.boolean_;
     } else if (from.type_ == ValueType::Numeric) {
         to.numeric_ = from.numeric_;
     } else if (from.type_ == ValueType::Color) {
@@ -127,8 +120,6 @@ Value::Equal(const Value& a, const Value& b)
             if (a.GetAt(i) != b.GetAt(i)) return false;
         }
         return true;
-    } else if (a.type_ == ValueType::Boolean) {
-        return a.boolean_ == b.boolean_;
     } else if (a.type_ == ValueType::Numeric) {
         return a.numeric_ == b.numeric_;
     } else if (a.type_ == ValueType::Color) {
@@ -142,9 +133,18 @@ MISO_INLINE bool
 Value::IsValid() const
 {
     return
-        (type_ == ValueType::Boolean) ? boolean_.IsValid() :
         (type_ == ValueType::Numeric) ? numeric_.IsValid() :
         (type_ == ValueType::Color) ? color_.IsValid() :
+        (type_ == ValueType::Array) ? true :
+        false;
+}
+
+MISO_INLINE bool
+Value::IsTrue() const
+{
+    return
+        (type_ == ValueType::Numeric) ? numeric_.IsTrue() :
+        (type_ == ValueType::Color) ? color_.IsTrue() :
         (type_ == ValueType::Array) ? true :
         false;
 }
@@ -156,13 +156,6 @@ Value::GetAt(size_t index) const
         (type_ == ValueType::Array && index < array_->size()) ? array_->at(index) :
         (type_ != ValueType::Array) ? *this :
         GetInvalid();
-}
-
-MISO_INLINE bool
-Value::AsBool(size_t index) const
-{
-    auto& v = GetAt(index);
-    return (v.type_ == ValueType::Boolean) ? v.boolean_.IsTrue() : false;
 }
 
 MISO_INLINE const Numeric&
@@ -193,8 +186,6 @@ Value::GetInterpolated(const Value& end_value, const Interpolator& interpolator,
         for (size_t i = 0; i < array_->size(); ++i) {
             value.array_->push_back(array_->at(i).GetInterpolated(end_value.array_->at(i), interpolator, progress));
         }
-    } else if (type_ == ValueType::Boolean) {
-        value.boolean_ = boolean_.GetInterpolated(end_value.boolean_, interpolator, progress);
     } else if (type_ == ValueType::Numeric) {
         value.numeric_ = numeric_.GetInterpolated(end_value.numeric_, interpolator, progress);
     } else if (type_ == ValueType::Color) {
@@ -217,7 +208,6 @@ Value::ToString(const char* format) const
         return s.str();
     } else {
         return
-            (type_ == ValueType::Boolean) ? boolean_.ToString(format) :
             (type_ == ValueType::Numeric) ? numeric_.ToString(format) :
             (type_ == ValueType::Color) ? color_.ToString(format) :
             "";

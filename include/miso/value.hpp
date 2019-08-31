@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "miso/boolean.hpp"
 #include "miso/color.hpp"
 #include "miso/numeric.hpp"
 
@@ -29,16 +28,16 @@ public:
     bool operator!=(const Value& value) const { return !Equal(*this, value); }
 
     bool IsValid() const;
+    bool IsTrue() const;
     size_t GetCount() const { return (type_ == ValueType::Array) ? array_->size() : 1; }
     const Value& GetAt(size_t index) const;
-    bool AsBool(size_t index = 0) const;
     const Numeric& AsNumeric(size_t index = 0) const;
     const Color& AsColor(size_t index = 0) const;
     Value GetInterpolated(const Value& end_value, const Interpolator& interpolator, float progress) const;
     std::string ToString(const char* format = nullptr) const;
 
 private:
-    enum class ValueType { Invalid, Array, Boolean, Numeric, Color };
+    enum class ValueType { Invalid, Array, Numeric, Color };
 
     static Value TryParse(const char* str, size_t* consumed_out = nullptr);
     static void Copy(const Value& from, Value& to);
@@ -50,7 +49,6 @@ private:
     ValueType type_ = ValueType::Invalid;
     union {
         std::vector<Value>* array_ = 0;
-        Boolean boolean_;
         Numeric numeric_;
         Color color_;
     };

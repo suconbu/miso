@@ -18,8 +18,49 @@ Numeric::GetInvalid()
 MISO_INLINE Numeric
 Numeric::TryParse(const char* str, size_t* consumed_out)
 {
-    if (str == nullptr || *str == '\0') return GetInvalid();
+    Numeric numeric;
+    if (str == nullptr || *str == '\0') return numeric;
+    if (TryParseBoolean(str, &numeric, consumed_out)) return numeric;
+    if (TryParseNumeric(str, &numeric, consumed_out)) return numeric;
+    return numeric;
+}
 
+MISO_INLINE bool
+Numeric::TryParseBoolean(const char* str, Numeric* numeric_out, size_t* consumed_out)
+{
+    static const char* names[] = { "true", "false", "on", "off", "yes", "no" };
+
+    auto s = str;
+    auto start = s;
+
+    while (isalpha(*s)) ++s;
+    auto count = static_cast<size_t>(s - start);
+    if (count < 2) return false;
+
+    auto value = std::numeric_limits<double>::quiet_NaN();
+    for (size_t i = 0; i < sizeof(names) / sizeof(names[0]); ++i) {
+        if (StringUtils::CompareN(start, names[i], strlen(names[i]), true) == 0) {
+            value = ((i % 2) == 0) ? 1.0 : 0.0;
+            break;
+        }
+    }
+    if (std::isnan(value)) return false;
+
+    if (numeric_out != nullptr) {
+        numeric_out->value_ = value;
+        numeric_out->unit_ = NumericUnit::Unitless;
+        numeric_out->float_ = false;
+    }
+    if (consumed_out != nullptr) {
+        *consumed_out = static_cast<size_t>(s - start);
+    }
+
+    return true;
+}
+
+MISO_INLINE bool
+Numeric::TryParseNumeric(const char* str, Numeric* numeric_out, size_t* consumed_out)
+{
     // [+-]?(\d+(\.(\d+)?)?)|(\.\d+)?(\w+|%)
     auto s = str;
     auto start = s;
@@ -31,7 +72,7 @@ Numeric::TryParse(const char* str, size_t* consumed_out)
         ++s;
     }
 
-    if (*s != '.' && !isdigit(*s)) return GetInvalid();
+    if (*s != '.' && !isdigit(*s)) return false;
 
     // Digits
     auto digit_start = s;
@@ -48,13 +89,13 @@ Numeric::TryParse(const char* str, size_t* consumed_out)
                 denominator *= base;
             }
         } else if (*s == '.') {
-            if (denominator != 0) return GetInvalid();
+            if (denominator != 0) return false;
             denominator = base;
         } else {
             break;
         }
     }
-    if (s == digit_start) return GetInvalid();
+    if (s == digit_start) return false;
 
     // Unit
     auto unit = NumericUnit::NaN;
@@ -67,17 +108,18 @@ Numeric::TryParse(const char* str, size_t* consumed_out)
             break;
         }
     }
-    if (unit == NumericUnit::NaN) return GetInvalid();
+    if (unit == NumericUnit::NaN) return false;
 
-    if (negative) value = -value;
+    if (numeric_out != nullptr) {
+        numeric_out->value_ = negative ? -value : value;
+        numeric_out->unit_ = unit;
+        numeric_out->float_ = (denominator != 0);
+    }
+    if (consumed_out != nullptr) {
+        *consumed_out = static_cast<size_t>(s - start);
+    }
 
-    Numeric numeric;
-    numeric.value_ = value;
-    numeric.unit_ = unit;
-    numeric.float_ = (denominator != 0);
-    if (consumed_out != nullptr) *consumed_out = static_cast<size_t>(s - start);
-
-    return numeric;
+    return true;
 }
 
 MISO_INLINE const std::map<NumericUnit, const char*>&

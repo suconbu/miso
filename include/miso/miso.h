@@ -6,7 +6,6 @@
 // MISO_HEADER_ONLY
 
 #include "miso/binary_reader.hpp"
-#include "miso/boolean.hpp"
 #include "miso/buffer.hpp"
 #include "miso/color.hpp"
 #include "miso/colorspace_utils.hpp"

@@ -30,9 +30,6 @@
     <ClCompile Include="..\..\..\src\binary_reader.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\boolean.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\color.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -84,9 +81,6 @@
       <Filter>include\miso</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\miso\binary_reader.hpp">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\miso\boolean.hpp">
       <Filter>include\miso</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\miso\buffer.hpp">

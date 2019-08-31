@@ -20,6 +20,8 @@ public:
     Value(Value&& value) noexcept { Move(value, *this); }
     explicit Value(const char* str);
     explicit Value(const std::string& str) : Value(str.c_str()) {}
+    explicit Value(const Numeric& numeric) : type_(ValueType::Numeric), numeric_(numeric) {}
+    explicit Value(const Color& color) : type_(ValueType::Color), color_(color) {}
     ~Value();
 
     Value& operator=(const Value& value) { Copy(value, *this); return *this; }

@@ -1022,6 +1022,50 @@ TEST_F(MisoTest, Value_Multiply)
     }
 }
 
+TEST_F(MisoTest, Value_Restore)
+{
+    TEST_TRACE("");
+    {
+        auto ss = { "0", "1.2", "-1", "1px", "1sp", "1vw", "1vh", "1vmin", "1vmax", "1%", "1s", "1ms" };
+        for (auto s : ss) {
+            miso::Value v(s);
+            auto n = v.AsNumeric();
+            miso::Value w(n);
+            auto m = w.AsNumeric();
+            EXPECT_TRUE(v == w);
+            EXPECT_TRUE(n == m);
+        }
+    }
+    {
+        auto ss = {
+            "#123", "#1234", "#123456", "#12345678",
+            "rgb(10,20,30)", "rgb(0.1,0.2,0.3)", "rgb(10%,20%,30%)",
+            "rgba(10,20,30,40)", "rgba(0.1,0.2,0.3,0.4)", "rgba(10%,20%,30%,40%)",
+            "hsl(10,20,30)", "hsl(0.1,0.2,0.3)", "hsl(10%,20%,30%)",
+            "hsla(10,20,30,40)", "hsla(0.1,0.2,0.3,0.4)", "hsla(10%,20%,30%,40%)",
+            "hsv(10,20,30)", "hsv(0.1,0.2,0.3)", "hsv(10%,20%,30%)",
+            "hsva(10,20,30,40)", "hsva(0.1,0.2,0.3,0.4)", "hsva(10%,20%,30%,40%)"
+        };
+        for (auto s : ss) {
+            miso::Value v(s);
+            auto n = v.AsColor();
+            miso::Value w(n);
+            auto m = w.AsColor();
+            TEST_TRACE("s:%s", s);
+            EXPECT_TRUE(v == w);
+            EXPECT_TRUE(n == m);
+        }
+    }
+    //{
+    //    miso::Value v("hsv(20,40,80)");
+    //    auto n = v.AsColor();
+    //    miso::Value w(n.ToString());
+    //    auto m = w.AsColor();
+    //    EXPECT_TRUE(v == w);
+    //    EXPECT_TRUE(n == m);
+    //}
+}
+
 TEST_F(MisoTest, Boolean)
 {
     TEST_TRACE("");

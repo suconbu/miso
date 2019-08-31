@@ -134,7 +134,7 @@ Value::GetAt(size_t index) const
 {
     return
         (type_ == ValueType::Array && index < array_->size()) ? array_->at(index) :
-        (type_ != ValueType::Array) ? *this :
+        (type_ != ValueType::Array && index == 0) ? *this :
         GetInvalid();
 }
 

@@ -889,37 +889,44 @@ miso::Value ValueMoveTest()
 TEST_F(MisoTest, Value)
 {
     TEST_TRACE("");
-    miso::Value value("1");
-    ASSERT_EQ(1, value.GetCount());
-    EXPECT_EQ(1, value.AsNumeric().GetValue());
-    EXPECT_EQ(1, value[0].AsNumeric().GetValue());
-
-    miso::Value values("0 1 \t \t 2 rgb ( 12,34 , 56 )10px 20% True hsla(0,0,0,0)");
-    ASSERT_EQ(8, values.GetCount());
-    EXPECT_EQ(0, values[0].AsNumeric().GetValue());
-    EXPECT_EQ(1, values[1].AsNumeric().GetValue());
-    EXPECT_EQ(2, values[2].AsNumeric().GetValue());
-    EXPECT_TRUE(values[3].AsColor().IsValid());
-    EXPECT_EQ(10, values[4].AsNumeric().GetValue());
-    EXPECT_EQ(20, values[5].AsNumeric().GetValue());
-    EXPECT_TRUE(values[6].IsTrue());
-    EXPECT_FALSE(values[7].IsTrue());
-    EXPECT_STREQ("0 1 2 #0c2238 10px 20% 1 #000000", values.ToString().c_str());
-
-    miso::Value copy(values);
-    EXPECT_EQ(8, copy.GetCount());
-
-    auto moved = ValueMoveTest();
-    EXPECT_EQ(3, moved.GetCount());
-
-    miso::Value v1("123");
-    miso::Value v2("123");
-    miso::Value v3("12.3");
-    miso::Value v4("#123");
-    EXPECT_TRUE(v1 == v2);
-    EXPECT_FALSE(v1 != v2);
-    EXPECT_TRUE(v1 != v3);
-    EXPECT_TRUE(v1 != v4);
+    {
+        miso::Value value("1");
+        ASSERT_EQ(1, value.GetCount());
+        EXPECT_EQ(1, value.AsNumeric().GetValue());
+        EXPECT_EQ(1, value[0].AsNumeric().GetValue());
+    }
+    {
+        miso::Value values("0 1 \t \t 2 rgb ( 12,34 , 56 )10px 20% True hsla(0,0,0,0)");
+        ASSERT_EQ(8, values.GetCount());
+        EXPECT_EQ(0, values[0].AsNumeric().GetValue());
+        EXPECT_EQ(1, values[1].AsNumeric().GetValue());
+        EXPECT_EQ(2, values[2].AsNumeric().GetValue());
+        EXPECT_TRUE(values[3].AsColor().IsValid());
+        EXPECT_EQ(10, values[4].AsNumeric().GetValue());
+        EXPECT_EQ(20, values[5].AsNumeric().GetValue());
+        EXPECT_TRUE(values[6].IsTrue());
+        EXPECT_FALSE(values[7].IsTrue());
+        EXPECT_STREQ("0 1 2 #0c2238 10px 20% 1 #000000", values.ToString().c_str());
+        miso::Value copy(values);
+        EXPECT_EQ(8, copy.GetCount());
+        auto moved = ValueMoveTest();
+        EXPECT_EQ(3, moved.GetCount());
+    }
+    {
+        miso::Value v1("123");
+        miso::Value v2("123");
+        miso::Value v3("12.3");
+        miso::Value v4("#123");
+        EXPECT_TRUE(v1 == v2);
+        EXPECT_FALSE(v1 != v2);
+        EXPECT_TRUE(v1 != v3);
+        EXPECT_TRUE(v1 != v4);
+    }
+    {
+        miso::Value v("1");
+        auto v1 = v[1];
+        EXPECT_FALSE(v1.IsValid());
+    }
 }
 
 TEST_F(MisoTest, Value_CopyMove)

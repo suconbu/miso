@@ -11,6 +11,8 @@
 
 namespace miso {
 
+enum class ValueType { Invalid, Array, Numeric, Color };
+
 class Value {
 public:
     static const Value& GetInvalid();
@@ -34,6 +36,7 @@ public:
     bool IsTrue() const;
     size_t GetCount() const { return (type_ == ValueType::Array) ? array_->size() : 1; }
     const Value& GetAt(size_t index) const;
+    ValueType GetType(size_t index = SIZE_MAX);
     Value Added(const Value& value) const;
     const Numeric& AsNumeric(size_t index = 0) const;
     const Color& AsColor(size_t index = 0) const;
@@ -41,8 +44,6 @@ public:
     std::string ToString(const char* format = nullptr) const;
 
 private:
-    enum class ValueType { Invalid, Array, Numeric, Color };
-
     static Value TryParse(const char* str, size_t* consumed_out = nullptr);
     static void Copy(const Value& from, Value& to);
     static void Move(Value& from, Value& to);

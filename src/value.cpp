@@ -138,6 +138,25 @@ Value::GetAt(size_t index) const
         GetInvalid();
 }
 
+MISO_INLINE ValueType
+Value::GetType(size_t index)
+{
+    auto type = ValueType::Invalid;
+    if (type_ == ValueType::Invalid) {
+        ;
+    } else if (type_ == ValueType::Array) {
+        type =
+            (index == SIZE_MAX) ? ValueType::Array :
+            (index < array_->size()) ? array_->at(index).type_ :
+            ValueType::Invalid;
+    } else {
+        type =
+            (index == SIZE_MAX || index == 0) ? type_ :
+            ValueType::Invalid;
+    }
+    return type;
+}
+
 MISO_INLINE Value
 Value::Added(const Value& value) const
 {

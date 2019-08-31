@@ -1066,12 +1066,21 @@ TEST_F(MisoTest, Value_Add)
         v = v.Added(miso::Value("2%"));
         v = v.Added(miso::Value("#123"));
         EXPECT_EQ(3, v.GetCount());
+        EXPECT_EQ(miso::ValueType::Array, v.GetType());
+        EXPECT_EQ(miso::ValueType::Numeric, v.GetType(0));
+        EXPECT_EQ(miso::ValueType::Numeric, v.GetType(1));
+        EXPECT_EQ(miso::ValueType::Color, v.GetType(2));
+        EXPECT_EQ(miso::ValueType::Invalid, v.GetType(3));
         EXPECT_DOUBLE_EQ(1, v.AsNumeric(0).GetValue());
         EXPECT_DOUBLE_EQ(2, v.AsNumeric(1).GetValue());
         EXPECT_EQ(miso::NumericUnit::Parcent, v.AsNumeric(1).GetUnit());
         EXPECT_EQ(0x112233FF, v.AsColor(2).ToUint32());
 
         EXPECT_EQ(v, miso::Value("1 2% #123"));
+
+        v = v.Added(miso::Value("-"));
+        EXPECT_EQ(4, v.GetCount());
+        EXPECT_EQ(miso::ValueType::Invalid, v.GetType(3));
     }
 }
 

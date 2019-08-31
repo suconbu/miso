@@ -15,6 +15,13 @@ Numeric::GetInvalid()
     return invalid;
 }
 
+MISO_INLINE const Numeric&
+Numeric::GetZero()
+{
+    static const Numeric zero("0");
+    return zero;
+}
+
 MISO_INLINE Numeric
 Numeric::TryParse(const char* str, size_t* consumed_out)
 {
@@ -140,18 +147,6 @@ Numeric::GetUnitToSuffixMap()
     return kUnitToSuffix;
 }
 
-MISO_INLINE bool
-Numeric::operator==(const Numeric& other) const
-{
-    return (unit_ == other.unit_) && (value_ == other.value_);
-}
-
-MISO_INLINE bool
-Numeric::operator!=(const Numeric& other) const
-{
-    return !(*this == other);
-}
-
 MISO_INLINE Numeric
 Numeric::GetInterpolated(const Numeric& end_value, const Interpolator& interpolator, float progress) const
 {
@@ -168,6 +163,24 @@ Numeric::ToString(const char* format) const
     } else {
         return StringUtils::Format("%.0Lf%s", value_, GetUnitToSuffixMap().at(unit_));
     }
+}
+
+MISO_INLINE bool
+Numeric::operator==(const Numeric& other) const
+{
+    return (unit_ == other.unit_) && (value_ == other.value_);
+}
+
+MISO_INLINE bool
+Numeric::operator!=(const Numeric& other) const
+{
+    return !(*this == other);
+}
+
+MISO_INLINE Numeric
+Numeric::operator*(double multiplier) const
+{
+    return Numeric(value_ * multiplier, unit_);
 }
 
 } // namespace miso

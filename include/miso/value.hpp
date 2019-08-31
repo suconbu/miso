@@ -26,6 +26,7 @@ public:
     const Value& operator[](size_t index) { return GetAt(index); }
     bool operator==(const Value& value) const { return Equal(*this, value); }
     bool operator!=(const Value& value) const { return !Equal(*this, value); }
+    Value operator*(double multiplier) const;
 
     bool IsValid() const;
     bool IsTrue() const;

@@ -12,6 +12,7 @@ namespace miso {
 class Color {
 public:
     static const Color& GetInvalid();
+    static const Color& GetZero();
     static Color TryParse(const char* str, size_t* consumed_out = nullptr);
     static Color FromHsla(float h, float s, float l, float a);
     static Color FromHsva(float h, float s, float v, float a);
@@ -25,6 +26,7 @@ public:
 
     bool operator==(const Color& other) const;
     bool operator!=(const Color& other) const;
+    Color operator*(double multiplier) const;
 
     bool IsValid() const { return !std::isnan(R) && !std::isnan(G) && !std::isnan(B) && !std::isnan(A); }
     bool IsTrue() const { return IsValid() && (R != 0.0f || G != 0.0f || B != 0.0f || A != 0.0f); }

@@ -17,6 +17,13 @@ Color::GetInvalid()
     return invalid;
 }
 
+MISO_INLINE const Color&
+Color::GetZero()
+{
+    static const Color zero(static_cast<uint32_t>(0));
+    return zero;
+}
+
 MISO_INLINE Color
 Color::FromHsla(float h, float s, float l, float a)
 {
@@ -498,6 +505,16 @@ MISO_INLINE bool
 Color::operator!=(const Color& other) const
 {
     return !(*this == other);
+}
+
+MISO_INLINE Color
+Color::operator*(double multiplier) const
+{
+    return Color(
+        static_cast<float>(std::max(0.0, std::min(R * multiplier, 1.0))),
+        static_cast<float>(std::max(0.0, std::min(G * multiplier, 1.0))),
+        static_cast<float>(std::max(0.0, std::min(B * multiplier, 1.0))),
+        static_cast<float>(std::max(0.0, std::min(A * multiplier, 1.0))));
 }
 
 } // namespace miso

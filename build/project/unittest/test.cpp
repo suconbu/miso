@@ -2,6 +2,8 @@
 
 _CrtMemState G_MEMORY_STATE = { 0 };
 
+const double kNearError = 0.001;
+
 class MisoTest : public ::testing::Test {
 protected:
     virtual void SetUp()
@@ -967,17 +969,50 @@ TEST_F(MisoTest, Value_Interpolate)
 TEST_F(MisoTest, Value_Multiply)
 {
     TEST_TRACE("");
-    //{
-    //    miso::Value a("true false");
-    //    miso::Value b("10 20 30");
-    //    miso::Value c("rgb(0,50,100) hsl(50,50,100)");
-    //    auto ai = a.GetMultiplied(0.3);
-    //    EXPECT_TRUE(ai[0].IsTrue());
-    //    EXPECT_FALSE(ai[1].IsTrue());
-    //    ai = a.GetMultiplied(0.0);
-    //    EXPECT_FALSE(ai[0].IsTrue());
-    //    EXPECT_FALSE(ai[1].IsTrue());
-    //}
+    {
+        miso::Value v("true false");
+        auto vv = v * 0.0;
+        EXPECT_FALSE(vv[0].IsTrue());
+        EXPECT_FALSE(vv[1].IsTrue());
+        vv = v * 1.0;
+        EXPECT_TRUE(vv[0].IsTrue());
+        EXPECT_FALSE(vv[1].IsTrue());
+        vv = v * -0.1;
+        EXPECT_TRUE(vv[0].IsTrue());
+        EXPECT_FALSE(vv[1].IsTrue());
+    }
+    {
+        miso::Value v("10 20 30");
+        auto vv = v * 0.1;
+        EXPECT_DOUBLE_EQ(1.0, vv[0].AsNumeric().GetValue());
+        EXPECT_DOUBLE_EQ(2.0, vv[1].AsNumeric().GetValue());
+        EXPECT_DOUBLE_EQ(3.0, vv[2].AsNumeric().GetValue());
+        vv = v * -0.1;
+        EXPECT_DOUBLE_EQ(-1.0, vv[0].AsNumeric().GetValue());
+        EXPECT_DOUBLE_EQ(-2.0, vv[1].AsNumeric().GetValue());
+        EXPECT_DOUBLE_EQ(-3.0, vv[2].AsNumeric().GetValue());
+    }
+    {
+        miso::Value v("rgba(10,50,100,200)");
+        auto vv = v * 0.5;
+        EXPECT_NEAR(10 / 255.0 * 0.5, vv.AsColor().R, kNearError);
+        EXPECT_NEAR(50 / 255.0 * 0.5, vv.AsColor().G, kNearError);
+        EXPECT_NEAR(100 / 255.0 * 0.5, vv.AsColor().B, kNearError);
+        EXPECT_NEAR(200 / 255.0 * 0.5, vv.AsColor().A, kNearError);
+        vv = v * -0.5;
+        EXPECT_FLOAT_EQ(0.0f, vv.AsColor().R);
+        EXPECT_FLOAT_EQ(0.0f, vv.AsColor().G);
+        EXPECT_FLOAT_EQ(0.0f, vv.AsColor().B);
+        EXPECT_FLOAT_EQ(0.0f, vv.AsColor().A);
+    }
+    {
+        miso::Value v("rgba(10,50,100,200)");
+        auto vv = v * 10;
+        EXPECT_NEAR(100 / 255.0, vv.AsColor().R, kNearError);
+        EXPECT_NEAR(255 / 255.0, vv.AsColor().G, kNearError);
+        EXPECT_NEAR(255 / 255.0, vv.AsColor().B, kNearError);
+        EXPECT_NEAR(255 / 255.0, vv.AsColor().A, kNearError);
+    }
 }
 
 TEST_F(MisoTest, Boolean)
@@ -1034,6 +1069,12 @@ TEST_F(MisoTest, Boolean)
         miso::Numeric d("YeS");
         EXPECT_TRUE(d.IsValid());
         EXPECT_TRUE(d.IsTrue());
+    }
+    {
+        auto zero = miso::Numeric::GetZero();
+        EXPECT_TRUE(zero.IsValid());
+        EXPECT_FALSE(zero.IsTrue());
+        EXPECT_EQ(0.0, zero.GetValue());
     }
 }
 
@@ -1130,9 +1171,13 @@ TEST_F(MisoTest, Color)
         EXPECT_TRUE(red.IsValid());
         EXPECT_EQ(0xFF0000FF, red.ToUint32());
     }
+    {
+        auto zero = miso::Color::GetZero();
+        EXPECT_TRUE(zero.IsValid());
+        EXPECT_FALSE(zero.IsTrue());
+        EXPECT_EQ(0, zero.ToUint32());
+    }
 }
-
-const double kNearError = 0.001;
 
 TEST_F(MisoTest, Interpolate)
 {

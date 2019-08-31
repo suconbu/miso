@@ -196,6 +196,28 @@ Value::GetInterpolated(const Value& end_value, const Interpolator& interpolator,
     return value;
 }
 
+Value
+Value::operator*(double multiplier) const
+{
+    Value value;
+    value.type_ = type_;
+    if (type_ == ValueType::Array) {
+        value.array_ = new std::vector<Value>();
+        if (value.array_ == nullptr) return Value::GetInvalid();
+        value.array_->reserve(array_->size());
+        for (size_t i = 0; i < array_->size(); ++i) {
+            value.array_->push_back(array_->at(i) * multiplier);// .GetMultiplied(multiplier));
+        }
+    } else if (type_ == ValueType::Numeric) {
+        value.numeric_ = numeric_ * multiplier;// Numeric::GetZero().GetInterpolated(numeric_, Interpolator("linear"), multiplier);
+    } else if (type_ == ValueType::Color) {
+        value.color_ = color_ * multiplier;// Color::GetZero().GetInterpolated(color_, Interpolator("linear"), multiplier);
+    } else {
+        ;
+    }
+    return value;
+}
+
 MISO_INLINE std::string
 Value::ToString(const char* format) const
 {

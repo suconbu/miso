@@ -22,6 +22,7 @@ enum class NumericUnit {
 class Numeric {
 public:
     static const Numeric& GetInvalid();
+    static const Numeric& GetZero();
     static Numeric TryParse(const char* str, size_t* consumed_out = nullptr);
 
     explicit Numeric(const char* str) : Numeric() { *this = Numeric::TryParse(str); }
@@ -30,6 +31,7 @@ public:
 
     bool operator==(const Numeric& other) const;
     bool operator!=(const Numeric& other) const;
+    Numeric operator*(double multiplier) const;
 
     bool IsValid() const { return unit_ != NumericUnit::NaN; }
     bool IsTrue() const { return unit_ != NumericUnit::NaN && value_ != 0.0; }

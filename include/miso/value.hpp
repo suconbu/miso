@@ -25,7 +25,7 @@ public:
     ~Value();
 
     Value& operator=(const Value& value) { Copy(value, *this); return *this; }
-    const Value& operator[](size_t index) { return GetAt(index); }
+    const Value& operator[](size_t index) const { return GetAt(index); }
     bool operator==(const Value& other) const;
     bool operator!=(const Value& value) const;
     Value operator*(double multiplier) const;

@@ -11,6 +11,8 @@ namespace miso {
 class StringUtils {
 public:
     StringUtils() = delete;
+    StringUtils(const StringUtils&) = delete;
+    StringUtils(StringUtils&&) = delete;
 
     static std::string ReadFile(const std::string& filepath);
     static void WriteFile(const std::string& filepath, const std::string& content);

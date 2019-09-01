@@ -12,6 +12,8 @@ enum class Endian { Native, Little, Big };
 class EndianUtils {
 public:
     EndianUtils() = delete;
+    EndianUtils(const EndianUtils&) = delete;
+    EndianUtils(EndianUtils&&) = delete;
 
     static Endian GetNativeEndian();
     template<typename T> static T Flip(const T value);

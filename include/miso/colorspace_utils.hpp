@@ -10,6 +10,8 @@ enum class ColorSpace { Invalid, Rgb, Hsl, Hsv };
 class ColorSpaceUtils {
 public:
     ColorSpaceUtils() = delete;
+    ColorSpaceUtils(const ColorSpaceUtils&) = delete;
+    ColorSpaceUtils(ColorSpaceUtils&&) = delete;
 
     // HSL
     static void HslToRgb(float h, float s, float l, float* r_out, float* g_out, float* b_out);

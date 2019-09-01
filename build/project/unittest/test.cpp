@@ -1381,6 +1381,26 @@ TEST_F(MisoTest, Value_ParsePerformance)
     }
 }
 
+enum class TestEnum { Tomato, Banana, Orange };
+MISO_DEFINE_ENUM(TestEnum, {
+    { TestEnum::Tomato, "Tomato" },
+    { TestEnum::Banana, "Banana" },
+    { TestEnum::Orange, "Orange" }
+    });
+
+TEST_F(MisoTest, Enum)
+{
+    EXPECT_STREQ("Tomato", Enum<TestEnum>::ToString(TestEnum::Tomato));
+    EXPECT_EQ(TestEnum::Banana, Enum<TestEnum>::ToEnum("Banana"));
+    EXPECT_EQ(TestEnum::Tomato, Enum<TestEnum>::ToEnum("Bananana"));
+    TestEnum value;
+    EXPECT_TRUE(Enum<TestEnum>::TryParse("Orange", &value));
+    EXPECT_EQ(TestEnum::Orange, value);
+    EXPECT_FALSE(Enum<TestEnum>::TryParse("Bananana", &value));
+    EXPECT_EQ(TestEnum::Orange, value);
+    EXPECT_TRUE(Enum<TestEnum>::TryParse(std::string("Tomato")));
+}
+
 // BinaryReader Performance
 #if 0
 TEST_F(Performace, OneRead1MCrt)

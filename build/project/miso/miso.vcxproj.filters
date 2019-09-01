@@ -90,5 +90,8 @@
     <ClInclude Include="..\..\..\include\miso\miso.hpp">
       <Filter>include\miso</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\enum.hpp">
+      <Filter>include\miso</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

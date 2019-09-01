@@ -38,6 +38,7 @@
     <ClInclude Include="..\..\..\include\miso\colorspace_utils.hpp" />
     <ClInclude Include="..\..\..\include\miso\common.hpp" />
     <ClInclude Include="..\..\..\include\miso\endian_utils.hpp" />
+    <ClInclude Include="..\..\..\include\miso\enum.hpp" />
     <ClInclude Include="..\..\..\include\miso\file_stream.hpp" />
     <ClInclude Include="..\..\..\include\miso\interpolator.hpp" />
     <ClInclude Include="..\..\..\include\miso\memory_stream.hpp" />

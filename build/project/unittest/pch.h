@@ -14,6 +14,7 @@
 
 //#define MISO_HEADER_ONLY
 #include "miso/miso.hpp"
+#include "miso/enum.hpp"
 #include "gtest/gtest.h"
 
 #include <crtdbg.h>

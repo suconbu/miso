@@ -1,7 +1,7 @@
 #ifndef MISO_STRING_HPP_
 #define MISO_STRING_HPP_
 
-#include "miso/common.h"
+#include "miso/common.hpp"
 
 #include <string>
 #include <vector>

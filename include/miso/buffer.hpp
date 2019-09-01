@@ -1,7 +1,7 @@
 #ifndef MISO_BUFFER_HPP_
 #define MISO_BUFFER_HPP_
 
-#include "miso/common.h"
+#include "miso/common.hpp"
 
 #include <memory>
 

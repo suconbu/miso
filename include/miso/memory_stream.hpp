@@ -1,7 +1,7 @@
 #ifndef MISO_MEMORY_STREAM_HPP_
 #define MISO_MEMORY_STREAM_HPP_
 
-#include "miso/common.h"
+#include "miso/common.hpp"
 
 #include "miso/stream.hpp"
 

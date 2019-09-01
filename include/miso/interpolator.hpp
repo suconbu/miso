@@ -1,7 +1,7 @@
 #ifndef MISO_INTERPOLATOR_HPP_
 #define MISO_INTERPOLATOR_HPP_
 
-#include "miso/common.h"
+#include "miso/common.hpp"
 
 #include <array>
 #include <string>

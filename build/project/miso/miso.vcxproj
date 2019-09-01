@@ -24,24 +24,24 @@
     <ClCompile Include="..\..\..\src\colorspace_utils.cpp" />
     <ClCompile Include="..\..\..\src\file_stream.cpp" />
     <ClCompile Include="..\..\..\src\interpolator.cpp" />
-    <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\src\memory_stream.cpp" />
     <ClCompile Include="..\..\..\src\numeric.cpp" />
     <ClCompile Include="..\..\..\src\string_utils.cpp" />
     <ClCompile Include="..\..\..\src\value.cpp" />
     <ClCompile Include="..\..\..\src\xml_reader.cpp" />
+    <ClCompile Include="..\main\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\miso\binary_reader.hpp" />
     <ClInclude Include="..\..\..\include\miso\buffer.hpp" />
     <ClInclude Include="..\..\..\include\miso\color.hpp" />
     <ClInclude Include="..\..\..\include\miso\colorspace_utils.hpp" />
-    <ClInclude Include="..\..\..\include\miso\common.h" />
+    <ClInclude Include="..\..\..\include\miso\common.hpp" />
     <ClInclude Include="..\..\..\include\miso\endian_utils.hpp" />
     <ClInclude Include="..\..\..\include\miso\file_stream.hpp" />
     <ClInclude Include="..\..\..\include\miso\interpolator.hpp" />
     <ClInclude Include="..\..\..\include\miso\memory_stream.hpp" />
-    <ClInclude Include="..\..\..\include\miso\miso.h" />
+    <ClInclude Include="..\..\..\include\miso\miso.hpp" />
     <ClInclude Include="..\..\..\include\miso\numeric.hpp" />
     <ClInclude Include="..\..\..\include\miso\stream.hpp" />
     <ClInclude Include="..\..\..\include\miso\string_utils.hpp" />

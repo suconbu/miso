@@ -1,7 +1,7 @@
 #ifndef MISO_ENDIAN_UTILS_HPP_
 #define MISO_ENDIAN_UTILS_HPP_
 
-#include "miso/common.h"
+#include "miso/common.hpp"
 
 #include <memory>
 

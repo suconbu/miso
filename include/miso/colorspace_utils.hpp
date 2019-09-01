@@ -1,7 +1,7 @@
 #ifndef MISO_COLORSPACE_UTILS_HPP_
 #define MISO_COLORSPACE_UTILS_HPP_
 
-#include "miso/common.h"
+#include "miso/common.hpp"
 
 namespace miso {
 

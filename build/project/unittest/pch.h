@@ -13,7 +13,7 @@
 #endif
 
 //#define MISO_HEADER_ONLY
-#include "miso/miso.h"
+#include "miso/miso.hpp"
 #include "gtest/gtest.h"
 
 #include <crtdbg.h>

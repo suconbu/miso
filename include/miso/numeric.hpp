@@ -1,7 +1,7 @@
 #ifndef MISO_NUMERIC_HPP_
 #define MISO_NUMERIC_HPP_
 
-#include "miso/common.h"
+#include "miso/common.hpp"
 
 #include <map>
 #include <string>

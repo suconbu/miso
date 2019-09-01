@@ -1,7 +1,7 @@
 #ifndef MISO_COLOR_HPP_
 #define MISO_COLOR_HPP_
 
-#include "miso/common.h"
+#include "miso/common.hpp"
 
 #include <string>
 

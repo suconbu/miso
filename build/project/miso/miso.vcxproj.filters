@@ -42,9 +42,7 @@
     <ClCompile Include="..\..\..\src\interpolator.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\main.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
+    <ClCompile Include="..\main\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\miso\endian_utils.hpp">
@@ -74,12 +72,6 @@
     <ClInclude Include="..\..\..\include\miso\xml_reader.hpp">
       <Filter>include\miso</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\miso\common.h">
-      <Filter>include\miso</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\miso\miso.h">
-      <Filter>include\miso</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\miso\binary_reader.hpp">
       <Filter>include\miso</Filter>
     </ClInclude>
@@ -90,6 +82,12 @@
       <Filter>include\miso</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\miso\colorspace_utils.hpp">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\common.hpp">
+      <Filter>include\miso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\miso\miso.hpp">
       <Filter>include\miso</Filter>
     </ClInclude>
   </ItemGroup>

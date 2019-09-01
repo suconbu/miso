@@ -10,10 +10,9 @@ namespace miso {
 
 class Interpolator {
 public:
-    static const Interpolator& GetInterpolator(const char* name);
-    static const Interpolator& GetInterpolator(const std::string& name) { return GetInterpolator(name.c_str()); }
-
     Interpolator() = default;
+    explicit Interpolator(const char* name) { *this = GetInterpolator(name); }
+    explicit Interpolator(const std::string& name) : Interpolator(name.c_str()) {}
     explicit Interpolator(float x1, float y1, float x2, float y2);
 
     bool IsValid() const { return function_ != None; }
@@ -29,6 +28,8 @@ private:
     static constexpr float kSubdivisionPrecision = 0.0000001f;
     static constexpr int kSubdivisionMaxIterations = 10;
     static constexpr float kPi = 3.1415926535f;
+
+    static const Interpolator& GetInterpolator(const char* name);
 
     explicit Interpolator(Function function) : function_(function) {}
 

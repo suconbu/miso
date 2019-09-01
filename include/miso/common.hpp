@@ -1,5 +1,5 @@
-#ifndef MISO_COMMON_H_
-#define MISO_COMMON_H_
+#ifndef MISO_COMMON_HPP_
+#define MISO_COMMON_HPP_
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -11,4 +11,4 @@
 
 #include <cstdint>
 
-#endif // MISO_COMMON_H_
+#endif // MISO_COMMON_HPP_

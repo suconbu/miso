@@ -129,6 +129,24 @@ Numeric::TryParseNumeric(const char* str, Numeric* numeric_out, size_t* consumed
     return true;
 }
 
+MISO_INLINE bool
+Numeric::operator==(const Numeric& other) const
+{
+    return (unit_ == other.unit_) && (value_ == other.value_);
+}
+
+MISO_INLINE bool
+Numeric::operator!=(const Numeric& other) const
+{
+    return !(*this == other);
+}
+
+MISO_INLINE Numeric
+Numeric::operator*(double multiplier) const
+{
+    return Numeric(value_ * multiplier, unit_);
+}
+
 MISO_INLINE const std::map<NumericUnit, const char*>&
 Numeric::GetUnitToSuffixMap()
 {
@@ -163,24 +181,6 @@ Numeric::ToString(const char* format) const
     } else {
         return StringUtils::Format("%.0Lf%s", value_, GetUnitToSuffixMap().at(unit_));
     }
-}
-
-MISO_INLINE bool
-Numeric::operator==(const Numeric& other) const
-{
-    return (unit_ == other.unit_) && (value_ == other.value_);
-}
-
-MISO_INLINE bool
-Numeric::operator!=(const Numeric& other) const
-{
-    return !(*this == other);
-}
-
-MISO_INLINE Numeric
-Numeric::operator*(double multiplier) const
-{
-    return Numeric(value_ * multiplier, unit_);
 }
 
 } // namespace miso

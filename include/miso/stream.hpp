@@ -7,7 +7,7 @@ namespace miso {
 
 class IStream {
 public:
-    virtual ~IStream() {}
+    virtual ~IStream() = default;
 
     virtual bool CanRead(size_t size = 1) const = 0;
     virtual uint8_t Read() = 0;

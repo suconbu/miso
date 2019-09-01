@@ -30,6 +30,8 @@ private:
     static constexpr int kSubdivisionMaxIterations = 10;
     static constexpr float kPi = 3.1415926535f;
 
+    explicit Interpolator(Function function) : function_(function) {}
+
     static float None(const Interpolator& self, float t, float s, float d) { return StepStart(self, t, s, d); }
     static float Bezier(const Interpolator& self, float t, float s, float d);
     static float StepStart(const Interpolator& self, float t, float s, float d) { (void)self;  return (t <= 0.0f) ? s : (s + d); }
@@ -49,8 +51,6 @@ private:
     static float GetT(const Interpolator& self, float x);
     static float NewtonRaphsonIterate(float x, float guess_t, float x1, float x2);
     static float BinarySubdivide(float x, float a, float b, float x1, float x2);
-
-    explicit Interpolator(Function function) : function_(function) {}
 
     Function function_ = None;
     float x1_ = 0.0f;

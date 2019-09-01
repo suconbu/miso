@@ -19,6 +19,9 @@ public:
     static Color FromHtmlColorName(const char* name);
     static Color FromHtmlColorName(const std::string& name) { return FromHtmlColorName(name.c_str()); }
 
+    Color() = default;
+    Color(const Color&) = default;
+    Color& operator=(const Color&) = default;
     explicit Color(float r, float g, float b, float a) : R(r), G(g), B(b), A(a) {}
     explicit Color(uint32_t rgba) : R(((rgba >> 24) & 0xFF) / 255.0f), G(((rgba >> 16) & 0xFF) / 255.0f), B(((rgba >> 8) & 0xFF) / 255.0f), A(((rgba >> 0) & 0xFF) / 255.0f) {}
     explicit Color(const char* str) { *this = TryParse(str); }
@@ -43,8 +46,6 @@ private:
     static constexpr float kEqualTolerance = 0.0001f;
     static bool TryParseHex(const char* str, Color* color_out, size_t* consumed_out);
     static bool TryParseDec(const char* str, Color* color_out, size_t* consumed_out);
-
-    Color() = default;
 
     std::string ToStringHex(const char* format) const;
     std::string ToStringDec(const char* format) const;

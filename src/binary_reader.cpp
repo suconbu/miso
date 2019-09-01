@@ -8,6 +8,13 @@
 namespace miso {
 
 MISO_INLINE
+BinaryReader::BinaryReader(BinaryReader&& other) noexcept :
+    BinaryReader(other.stream_, other.target_endian_)
+{
+    other.stream_ = nullptr;
+}
+
+MISO_INLINE
 BinaryReader::BinaryReader(const char* filename, Endian endian) :
     BinaryReader(new FileStream(filename), endian)
 {}
@@ -16,13 +23,6 @@ MISO_INLINE
 BinaryReader::BinaryReader(const uint8_t* buffer, size_t size, Endian endian) :
     BinaryReader(new MemoryStream(buffer, size), endian)
 {}
-
-MISO_INLINE
-BinaryReader::BinaryReader(BinaryReader&& other) noexcept :
-    BinaryReader(other.stream_, other.target_endian_)
-{
-    other.stream_ = nullptr;
-}
 
 MISO_INLINE
 BinaryReader::BinaryReader(IStream* stream, Endian endian) :

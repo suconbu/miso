@@ -30,9 +30,12 @@ enum class XmlNodeType { None, StartElement, EmptyElement, EndElement, Text };
 class XmlReader {
 public:
     XmlReader() = delete;
-    XmlReader(const char* buffer, size_t size);
+    XmlReader(const XmlReader& other) = delete;
+    XmlReader& operator=(const XmlReader&) = delete;
     XmlReader(XmlReader&& other) noexcept;
+    XmlReader& operator=(XmlReader&&) = delete;
     explicit XmlReader(const char* filename);
+    explicit XmlReader(const char* buffer, size_t size);
     ~XmlReader();
 
     bool CanRead() const { return reader_ != nullptr && !reached_to_end_; }
@@ -52,6 +55,7 @@ public:
 
 private:
     XmlReader(libxml::xmlParserInputBufferPtr buffer);
+
     bool MoveToElementInside(const char* element_name, const char* attribute_name, const char* attribute_value, bool current_level);
     bool MoveToEndElementInside(bool end_of_parent);
     static void ErrorHandler(void* arg, const char* msg, libxml::xmlParserSeverities severity, libxml::xmlTextReaderLocatorPtr locator);

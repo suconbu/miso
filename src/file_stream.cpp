@@ -8,18 +8,18 @@
 namespace miso {
 
 MISO_INLINE
-FileStream::FileStream(const char *filename) :
-    FileStream(fopen(filename, "rb"))
-{
-    if (fp_ != 0) FillBuffer();
-}
-
-MISO_INLINE
 FileStream::FileStream(FileStream&& other) noexcept :
     FileStream(other.fp_)
 {
     other.fp_ = 0;
     other.stream_size_ = 0;
+}
+
+MISO_INLINE
+FileStream::FileStream(const char *filename) :
+    FileStream(fopen(filename, "rb"))
+{
+    if (fp_ != 0) FillBuffer();
 }
 
 MISO_INLINE

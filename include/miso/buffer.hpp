@@ -12,13 +12,14 @@ class Buffer {
 public:
     using Allocator = TAllocator;
 
-    explicit Buffer(size_t size = 0, Allocator& allocator = Allocator());
-    explicit Buffer(const uint8_t* source, size_t size, Allocator& allocator = Allocator());
+    Buffer() : Buffer(0) {}
     Buffer(const Buffer<Allocator>& other);
     Buffer(Buffer<Allocator>&& other) noexcept;
+    explicit Buffer(size_t size, Allocator& allocator = Allocator());
+    explicit Buffer(const uint8_t* source, size_t size, Allocator& allocator = Allocator());
     ~Buffer();
 
-    Buffer& operator=(const Buffer<Allocator>&) = delete;
+    Buffer& operator=(Buffer<Allocator> other);
     operator uint8_t*() const { return buffer_; }
 
     bool IsEmpty() { return buffer_ == nullptr; }
@@ -28,25 +29,10 @@ public:
 
 private:
     Allocator& allocator_;
-    uint8_t* buffer_;
-    size_t buffer_size_;
-    size_t used_size_;
+    uint8_t* buffer_ = nullptr;
+    size_t buffer_size_ = 0;
+    size_t used_size_ = 0;
 };
-
-template<typename TAllocator> inline
-Buffer<TAllocator>::Buffer(size_t size, Allocator& allocator) :
-    allocator_(allocator),
-    buffer_((0 < size) ? allocator.allocate(size) : nullptr),
-    buffer_size_(size),
-    used_size_(size)
-{}
-
-template<typename TAllocator> inline
-Buffer<TAllocator>::Buffer(const uint8_t* source, size_t size, Allocator& allocator) :
-    Buffer(size, allocator)
-{
-    std::memcpy(buffer_, source, sizeof(uint8_t) * size);
-}
 
 template<typename TAllocator> inline
 Buffer<TAllocator>::Buffer(const Buffer<Allocator>& other) :
@@ -66,9 +52,34 @@ Buffer<TAllocator>::Buffer(Buffer<Allocator>&& other) noexcept :
 }
 
 template<typename TAllocator> inline
+Buffer<TAllocator>::Buffer(size_t size, Allocator& allocator) :
+    allocator_(allocator),
+    buffer_((0 < size) ? allocator.allocate(size) : nullptr),
+    buffer_size_(size),
+    used_size_(size)
+{}
+
+template<typename TAllocator> inline
+Buffer<TAllocator>::Buffer(const uint8_t* source, size_t size, Allocator& allocator) :
+    Buffer(size, allocator)
+{
+    std::memcpy(buffer_, source, sizeof(uint8_t) * size);
+}
+
+template<typename TAllocator> inline
 Buffer<TAllocator>::~Buffer()
 {
     allocator_.deallocate(buffer_, buffer_size_);
+}
+
+template<typename TAllocator> inline Buffer<TAllocator>&
+Buffer<TAllocator>::operator=(Buffer<Allocator> other)
+{
+    std::swap(allocator_, other.allocator_);
+    std::swap(buffer_, other.buffer_);
+    std::swap(buffer_size_, other.buffer_size_);
+    std::swap(used_size_, other.used_size_);
+    return *this;
 }
 
 template<typename TAllocator> inline void

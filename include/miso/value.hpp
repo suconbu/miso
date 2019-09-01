@@ -18,18 +18,18 @@ public:
     static const Value& GetInvalid();
 
     Value() {};
-    Value(const Value& value) { Copy(value, *this); }
-    Value(Value&& value) noexcept { Move(value, *this); }
+    Value(const Value& value);
+    Value(Value&& value) noexcept;
+    Value& operator=(Value other);
     explicit Value(const char* str);
     explicit Value(const std::string& str) : Value(str.c_str()) {}
     explicit Value(const Numeric& numeric) : type_(ValueType::Numeric), numeric_(numeric) {}
     explicit Value(const Color& color) : type_(ValueType::Color), color_(color) {}
     ~Value();
 
-    Value& operator=(const Value& value) { Copy(value, *this); return *this; }
-    const Value& operator[](size_t index) const { return GetAt(index); }
     bool operator==(const Value& other) const;
     bool operator!=(const Value& value) const;
+    const Value& operator[](size_t index) const { return GetAt(index); }
     Value operator*(double multiplier) const;
 
     bool IsValid() const;
@@ -45,10 +45,6 @@ public:
 
 private:
     static Value TryParse(const char* str, size_t* consumed_out = nullptr);
-    static void Copy(const Value& from, Value& to);
-    static void Move(Value& from, Value& to);
-
-    void Dispose();
 
     ValueType type_ = ValueType::Invalid;
     union {
@@ -56,6 +52,8 @@ private:
         Numeric numeric_;
         Color color_;
     };
+
+    static const size_t kInitialArrayCapacityOnParse = 10;
 };
 
 } // namespace miso

@@ -25,6 +25,9 @@ public:
     static const Numeric& GetZero();
     static Numeric TryParse(const char* str, size_t* consumed_out = nullptr);
 
+    Numeric() = default;
+    Numeric(const Numeric&) = default;
+    Numeric& operator=(const Numeric&) = default;
     explicit Numeric(const char* str) : Numeric() { *this = Numeric::TryParse(str); }
     explicit Numeric(const std::string& str) : Numeric(str.c_str()) {}
     explicit Numeric(double value, NumericUnit unit) : value_(value), unit_(unit), float_(value_ != floor(value_)) {}
@@ -48,8 +51,6 @@ private:
     static const std::map<NumericUnit, const char*>& GetUnitToSuffixMap();
     static bool TryParseBoolean(const char* str, Numeric* numeric_out, size_t* consumed_out);
     static bool TryParseNumeric(const char* str, Numeric* numeric_out, size_t* consumed_out);
-
-    Numeric() = default;
 
     double value_ = std::numeric_limits<double>::quiet_NaN();
     NumericUnit unit_ = NumericUnit::NaN;

@@ -12,9 +12,12 @@ namespace miso {
 class BinaryReader {
 public:
     BinaryReader() = delete;
-    BinaryReader(const char* filename, Endian endian = Endian::Native);
-    BinaryReader(const uint8_t* buffer, size_t size, Endian endian = Endian::Native);
+    BinaryReader(const BinaryReader&) = delete;
+    BinaryReader& operator=(const BinaryReader&) = delete;
     BinaryReader(BinaryReader&& other) noexcept;
+    BinaryReader& operator=(BinaryReader&&) = delete;
+    explicit BinaryReader(const char* filename, Endian endian = Endian::Native);
+    explicit BinaryReader(const uint8_t* buffer, size_t size, Endian endian = Endian::Native);
     ~BinaryReader();
 
     bool CanRead(size_t size = 1) const { return stream_ != nullptr && stream_->CanRead(size); }

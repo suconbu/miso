@@ -32,90 +32,134 @@ Value::TryParse(const char* str, size_t* consumed_out)
 }
 
 MISO_INLINE
+Value::Value(const Value& other)
+{
+    type_ = other.type_;
+    if (type_ == ValueType::Array) {
+        array_ = new std::vector<Value>(*other.array_);
+        if (array_ == nullptr) {
+            type_ = ValueType::Invalid;
+        }
+    } else if (type_ == ValueType::Numeric) {
+        numeric_ = other.numeric_;
+    } else if (type_ == ValueType::Color) {
+        color_ = other.color_;
+    }
+}
+
+MISO_INLINE
+Value::Value(Value&& other) noexcept
+{
+    type_ = other.type_;
+    if (type_ == ValueType::Array) {
+        array_ = new std::vector<Value>(std::move(*other.array_));
+        if (array_ == nullptr) {
+            type_ = ValueType::Invalid;
+        }
+    } else if (type_ == ValueType::Numeric) {
+        numeric_ = other.numeric_;
+    } else if (type_ == ValueType::Color) {
+        color_ = other.color_;
+    }
+}
+
+MISO_INLINE Value&
+Value::operator=(Value other)
+{
+    if (other.type_ == ValueType::Array) {
+        std::swap(array_, other.array_);
+    } else if (other.type_ == ValueType::Numeric) {
+        std::swap(numeric_, other.numeric_);
+    } else if (other.type_ == ValueType::Color) {
+        std::swap(color_, other.color_);
+    }
+    std::swap(type_, other.type_);
+    return *this;
+}
+
+MISO_INLINE
 Value::Value(const char* str) : Value()
 {
-    auto values = new std::vector<Value>();
-    if (values == nullptr) return;
+    std::vector<Value> values;
+    values.reserve(kInitialArrayCapacityOnParse);
 
-    values->reserve(10);
     auto s = str;
     for (; *s != '\0'; ++s) {
         if (!isspace(*s)) {
             size_t count;
             auto value = TryParse(s, &count);
             if (!value.IsValid()) break;
-            values->push_back(std::move(value));
+            values.push_back(std::move(value));
             s += (count - 1);
         }
     }
 
     if (*s != '\0') {
         ;
-    } else if (values->size() > 1) {
-        type_ = ValueType::Array;
-        array_ = values;
-        values = nullptr;
-    } else if (values->size() == 1) {
-        Copy(values->at(0), *this);
+    } else if (values.size() == 1) {
+        *this = values.at(0);
+    } else if (values.size() > 1) {
+        array_ = new std::vector<Value>(std::move(values));
+        type_ = (array_ != nullptr) ? ValueType::Array : ValueType::Invalid;
     } else {
         ;
     }
-    delete values;
-    values = nullptr;
 }
 
 MISO_INLINE
 Value::~Value()
 {
-    Dispose();
-}
-
-MISO_INLINE void
-Value::Copy(const Value& from, Value& to)
-{
-    to.Dispose();
-    to.type_ = from.type_;
-    if (from.type_ == ValueType::Array) {
-        to.array_ = new std::vector<Value>();
-        if (to.array_ != nullptr) {
-            to.array_->reserve(from.array_->size());
-            std::copy(from.array_->begin(), from.array_->end(), std::back_inserter(*to.array_));
-        } else {
-            to.type_ = ValueType::Invalid;
-        }
-    } else if (from.type_ == ValueType::Numeric) {
-        to.numeric_ = from.numeric_;
-    } else if (from.type_ == ValueType::Color) {
-        to.color_ = from.color_;
-    } else {
-        ;
-    }
-}
-
-MISO_INLINE void
-Value::Move(Value& from, Value& to)
-{
-    to.Dispose();
-    to.type_ = from.type_;
-    if (from.type_ == ValueType::Array) {
-        to.array_ = from.array_;
-        from.array_ = nullptr;
-    } else if (from.type_ == ValueType::Numeric) {
-        to.numeric_ = from.numeric_;
-    } else if (from.type_ == ValueType::Color) {
-        to.color_ = from.color_;
-    } else {
-        ;
-    }
-}
-
-MISO_INLINE void
-Value::Dispose()
-{
     if (type_ == ValueType::Array) {
         delete array_;
-        array_ = nullptr;
     }
+}
+
+MISO_INLINE bool
+Value::operator==(const Value& other) const
+{
+    if (type_ != other.type_) return false;
+
+    if (type_ == ValueType::Array) {
+        if (array_->size() != other.array_->size()) return false;
+        for (size_t i = 0; i < array_->size(); ++i) {
+            if (GetAt(i) != other.GetAt(i)) return false;
+        }
+        return true;
+    } else if (type_ == ValueType::Numeric) {
+        return numeric_ == other.numeric_;
+    } else if (type_ == ValueType::Color) {
+        return color_ == other.color_;
+    } else {
+        return false;
+    }
+}
+
+MISO_INLINE bool
+Value::operator!=(const Value& other) const
+{
+    return !(*this == other);
+}
+
+Value
+Value::operator*(double multiplier) const
+{
+    Value value;
+    value.type_ = type_;
+    if (type_ == ValueType::Array) {
+        value.array_ = new std::vector<Value>();
+        if (value.array_ == nullptr) return Value::GetInvalid();
+        value.array_->reserve(array_->size());
+        for (size_t i = 0; i < array_->size(); ++i) {
+            value.array_->push_back(array_->at(i) * multiplier);
+        }
+    } else if (type_ == ValueType::Numeric) {
+        value.numeric_ = numeric_ * multiplier;
+    } else if (type_ == ValueType::Color) {
+        value.color_ = color_ * multiplier;
+    } else {
+        ;
+    }
+    return value;
 }
 
 MISO_INLINE bool
@@ -220,28 +264,6 @@ Value::GetInterpolated(const Value& end_value, const Interpolator& interpolator,
     return value;
 }
 
-Value
-Value::operator*(double multiplier) const
-{
-    Value value;
-    value.type_ = type_;
-    if (type_ == ValueType::Array) {
-        value.array_ = new std::vector<Value>();
-        if (value.array_ == nullptr) return Value::GetInvalid();
-        value.array_->reserve(array_->size());
-        for (size_t i = 0; i < array_->size(); ++i) {
-            value.array_->push_back(array_->at(i) * multiplier);
-        }
-    } else if (type_ == ValueType::Numeric) {
-        value.numeric_ = numeric_ * multiplier;
-    } else if (type_ == ValueType::Color) {
-        value.color_ = color_ * multiplier;
-    } else {
-        ;
-    }
-    return value;
-}
-
 MISO_INLINE std::string
 Value::ToString(const char* format) const
 {
@@ -258,32 +280,6 @@ Value::ToString(const char* format) const
             (type_ == ValueType::Color) ? color_.ToString(format) :
             "";
     }
-}
-
-MISO_INLINE bool
-Value::operator==(const Value& other) const
-{
-    if (type_ != other.type_) return false;
-
-    if (type_ == ValueType::Array) {
-        if (array_->size() != other.array_->size()) return false;
-        for (size_t i = 0; i < array_->size(); ++i) {
-            if (GetAt(i) != other.GetAt(i)) return false;
-        }
-        return true;
-    } else if (type_ == ValueType::Numeric) {
-        return numeric_ == other.numeric_;
-    } else if (type_ == ValueType::Color) {
-        return color_ == other.color_;
-    } else {
-        return false;
-    }
-}
-
-MISO_INLINE bool
-Value::operator!=(const Value& other) const
-{
-    return !(*this == other);
 }
 
 } // namespace miso

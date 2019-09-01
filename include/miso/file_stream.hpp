@@ -13,8 +13,12 @@ public:
     template<typename TAllocator = std::allocator<uint8_t>>
     static Buffer<TAllocator> ReadAll(const char *filename, TAllocator &allocator = TAllocator());
 
-    explicit FileStream(const char *filename);
+    FileStream() = delete;
+    FileStream(const FileStream&) = delete;
+    FileStream& operator=(const FileStream&) = delete;
     FileStream(FileStream&& other) noexcept;
+    FileStream& operator=(FileStream&&) = delete;
+    explicit FileStream(const char *filename);
     ~FileStream();
 
     bool CanRead(size_t size = 1) const;
@@ -26,12 +30,11 @@ public:
     void SetPosition(size_t position);
 
 private:
-    static size_t GetStreamSize(FILE *fp);
-
     static constexpr size_t kBufferSize = 256;
 
     explicit FileStream(FILE* fp);
 
+    static size_t GetStreamSize(FILE *fp);
     void FillBuffer();
 
     uint8_t buffer_[kBufferSize] = {};

@@ -10,8 +10,9 @@ namespace miso {
 class MemoryStream : public IStream {
 public:
     MemoryStream() = delete;
-    MemoryStream(const uint8_t* memory, size_t size) : current_(memory), begin_(memory), end_(memory + size) {}
-    //MemoryStream(MemoryStream&&) noexcept = default;
+    MemoryStream(const MemoryStream&) = default;
+    MemoryStream& operator=(const MemoryStream&) = default;
+    explicit MemoryStream(const uint8_t* memory, size_t size) : current_(memory), begin_(memory), end_(memory + size) {}
 
     bool CanRead(size_t size = 1) const { return begin_ != nullptr && (current_ + size) <= end_; }
     size_t GetSize() const { return static_cast<size_t>(end_ - begin_); }

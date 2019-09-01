@@ -365,6 +365,32 @@ Color::TryParseDec(const char* str, Color* color_out, size_t* consumed_out)
     return true;
 }
 
+MISO_INLINE bool
+Color::operator==(const Color& other) const
+{
+    return
+        (std::abs(R - other.R) < kEqualTolerance) &&
+        (std::abs(G - other.G) < kEqualTolerance) &&
+        (std::abs(B - other.B) < kEqualTolerance) &&
+        (std::abs(A - other.A) < kEqualTolerance);
+}
+
+MISO_INLINE bool
+Color::operator!=(const Color& other) const
+{
+    return !(*this == other);
+}
+
+MISO_INLINE Color
+Color::operator*(double multiplier) const
+{
+    return Color(
+        static_cast<float>(std::max(0.0, std::min(R * multiplier, 1.0))),
+        static_cast<float>(std::max(0.0, std::min(G * multiplier, 1.0))),
+        static_cast<float>(std::max(0.0, std::min(B * multiplier, 1.0))),
+        static_cast<float>(std::max(0.0, std::min(A * multiplier, 1.0))));
+}
+
 MISO_INLINE uint32_t
 Color::ToUint32() const
 {
@@ -385,6 +411,8 @@ Color::GetInterpolated(const Color& end_value, const Interpolator& interpolator,
         static_cast<float>(interpolator.Interpolate(A, end_value.A, progress)));
 }
 
+// format   | output
+// ---------|------------------------------------------
 // hex3     | #rgb
 // hex4     | #rgba
 // hex,hex6 | #rrggbb
@@ -489,32 +517,6 @@ Color::ToStringDec(const char* format) const
     return alpha ?
         StringUtils::Format(format, prefix, vi[0], vi[1], vi[2], vi[3]) :
         StringUtils::Format(format, prefix, vi[0], vi[1], vi[2]);
-}
-
-MISO_INLINE bool
-Color::operator==(const Color& other) const
-{
-    return
-        (std::abs(R - other.R) < kEqualTolerance) &&
-        (std::abs(G - other.G) < kEqualTolerance) &&
-        (std::abs(B - other.B) < kEqualTolerance) &&
-        (std::abs(A - other.A) < kEqualTolerance);
-}
-
-MISO_INLINE bool
-Color::operator!=(const Color& other) const
-{
-    return !(*this == other);
-}
-
-MISO_INLINE Color
-Color::operator*(double multiplier) const
-{
-    return Color(
-        static_cast<float>(std::max(0.0, std::min(R * multiplier, 1.0))),
-        static_cast<float>(std::max(0.0, std::min(G * multiplier, 1.0))),
-        static_cast<float>(std::max(0.0, std::min(B * multiplier, 1.0))),
-        static_cast<float>(std::max(0.0, std::min(A * multiplier, 1.0))));
 }
 
 } // namespace miso

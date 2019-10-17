@@ -1,6 +1,6 @@
 #include "miso/xml_reader.hpp"
 
-#include <string>
+#include <cstring>
 #include <vector>
 
 #include "miso/string_utils.hpp"
@@ -111,13 +111,13 @@ XmlReader::MoveToElementInside(const char* element_name, const char* attribute_n
                 }
                 if (element_name != nullptr) {
                     auto name = reinterpret_cast<const char*>(libxml::xmlTextReaderConstName(reader_));
-                    if (name == nullptr || strcmp(element_name, name) != 0) break;
+                    if (name == nullptr || std::strcmp(element_name, name) != 0) break;
                 }
                 if (attribute_name != nullptr) {
                     auto value = reinterpret_cast<char*>(
                         libxml::xmlTextReaderGetAttribute(reader_, reinterpret_cast<const libxml::xmlChar*>(attribute_name)));
                     if (value == nullptr ||
-                        (attribute_value != nullptr && strcmp(attribute_value, value) != 0)) {
+                        (attribute_value != nullptr && std::strcmp(attribute_value, value) != 0)) {
                         libxml::xmlFree(value);
                         break;
                     }

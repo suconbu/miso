@@ -3,6 +3,7 @@
 
 #include "miso/common.hpp"
 
+#include <cstring>
 #include <memory>
 
 namespace miso {

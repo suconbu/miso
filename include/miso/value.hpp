@@ -48,7 +48,7 @@ private:
 
     ValueType type_ = ValueType::Invalid;
     union {
-        std::vector<Value>* array_ = 0;
+        std::vector<Value>* array_ = nullptr;
         Numeric numeric_;
         Color color_;
     };

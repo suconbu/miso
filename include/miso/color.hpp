@@ -3,6 +3,8 @@
 
 #include "miso/common.hpp"
 
+#include <cmath>
+#include <limits>
 #include <string>
 
 #include "miso/interpolator.hpp"

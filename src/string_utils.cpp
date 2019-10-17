@@ -1,10 +1,10 @@
 #include "miso/string_utils.hpp"
 
-#include <stdarg.h>
 #include <algorithm>
+#include <cstring>
 #include <fstream>
 #include <sstream>
-#include <string>
+#include <stdarg.h>
 #include <vector>
 
 namespace miso {
@@ -178,7 +178,7 @@ StringUtils::Format(const char* format, ...)
 MISO_INLINE bool
 StringUtils::StartsWith(const char* str, const char* x, bool ignore_case)
 {
-    size_t x_len = (x != nullptr) ? strlen(x) : 0;
+    size_t x_len = (x != nullptr) ? std::strlen(x) : 0;
     return CompareN(str, x, x_len, ignore_case) == 0;
 }
 
@@ -191,8 +191,8 @@ StringUtils::StartsWith(const std::string& str, const std::string& x, bool ignor
 MISO_INLINE bool
 StringUtils::EndsWith(const char* str, const char* x, bool ignore_case)
 {
-    size_t str_len = (str != nullptr) ? strlen(str) : 0;
-    size_t x_len = (x != nullptr) ? strlen(x) : 0;
+    size_t str_len = (str != nullptr) ? std::strlen(str) : 0;
+    size_t x_len = (x != nullptr) ? std::strlen(x) : 0;
     if (str_len < x_len) return false;
     auto start = str + str_len - x_len;
     return CompareN(start, x, x_len, ignore_case) == 0;

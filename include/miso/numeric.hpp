@@ -3,6 +3,8 @@
 
 #include "miso/common.hpp"
 
+#include <cmath>
+#include <limits>
 #include <map>
 #include <string>
 
@@ -30,7 +32,7 @@ public:
     Numeric& operator=(const Numeric&) = default;
     explicit Numeric(const char* str) : Numeric() { *this = Numeric::TryParse(str); }
     explicit Numeric(const std::string& str) : Numeric(str.c_str()) {}
-    explicit Numeric(double value, NumericUnit unit) : value_(value), unit_(unit), float_(value_ != floor(value_)) {}
+    explicit Numeric(double value, NumericUnit unit) : value_(value), unit_(unit), float_(value_ != std::floor(value_)) {}
 
     bool operator==(const Numeric& other) const;
     bool operator!=(const Numeric& other) const;

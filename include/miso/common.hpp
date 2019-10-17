@@ -10,5 +10,6 @@
 #endif // MISO_HEADER_ONLY
 
 #include <cstdint>
+#include <stddef.h>
 
 #endif // MISO_COMMON_HPP_

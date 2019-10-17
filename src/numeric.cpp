@@ -1,5 +1,6 @@
 #include "miso/numeric.hpp"
 
+#include <cstring>
 #include <map>
 #include <string>
 
@@ -46,7 +47,7 @@ Numeric::TryParseBoolean(const char* str, Numeric* numeric_out, size_t* consumed
 
     auto value = std::numeric_limits<double>::quiet_NaN();
     for (size_t i = 0; i < sizeof(names) / sizeof(names[0]); ++i) {
-        if (StringUtils::CompareN(start, names[i], strlen(names[i]), true) == 0) {
+        if (StringUtils::CompareN(start, names[i], std::strlen(names[i]), true) == 0) {
             value = ((i % 2) == 0) ? 1.0 : 0.0;
             break;
         }
@@ -107,7 +108,7 @@ Numeric::TryParseNumeric(const char* str, Numeric* numeric_out, size_t* consumed
     // Unit
     auto unit = NumericUnit::NaN;
     for (auto& pair : GetUnitToSuffixMap()) {
-        auto len = strlen(pair.second);
+        auto len = std::strlen(pair.second);
         if (strncmp(pair.second, s, len) == 0 &&
             (*(s + len) == '\0' || !isalnum(*(s + len)))) {
             unit = pair.first;

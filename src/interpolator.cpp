@@ -99,30 +99,33 @@ Interpolator::Interpolator(float x1, float y1, float x2, float y2)
 MISO_INLINE float
 Interpolator::EaseInElastic(const Interpolator& self, float t, float s, float d)
 {
+    (void)self;
     if (1.0f <= t) return s + d;
     float n1 = 0.3f;
     float n2 = n1 / 4.0f;
-    return -(d * std::powf(2.0f, 10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPi * 2.0f / n1)) + s;
+    return -(d * std::pow(2.0f, 10.0f * (t - 1.0f)) * std::sin((t - 1.0f - n2) * kPi * 2.0f / n1)) + s;
 }
 MISO_INLINE float
 Interpolator::EaseOutElastic(const Interpolator& self, float t, float s, float d)
 {
+    (void)self;
     if (1.0f <= t) return s + d;
     float n1 = 0.3f;
     float n2 = n1 / 4.0f;
-    return d * std::powf(2.0f, -10.0f * t) * std::sinf((t - n2) * kPi * 2.0f / n1) + d + s;
+    return d * std::pow(2.0f, -10.0f * t) * std::sin((t - n2) * kPi * 2.0f / n1) + d + s;
 }
 
 MISO_INLINE float
 Interpolator::EaseInOutElastic(const Interpolator& self, float t, float s, float d)
 {
+    (void)self;
     if (1.0f <= t) return s + d;
     t /= 0.5f;
     float n1 = 0.45f;
     float n2 = n1 / 4.0f;
     return (t < 1.0f) ?
-        -0.5f * (d * std::powf(2.0f, 10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPi * 2.0f / n1)) + s :
-        d * std::powf(2.0f, -10.0f * (t - 1.0f)) * std::sinf((t - 1.0f - n2) * kPi * 2.0f / n1) * 0.5f + d + s;
+        -0.5f * (d * std::pow(2.0f, 10.0f * (t - 1.0f)) * std::sin((t - 1.0f - n2) * kPi * 2.0f / n1)) + s :
+        d * std::pow(2.0f, -10.0f * (t - 1.0f)) * std::sin((t - 1.0f - n2) * kPi * 2.0f / n1) * 0.5f + d + s;
 }
 
 MISO_INLINE float
@@ -134,6 +137,7 @@ Interpolator::EaseInBounce(const Interpolator& self, float t, float s, float d)
 MISO_INLINE float
 Interpolator::EaseOutBounce(const Interpolator& self, float t, float s, float d)
 {
+    (void)self;
     if (t < 0.364f) {
         return d * (7.5625f * t * t) + s;
     }

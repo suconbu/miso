@@ -3,6 +3,7 @@
 
 #include "miso/common.hpp"
 
+#include <climits>
 #include <string>
 #include <vector>
 

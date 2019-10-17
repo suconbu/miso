@@ -1,6 +1,6 @@
 #include "miso/memory_stream.hpp"
 
-#include <memory>
+#include <cstring>
 
 #include "miso/stream.hpp"
 

@@ -36,9 +36,9 @@ private:
 
     template<typename T> T ReadStream(T default_value, bool advance);
 
+    IStream* stream_ = nullptr;
     Endian native_endian_ = Endian::Native;
     Endian target_endian_ = Endian::Native;
-    IStream* stream_ = nullptr;
 };
 
 template<typename TAllocator>
